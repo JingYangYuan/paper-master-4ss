@@ -1,6 +1,6 @@
 ---
 name: paper-master-4ss
-description: 中文社会科学论文总控工作流。用于统一管理 paper-workspace 输出区，登记任意输入路径，并在内部自包含模块之间路由：研究设计、文献综述、论文大纲、数据/质性分析、论文写作与润色、投稿文件整备。适用于用户不知道下一步、想整理论文项目状态，或想串联设计-文献-大纲-分析-写作-投稿流程时。
+description: 中文社会科学论文总控工作流。用于统一管理 paper-workspace 输出区，登记任意输入路径，并在内部自包含模块之间路由：研究设计、文献综述、论文大纲、数据/质性分析、论文写作与润色、全流程审稿检查、投稿文件整备。适用于用户不知道下一步、想整理论文项目状态，或想串联设计-文献-大纲-分析-写作-审稿-投稿流程时。
 hooks:
   PostToolUse:
     - matcher: Bash
@@ -47,7 +47,7 @@ hooks:
 默认输出结构见 `master/workspace-contract.md`。每次启动项目工作时，确保以下目录存在：
 
 ```bash
-mkdir -p paper-workspace/{00-meta,01-design,02-literature,03-outline,04-analysis,05-writing,06-submission,07-update,_logs,_logs/hook-audit,_index}
+mkdir -p paper-workspace/{00-meta,01-design,02-literature,03-outline,04-analysis,05-writing,05-writing/reviews,06-submission,07-update,_logs,_logs/hook-audit,_index}
 ```
 
 维护索引文件：
@@ -77,6 +77,7 @@ mkdir -p paper-workspace/{00-meta,01-design,02-literature,03-outline,04-analysis
 | outline | `modules/outline/` | 材料扫描、大纲构建、段落级写作蓝图、证据映射、缺口报告 | `paper-workspace/03-outline/` |
 | analysis | `modules/analysis/` | 数据清洗、描述统计、回归诊断(VIF/BP/DW/Hausman/弱IV)、Logit/Probit/Poisson/Tobit/Heckman、面板FE/RE/GMM、IV/2SLS、DID/事件研究/多期DID、RDD、PSM/CEM/IPW、SCM、分位数回归、中介/调节、时间序列、空间计量、质性编码、混合方法、三语言(Stata/R/Python)完整模板 | `paper-workspace/04-analysis/` |
 | write | `modules/write/` | 章节写作、正文净稿生成、润色、语言扫描、复杂度诊断 | `paper-workspace/05-writing/` |
+| check | `modules/check/` | 全文审稿、编辑首筛、论证闭环、诚信规范、技术与期刊适配；诊断后精确回流 | `paper-workspace/05-writing/reviews/` |
 | submission | `modules/submission/` | Markdown 转 Word、投稿格式模板对照、参考文献 GB/T 7714、APA 与中文社会学体例整理、cover letter、response letter | `paper-workspace/06-submission/` |
 | update | `modules/update/` | 生成全包待审核更新包：学科知识、写作范式、方法协议、流程协议、工具模板和 update 自身候选更新 | `paper-workspace/07-update/` |
 

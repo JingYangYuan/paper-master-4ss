@@ -4,13 +4,13 @@
 
 # Paper Master 4SS
 
-中文社会科学论文的总控 skill。它登记你给出的材料路径，判断当前该走哪一步，再路由到内部模块：研究设计、文献综述、大纲、数据分析、写作、投稿。产物统一写进项目里的 `paper-workspace/`。
+中文社会科学论文的总控 skill。它登记你给出的材料路径，判断当前该走哪一步，再路由到内部模块：研究设计、文献综述、大纲、数据分析、写作、全流程审稿检查、投稿。产物统一写进项目里的 `paper-workspace/`。
 
-适用场景：不知道下一步、想整理论文项目状态，或要把设计—文献—大纲—分析—写作—投稿串成一条可交接的流程。
+适用场景：不知道下一步、想整理论文项目状态，或要把设计—文献—大纲—分析—写作—审稿—投稿串成一条可交接的流程。
 
 ## 4SS 家族
 
-本仓库是**单一事实源**。七个业务模块可以单独安装，也可以只装总控（内部已自包含）。独立包由 `scripts/export_standalone.py` 导出，不要直接改独立仓库。
+本仓库是**单一事实源**。八个业务模块可以单独安装，也可以只装总控（内部已自包含）。独立包由 `scripts/export_standalone.py` 导出，不要直接改独立仓库。
 
 | 包 | 职责 | 默认输出 |
 |---|---|---|
@@ -20,13 +20,14 @@
 | [paper-outline-4ss](https://github.com/JingYangYuan/paper-outline-4ss) | 素材转大纲、证据映射、缺口报告 | `03-outline/` |
 | [paper-analysis-4ss](https://github.com/JingYangYuan/paper-analysis-4ss) | 定量 / 质性 / 混合，Stata · R · Python | `04-analysis/` |
 | [paper-write-4ss](https://github.com/JingYangYuan/paper-write-4ss) | 章节写作、润色、语言扫描、正文净稿 | `05-writing/` |
+| [paper-check-4ss](https://github.com/JingYangYuan/paper-check-4ss) | 全文审稿、质量门控、问题矩阵与精确回流 | `05-writing/reviews/` |
 | [paper-submission-4ss](https://github.com/JingYangYuan/paper-submission-4ss) | Word 导出、体例、投稿清单与信函 | `06-submission/` |
 | [paper-update-4ss](https://github.com/JingYangYuan/paper-update-4ss) | 待审核更新包，不直接改核心文件 | `07-update/` |
 
 用户层路径：
 
 ```text
-定位选题 → 文献定位 → 结构成型 → 分析/材料验证（按需） → 正文写作 → 投稿整备
+定位选题 → 文献定位 → 结构成型 → 分析/材料验证（按需） → 正文写作 → 审稿质量门 → 投稿整备
 ```
 
 `analysis` 只在设计蓝图标明需要经验验证时进入。理论、规范或阐释路径从大纲直接进写作。
@@ -44,7 +45,7 @@ git clone https://github.com/JingYangYuan/paper-master-4ss.git
 首次在某个论文项目里使用时，先建工作区：
 
 ```bash
-mkdir -p paper-workspace/{00-meta,01-design,02-literature,03-outline,04-analysis,05-writing,06-submission,07-update,_logs,_logs/hook-audit,_index}
+mkdir -p paper-workspace/{00-meta,01-design,02-literature,03-outline,04-analysis,05-writing,05-writing/reviews,06-submission,07-update,_logs,_logs/hook-audit,_index}
 ```
 
 依赖按目标模块验收，说明见 `references/install-dependencies.md`。缺依赖时停止路由，不假装已经跑通。
@@ -117,6 +118,7 @@ paper-master-4ss/
 │   ├── outline/
 │   ├── analysis/
 │   ├── write/
+│   ├── check/
 │   ├── submission/
 │   └── update/
 ├── references/              # 宿主适配、依赖、评分、顾问注册表

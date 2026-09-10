@@ -30,13 +30,14 @@ from pathlib import Path
 PKG_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = PKG_ROOT.parent
 
-MODULES = ["design", "lit", "outline", "analysis", "write", "submission", "update"]
+MODULES = ["design", "lit", "outline", "analysis", "write", "check", "submission", "update"]
 MODULE_TITLES = {
     "design": "研究设计",
     "lit": "文献综述",
     "outline": "论文大纲",
     "analysis": "数据分析",
     "write": "论文写作",
+    "check": "论文审稿检查",
     "submission": "投稿整备",
     "update": "知识更新",
 }
@@ -124,6 +125,7 @@ FAMILY_ROWS = [
     ("outline", "paper-outline-4ss", "素材转大纲、证据映射、缺口报告"),
     ("analysis", "paper-analysis-4ss", "定量 / 质性 / 混合，Stata · R · Python"),
     ("write", "paper-write-4ss", "章节写作、润色、语言扫描、正文净稿"),
+    ("check", "paper-check-4ss", "全文审稿、质量门控与精确回流"),
     ("submission", "paper-submission-4ss", "Word 导出、体例、投稿清单与信函"),
     ("update", "paper-update-4ss", "待审核更新包，不直接改核心文件"),
 ]
@@ -210,6 +212,13 @@ CNKI 依赖可见浏览器控制；Google Scholar 用 WebFetch/WebSearch。
 | 方法协议 | 规范、实证、阐释、混合 |
 | 发表风格 | 社会学研究范式 / 管理世界案例研究范式 |
 """,
+    "check": """
+## 它做什么
+
+对中文社会科学稿件执行编辑首筛、论证闭环、诚信规范和技术/期刊适配四层检查。只诊断与回流，不直接覆盖稿件；完整审稿链为 `write → check → submission`。
+
+缺少引文原文或期刊规则时，标记待核验，不推断违规。审稿报告写入 `paper-workspace/05-writing/reviews/`。
+""",
     "submission": """
 ## 它做什么
 
@@ -220,7 +229,7 @@ CNKI 依赖可见浏览器控制；Google Scholar 用 WebFetch/WebSearch。
     "update": """
 ## 它做什么
 
-从专著、教材、论文、课程材料、笔记和方法手册生成**待人工审核**的更新包，可指向 design、lit、outline、analysis、write、submission 与 update 自身。
+从专著、教材、论文、课程材料、笔记和方法手册生成**待人工审核**的更新包，可指向 design、lit、outline、analysis、write、check、submission 与 update 自身。
 
 只写到 `paper-workspace/07-update/`，不得直接修改任何核心模块文件。合并进总控必须经人工确认。
 """,
@@ -386,6 +395,10 @@ def export(module: str) -> tuple[list[str], int, int]:
     scripts_dst.mkdir(exist_ok=True)
     for name in SCRIPT_FILES:
         shutil.copy2(PKG_ROOT / "scripts" / name, scripts_dst / name)
+
+    license_src = PKG_ROOT / "LICENSE"
+    if license_src.is_file() and not (target / "LICENSE").exists():
+        shutil.copy2(license_src, target / "LICENSE")
 
     if module == "lit":
         frame_dst = target / "design" / "frame"

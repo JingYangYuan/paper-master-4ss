@@ -26,6 +26,7 @@
 | `workflow-protocol` | 模块入口、phase、agent 调度与质量门控 | `SKILL.md`, `phases/`, `agents/` | medium |
 | `tooling-template` | 脚本、代码模板、Word 模板、执行命令 | `scripts/`, `templates/` | high |
 | `self-update` | update 模块自身协议、agent、schema、rubric | `modules/update/**` | high |
+| `master-routing` | 总控路由、交接、用户路径与跨模块矩阵 | `master/routing-matrix.md` 等 | medium |
 
 ## 执行步骤
 
@@ -45,6 +46,9 @@
 - 先选模块，再选目标面，最后选具体文件。
 - 学科理论、概念、机制、测量优先路由到 `design/frame/` 或 `design/references/`。
 - 写作范式、章节技法、反模式优先路由到 `write/chapters/` 或 `write/resources/`。
+- 全流程审稿、编辑首筛、论证闭环、诚信规范优先路由到 `modules/check/`。
+- 写作范式若属于审稿检查/反模式/回流指令则进 check，不进 write/chapters。
+- master 路由/交接/用户路径图走 `master-routing`。
 - 文献检索、CNKI/Scholar、综述综合、假设推导优先路由到 `lit/references/`、`lit/phases/` 或 `lit/scripts/`。
 - 大纲结构、证据映射、素材扫描优先路由到 `outline/references/` 或 `outline/phases/`。
 - 量化、质性、混合方法、报告规范和分析模板优先路由到 `analysis/references/`、`analysis/templates/` 或 `analysis/phases/`。

@@ -7,7 +7,7 @@ user-invocable: true
 
 # Paper Submission 4SS
 
-你是中文社会科学论文投稿文件整备助手。你的职责是把已经完成或接近完成的 Markdown 稿件转化为可提交、可检查、可回流修改的投稿包。你不负责大规模重写正文；若发现正文论证或语言问题，应写入检查报告并回流 `modules/write/`。
+你是中文社会科学论文投稿文件整备助手。你的职责是把已经完成或接近完成的 Markdown 稿件转化为可提交、可检查、可回流修改的投稿包。你不负责大规模重写正文；若发现论证或证据问题，回流 `paper-check-report-*` 清单指向的模块（design/lit/outline/analysis/write），不只回流 write。语言扫描残留回流 write；Word、引文体例、模板和投稿包问题留在本模块。
 
 ## 路径约定
 
@@ -46,6 +46,7 @@ modules/submission/references/install-dependencies.md
 1. 用户显式指定的 Markdown、Word 模板或题录文件。
 2. `paper-workspace/05-writing/` 中的 `manuscript.md` 或最新 `manuscript-[slug]-[YYYY-MM-DD].md` 正文净稿。
 3. `paper-workspace/05-writing/revisions/` 中最新 `styled-[slug]-[YYYY-MM-DD].md` 正文净稿。
+3a. 最新 `paper-workspace/05-writing/reviews/paper-check-report-*`（及对应 matrix、revision-list）。若总体结论为 `不建议当前投稿` 或 `大修后复审`，默认不导出 Word，除非用户显式覆盖并在过程日志记录风险。
 4. `paper-workspace/05-writing/` 中的 `drafts/`、写作材料、扫描报告。内部 draft 只用于追溯，不作为默认投稿稿。
 5. `paper-workspace/02-literature/` 中的 `paper-registry.csv` 与 `literature-map.md`；检索日志见 `paper-workspace/_logs/paper-search-log-[slug]-[date]-[run].md`。
 6. 用户额外提供的 `.bib`、`.ris`、`.csv`、`.md` 题录或参考文献文件。
@@ -204,7 +205,7 @@ python3 modules/submission/scripts/check_citations.py \
 
 ## 5.1 投稿包最终复核
 
-生成 `submission-checklist.md`、cover letter 或 response letter 后，必须派发 `paper-submission-journal-package-consultant`。该顾问负责判断是否可提交、哪些声明或文件缺失、哪些问题必须回流 `write`、`lit` 或用户补充。最终回复必须列出 `agent-synthesis-submission-[YYYY-MM-DD].md` 中的投稿包状态和回流项。
+生成 `submission-checklist.md`、cover letter 或 response letter 后，必须派发 `paper-submission-journal-package-consultant`。该顾问负责判断是否可提交、哪些声明或文件缺失。论证/证据问题回流 check 清单指向的模块；格式与题录回流 write/lit 或用户补充；不得用 Word 模板修补未解决的论证、事实或诚信问题。最终回复必须列出 `agent-synthesis-submission-[YYYY-MM-DD].md` 中的投稿包状态和回流项。
 
 ## 6. 最终回复
 
@@ -213,4 +214,4 @@ python3 modules/submission/scripts/check_citations.py \
 1. 使用的稿件路径和 Word 输出路径。
 2. 生成的 Word、格式报告、引用报告、缺口报告路径。
 3. 已通过和未通过的投稿检查项。
-4. 需要回流 `write`、`lit` 或用户补充的信息。
+4. 需要回流 check 清单指向的模块、`write`、`lit` 或用户补充的信息。
