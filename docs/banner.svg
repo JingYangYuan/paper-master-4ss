@@ -50,26 +50,32 @@
   <text x="88" y="166" fill="#f8fafc" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="50" font-weight="800">paper<tspan fill="url(#title-grad)">-master-4ss</tspan></text>
   <text x="88" y="216" fill="#cbd5e1" font-family="ui-sans-serif, system-ui, PingFang SC, Microsoft YaHei, sans-serif" font-size="21">中文社会科学论文总控 · 登记 · 路由 · 交接</text>
 
-  <g font-family="ui-sans-serif, system-ui, PingFang SC, Microsoft YaHei, sans-serif" font-size="14" font-weight="600">
-    <rect x="88" y="248" width="92" height="36" rx="18" fill="#1c1408" stroke="#f59e0b" stroke-opacity=".6"/>
-    <circle cx="106" cy="266" r="4" fill="#f59e0b"/>
-    <text x="118" y="271" fill="#fcd34d">design</text>
-    <rect x="192" y="248" width="72" height="36" rx="18" fill="#061c18" stroke="#34d399" stroke-opacity=".6"/>
-    <circle cx="210" cy="266" r="4" fill="#34d399"/>
-    <text x="222" y="271" fill="#6ee7b7">lit</text>
-    <rect x="276" y="248" width="102" height="36" rx="18" fill="#111c30" stroke="#818cf8" stroke-opacity=".6"/>
-    <circle cx="294" cy="266" r="4" fill="#818cf8"/>
-    <text x="306" y="271" fill="#c4b5fd">outline</text>
-    <rect x="390" y="248" width="110" height="36" rx="18" fill="#0c1e33" stroke="#14b8a6" stroke-opacity=".6"/>
-    <circle cx="408" cy="266" r="4" fill="#14b8a6"/>
-    <text x="420" y="271" fill="#5eead4">analysis</text>
-    <rect x="512" y="248" width="86" height="36" rx="18" fill="#1c0a10" stroke="#fb7185" stroke-opacity=".6"/>
-    <circle cx="530" cy="266" r="4" fill="#fb7185"/>
-    <text x="542" y="271" fill="#fecdd3">write</text>
+  <g font-family="ui-sans-serif, system-ui, PingFang SC, Microsoft YaHei, sans-serif" font-size="12" font-weight="600">
+    <rect x="88" y="248" width="72" height="36" rx="18" fill="#1c1408" stroke="#f59e0b" stroke-opacity=".6"/>
+    <circle cx="104" cy="266" r="4" fill="#f59e0b"/>
+    <text x="114" y="271" fill="#fcd34d">design</text>
+    <rect x="168" y="248" width="52" height="36" rx="18" fill="#061c18" stroke="#34d399" stroke-opacity=".6"/>
+    <circle cx="182" cy="266" r="4" fill="#34d399"/>
+    <text x="192" y="271" fill="#6ee7b7">lit</text>
+    <rect x="228" y="248" width="78" height="36" rx="18" fill="#111c30" stroke="#818cf8" stroke-opacity=".6"/>
+    <circle cx="244" cy="266" r="4" fill="#818cf8"/>
+    <text x="254" y="271" fill="#c4b5fd">outline</text>
+    <rect x="314" y="248" width="86" height="36" rx="18" fill="#0c1e33" stroke="#14b8a6" stroke-opacity=".6"/>
+    <circle cx="330" cy="266" r="4" fill="#14b8a6"/>
+    <text x="340" y="271" fill="#5eead4">analysis</text>
+    <rect x="408" y="248" width="64" height="36" rx="18" fill="#1c0a10" stroke="#fb7185" stroke-opacity=".6"/>
+    <circle cx="424" cy="266" r="4" fill="#fb7185"/>
+    <text x="434" y="271" fill="#fecdd3">write</text>
+    <rect x="480" y="248" width="68" height="36" rx="18" fill="#082f36" stroke="#22d3ee" stroke-opacity=".6"/>
+    <circle cx="496" cy="266" r="4" fill="#22d3ee"/>
+    <text x="506" y="271" fill="#a5f3fc">check</text>
+    <rect x="556" y="248" width="52" height="36" rx="18" fill="#1c1408" stroke="#fbbf24" stroke-opacity=".6"/>
+    <circle cx="570" cy="266" r="4" fill="#fbbf24"/>
+    <text x="580" y="271" fill="#fde68a">sub</text>
   </g>
 
   <g font-family="ui-sans-serif, system-ui, PingFang SC, Microsoft YaHei, sans-serif">
-    <text x="88" y="332" fill="#94a3b8" font-size="14" font-weight="500">选题 → 文献 → 大纲 → 分析 → 写作 → 投稿</text>
+    <text x="88" y="332" fill="#94a3b8" font-size="14" font-weight="500">选题 → 文献 → 大纲 → 分析 → 写作 → 审稿 → 投稿</text>
     <rect x="88" y="348" width="536" height="12" rx="6" fill="#0f172a" stroke="#1e293b"/>
     <rect x="88" y="348" width="536" height="12" rx="6" fill="url(#progress-bar)"/>
   </g>

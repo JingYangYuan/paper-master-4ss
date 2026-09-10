@@ -17,6 +17,10 @@ Usage:
   python3 scripts/export_standalone.py            # export all modules
   python3 scripts/export_standalone.py lit write  # export selected modules
   python3 scripts/export_standalone.py --check    # verify only, no writes
+
+Sync rule: after changing any module, family table, routing, or protocol, re-export
+ALL modules (no args) and push paper-master-4ss plus every paper-*-4ss GitHub repo.
+Do not export only the module you edited; sibling READMEs share one family table.
 """
 
 from __future__ import annotations
@@ -111,7 +115,7 @@ git clone https://github.com/JingYangYuan/paper-{module}-4ss.git
 
 - 包内相对路径相对本包根目录解析
 - `master/` 与部分 `references/` 是导出时的协议快照
-- 更新方式：修改总控对应模块后重新导出，不要直接改本仓库
+- 更新方式：修改总控任一模块、家族表、路由或协议后，必须无参数重新导出**全部**独立包并 push 全部 GitHub 仓；不要只改本仓库，也不要只导出改过的那一个。
 
 ## License
 
@@ -203,7 +207,7 @@ CNKI 依赖可见浏览器控制；Google Scholar 用 WebFetch/WebSearch。
 
 先经研究方法协议与发表范式双层路由，再按章节标准和范文提示词写作、润色和检查。产出正文净稿（标题层级 + 自然段），过程材料不得拼进正文。
 
-配备 `writing_scanner.py` 与 `complexity_analyzer.py`，用于语言反模式扫描和文本复杂度诊断。
+配备 `writing_scanner.py` 与 `complexity_analyzer.py`，用于语言反模式扫描和文本复杂度诊断。语言扫描仍留本模块；全文审稿、编辑首筛、拒稿风险诊断交给同级 [`paper-check-4ss`](https://github.com/JingYangYuan/paper-check-4ss)。
 
 ## 路由
 
@@ -224,7 +228,7 @@ CNKI 依赖可见浏览器控制；Google Scholar 用 WebFetch/WebSearch。
 
 把接近完成的 Markdown 成稿转成投稿包：Word 导出、格式对照、正文引用与文后参考文献整理、投稿清单、cover letter 与 response letter。
 
-不负责大规模重写正文；论证或语言问题写入检查报告并回流 write。Word 导出依赖 pandoc。
+不负责大规模重写正文。论证或证据问题回流 [`paper-check-4ss`](https://github.com/JingYangYuan/paper-check-4ss) 清单指向的模块；语言扫描残留回流 write。Word 导出依赖 pandoc。默认读取最新 `paper-check-report-*`；总体结论为「不建议当前投稿」或「大修后复审」时不导出 Word，除非用户显式覆盖。
 """,
     "update": """
 ## 它做什么
@@ -234,7 +238,6 @@ CNKI 依赖可见浏览器控制；Google Scholar 用 WebFetch/WebSearch。
 只写到 `paper-workspace/07-update/`，不得直接修改任何核心模块文件。合并进总控必须经人工确认。
 """,
 }
-
 
 
 def read_text(path: Path) -> str:
@@ -316,11 +319,11 @@ def check_package(target: Path) -> list[str]:
         for raw in re.findall(r"[A-Za-z0-9_*][A-Za-z0-9_./*-]*", text):
             token = raw.rstrip("./-")
             if not token or token.endswith(".") or token.endswith("/"):
-                continue  # 行文省略号或目录名提及，非具体路径
+                continue
             if not any(token.startswith(p) for p in CHECK_PREFIXES):
                 continue
             if token.endswith(".env.kie"):
-                continue  # 记载用户级 token 文件，按设计不随包分发
+                continue
             stem = token.split("*")[0].rstrip("/")
             if not stem:
                 continue
@@ -330,13 +333,13 @@ def check_package(target: Path) -> list[str]:
             first = stem.split("/")[0]
             first_ok = any(c.exists() for c in [target / first, item.parent / first])
             if first_ok and ("*" in token or stem.endswith(("-", "_"))):
-                continue  # 通配/占位路径（含 [学科] 类中文占位），只要求所在目录存在
+                continue
             if "." not in stem.rsplit("/", 1)[-1]:
                 parent = stem.rsplit("/", 1)[0] if "/" in stem else "."
                 if any(c.exists() for c in [target / parent, item.parent / parent]):
-                    continue  # 家族/前缀式提及（无扩展名），只要求所在目录存在
+                    continue
             if re.search(r"-[A-Za-z]\.md$", stem):
-                continue  # 行文示例文件名（如 theory-frameworks-X.md）
+                continue
             broken.append(f"{rel}: {token}")
     return broken
 
@@ -408,6 +411,10 @@ def export(module: str) -> tuple[list[str], int, int]:
 
     rewritten = rewrite_text_files(target, module)
     make_readme(target, module)
+    (target / ".gitignore").write_text(
+        ".DS_Store\n__pycache__/\n*.py[cod]\n*$py.class\n*.log\n.env\n.env.*\n",
+        encoding="utf-8",
+    )
     broken = check_package(target)
     return broken, rewritten, sum(1 for _ in target.rglob("*") if _.is_file())
 

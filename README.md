@@ -56,6 +56,7 @@ mkdir -p paper-workspace/{00-meta,01-design,02-literature,03-outline,04-analysis
 | lit | CNKI 需要可见浏览器控制；Zotero MCP 可选 |
 | analysis | 按所选语言：Stata / R / Python |
 | write | Python 3（扫描脚本） |
+| check | 无强制外部依赖 |
 | submission | pandoc（Markdown → Word） |
 
 ## 它怎么工作
@@ -96,15 +97,14 @@ python3 scripts/register_zcode_hooks.py
 
 ## 导出独立包
 
-修改 `modules/<module>/` 后，从总控根目录导出：
+修改任一模块、家族表、路由或协议后，必须从总控根目录**无参数导出全部模块**，再把本仓库与全部独立仓提交并 push。不要只导出改过的那一个：每个独立包 README 共用同一张 4SS 家族表。
 
 ```bash
-python3 scripts/export_standalone.py            # 全部
-python3 scripts/export_standalone.py lit write  # 指定模块
+python3 scripts/export_standalone.py            # 全部（默认）
 python3 scripts/export_standalone.py --check    # 只检查路径
 ```
 
-导出结果写到与本包同级的 `paper-<module>-4ss/`。独立包里的 `master/`、部分 `references/` 是快照；跨模块路径仍指向同级安装的 `paper-master-4ss/`。
+导出结果写到与本包同级的 `paper-<module>-4ss/`。独立包里的 `master/`、部分 `references/` 是快照；跨模块路径仍指向同级安装的 `paper-master-4ss/`。随后同步 GitHub：`paper-master-4ss` 与 `paper-design-4ss`、`paper-lit-4ss`、`paper-outline-4ss`、`paper-analysis-4ss`、`paper-write-4ss`、`paper-check-4ss`、`paper-submission-4ss`、`paper-update-4ss`。
 
 ## 目录
 
