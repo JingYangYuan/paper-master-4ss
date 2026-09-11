@@ -6,13 +6,13 @@
 
 ## 1. 安装与配置 statamcp
 
-Stata 本体为商业软件（要求 Stata 17+），需自行购买并安装；MCP 服务经 statamcp 桥接。安装与配置以仓库 README 为权威来源：<https://github.com/JingYangYuan/stata-mcp-zcode>。
+Stata 本体为商业软件（要求 Stata 17+），需自行购买并安装；MCP 服务经 statamcp 桥接。安装与配置以仓库 README 为权威来源：<https://github.com/JingYangYuan/stata-mcp>。
 
 一键部署（Windows，PowerShell）：
 
 ```bash
-git clone https://github.com/JingYangYuan/stata-mcp-zcode.git
-cd stata-mcp-zcode
+git clone https://github.com/JingYangYuan/stata-mcp.git
+cd stata-mcp
 powershell -ExecutionPolicy Bypass -File deploy.ps1
 # 默认 Stata 路径 E:\Stata18；其他位置/端口显式指定：
 powershell -ExecutionPolicy Bypass -File deploy.ps1 -StataPath "D:\Stata21" -Port 4001
