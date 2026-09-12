@@ -21,6 +21,8 @@ Usage:
 Sync rule: after changing any module, family table, routing, or protocol, re-export
 ALL modules (no args) and push paper-master-4ss plus every paper-*-4ss GitHub repo.
 Do not export only the module you edited; sibling READMEs share one family table.
+The same run also refreshes ../pi-chrome-cnki/ (public copy of the lit module's
+OMP pi-chrome backend doc + cookie sink); push that repo too when it changes.
 """
 
 from __future__ import annotations
@@ -30,6 +32,9 @@ import re
 import shutil
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import export_pi_chrome_doc as pi_chrome_doc  # noqa: E402
 
 PKG_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = PKG_ROOT.parent
@@ -180,7 +185,9 @@ Zotero 是可选增强。启用后按 `references/zotero-local-mcp.md` 做能力
 | D 综述+假设 | 5 轮以上，含假设推导 |
 | E 知网专项 | CNKI kns8s 闭环为主 |
 
-CNKI 依赖可见浏览器控制；Google Scholar 用 WebFetch/WebSearch。
+CNKI 依赖可见浏览器控制，后端二选一：ZCode 内置 browser-use（无需安装），或 OMP pi-chrome（一次性加载伴生 Chrome 扩展，见 `references/pi-chrome-browser.md`）。Google Scholar 用 WebFetch/WebSearch。
+
+OMP 后端的安装与适配有公开文档副本，可直接分享：<https://github.com/JingYangYuan/pi-chrome-cnki>（由本包 `scripts/export_pi_chrome_doc.py` 同步导出）。
 """,
     "outline": """
 ## 它做什么
@@ -419,6 +426,12 @@ def export(module: str) -> tuple[list[str], int, int]:
     return broken, rewritten, sum(1 for _ in target.rglob("*") if _.is_file())
 
 
+def export_pi_chrome_docs() -> None:
+    files = pi_chrome_doc.build()
+    pi_chrome_doc.write_target(files)
+    print(f"[pi-chrome] 导出完成: {pi_chrome_doc.TARGET}（{len(files)} 文件）")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="导出 modules/<m> 为独立 skill")
     parser.add_argument("modules", nargs="*", help="要导出的模块名（默认全部）")
@@ -441,6 +454,8 @@ def main() -> int:
                     print(f"  - {b}")
             else:
                 print(f"[{m}] 路径自检通过")
+        if not args.modules:
+            export_pi_chrome_docs()
         return 0
 
     failed = False
@@ -458,6 +473,15 @@ def main() -> int:
                 print(f"  - {b}")
         else:
             print(f"[{m}] 路径自检通过: {target}")
+    if not args.modules:
+        drift = pi_chrome_doc.check_target(pi_chrome_doc.build())
+        if drift:
+            failed = True
+            print(f"[pi-chrome] 未同步（{len(drift)} 处）:")
+            for item in drift[:10]:
+                print(f"  - {item}")
+        else:
+            print(f"[pi-chrome] 已同步: {pi_chrome_doc.TARGET}")
     return 1 if failed else 0
 
 

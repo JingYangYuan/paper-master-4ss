@@ -1,33 +1,53 @@
 # lit module 安装说明
 
-本发布包用于中英文文献综述、CNKI/Google Scholar 精准补充、本地文献库联动和假设推导。CNKI 检索依赖 ZCode 内置浏览器控制（内置能力，无需安装）；Zotero 与 Zotero MCP 是可选增强，只有当用户希望保存论文、管理全文 PDF、检索本地库或深读已收藏文献时才要求启用。
+本发布包用于中英文文献综述、CNKI/Google Scholar 精准补充、本地文献库联动和假设推导。CNKI 检索依赖浏览器控制，后端按宿主二选一（ZCode 内置 browser-use，或 OMP pi-chrome）；Zotero 与 Zotero MCP 是可选增强，只有当用户希望保存论文、管理全文 PDF、检索本地库或深读已收藏文献时才要求启用。
 
 ## 安装模式
 
 | 模式 | 适用场景 | 必需依赖 | Zotero 状态 |
 |------|----------|----------|-------------|
-| 轻量检索 | 只需要在线检索、摘要筛选和综述写作，不保存全文 | ZCode 内置浏览器控制（内置） | 可跳过，记录为 `用户明确暂缓` |
-| 文献库联动 | 需要检查已有文献、去重、导入题录 | ZCode 内置浏览器控制 + Zotero Desktop/Connector | 启用 Zotero |
-| 全文保存/深读 | 需要保存 PDF、读取 Zotero 附件全文 | ZCode 内置浏览器控制 + Zotero Desktop/Connector + Zotero MCP | 启用 Zotero MCP |
+| 轻量检索 | 只需要在线检索、摘要筛选和综述写作，不保存全文 | 浏览器控制后端（ZCode 内置，或 OMP pi-chrome） | 可跳过，记录为 `用户明确暂缓` |
+| 文献库联动 | 需要检查已有文献、去重、导入题录 | 浏览器控制后端 + Zotero Desktop/Connector | 启用 Zotero |
+| 全文保存/深读 | 需要保存 PDF、读取 Zotero 附件全文 | 浏览器控制后端 + Zotero Desktop/Connector + Zotero MCP | 启用 Zotero MCP |
 
 **选择铁律**：Phase 0/Step 0Q 必须询问用户是否启用 Zotero 和 Zotero MCP。用户不想保存全文或不使用本地库时，不得强制安装 Zotero；把本地文献库阶段记录为 `用户明确暂缓`，继续执行 WebSearch、CNKI、Google Scholar 和摘要核验。
 
-## 强制依赖：ZCode 内置浏览器控制
+## 强制依赖：浏览器控制（后端二选一）
 
-CNKI 阶段使用 ZCode 内置浏览器控制（browser-use，`mcp__node_repl__js` + browser client），**无需安装任何额外依赖**：ZCode 桌面版自带该能力，浏览器面板对用户可见，验证码和登录由用户在面板中手动完成。
+CNKI 阶段必须由浏览器控制完成，后端按宿主选择：
+
+| 后端 | 宿主 | 安装 | 适配文件 |
+|---|---|---|---|
+| `ZCode` | ZCode 桌面版 | 内置能力，**无需安装** | [cnki-kns8s-closed-loop.md](cnki-kns8s-closed-loop.md) §2.1 |
+| `OMP` | OMP（Oh My Pi / Pi coding agent） | 需一次性加载伴生 Chrome 扩展，约 10 分钟；公开文档 <https://github.com/JingYangYuan/pi-chrome-cnki> | **[pi-chrome-browser.md](pi-chrome-browser.md)** |
+
+`ZCode` 后端：浏览器控制（browser-use，`mcp__node_repl__js` + browser client）由 ZCode 桌面版自带，浏览器面板对用户可见，验证码和登录由用户在面板中手动完成。
+
+`OMP` 后端：pi-chrome 通过伴生 Chrome 扩展驱动用户已登录的 Chrome profile，登录态与下载权限天然可用。安装与授权见 [pi-chrome-browser.md](pi-chrome-browser.md) §2，最小序列：
+
+```bash
+pi install npm:pi-chrome          # 已运行会话需 /reload
+```
+
+```text
+/chrome onboard                   # 显示伴生扩展目录路径
+chrome://extensions → 开发者模式 → 加载已解压的扩展程序 → 选该目录
+/chrome authorize                 # 或 /chrome authorize indefinite
+/chrome doctor                    # 应显示 ✓ Chrome is connected
+```
 
 安装后检查（每次 CNKI 阶段开始前执行可用性检查）：
 
-1. browser-use 可列标签页/新建标签页/导航到 `about:blank` 或 `https://kns.cnki.net`，并读取 URL/title 轻量状态。
-2. 打开 `https://kns.cnki.net/starter/advanced` 后检查页头机构信息（"大学/学院名 + 手机号"）确认机构授权；未登录时提示用户先在浏览器面板完成机构登录，未登录只能检索题录、不能下载全文。
+1. 浏览器控制可列标签页/新建标签页/导航到 `about:blank` 或 `https://kns.cnki.net`，并读取 URL/title 轻量状态（OMP 四项验收命令见 [pi-chrome-browser.md](pi-chrome-browser.md) §3）。
+2. 打开 `https://kns.cnki.net/starter/advanced` 后检查页头机构信息（"大学/学院名 + 手机号"）确认机构授权；未登录时提示用户先完成机构登录，未登录只能检索题录、不能下载全文。
 
 状态词表：
 
 - `浏览器控制正常`：可列页/新建页/导航且检索页可达。
-- `浏览器控制不可用`：工具抛错、无法列页/新建页/导航；停止 CNKI 阶段，提示用户重启宿主会话，不得用 WebSearch/Scholar 替代。
+- `浏览器控制不可用`：工具抛错、无法列页/新建页/导航；停止 CNKI 阶段（ZCode 提示重启宿主会话；OMP 先 `/chrome doctor` 并重载伴生扩展），不得用 WebSearch/Scholar 替代。
 - `浏览器页面未完成` / `CNKI 页面未完成`：页面加载未完成或选择器失配；重试一次后仍失败即停止并记录。
 
-验证码与下载约定：验证码出现时停止自动化并请用户在浏览器面板手动拖动完成；PDF 下载不走浏览器下载管线（必弹 Save-As），使用 `modules/lit/scripts/cnki/kns8s-download.sh`（Cookie + curl）免弹窗下载。完整协议见 [cnki-kns8s-closed-loop.md](cnki-kns8s-closed-loop.md)。
+验证码与下载约定：验证码出现时停止自动化并请用户在可见浏览器中手动拖动完成（OMP 下用户切到 `Pi Session:` 分组标签）；PDF 下载不走浏览器下载管线（必弹 Save-As），使用 `modules/lit/scripts/cnki/kns8s-download.sh`（Cookie + curl）免弹窗下载；Cookie 获取 OMP 走回环 sink（`modules/lit/scripts/cnki/cookie_sink.py`），不得经对话回传。完整协议见 [cnki-kns8s-closed-loop.md](cnki-kns8s-closed-loop.md)。
 
 Google Scholar 阶段无需浏览器，用 WebFetch/WebSearch 直接访问即可。
 
@@ -167,13 +187,17 @@ paper-master-4ss/modules/lit/
 test -f modules/lit/SKILL.md
 test -f modules/lit/phases/phase-1-search.md
 test -f modules/lit/references/cnki-kns8s-closed-loop.md
+test -f modules/lit/references/pi-chrome-browser.md
 test -f modules/lit/scripts/cnki/kns8s-download.sh
+test -f modules/lit/scripts/cnki/cookie_sink.py
+python3 modules/lit/scripts/cnki/cookie_sink.py --help
 ```
 
 人工确认：
 
-- 浏览器控制可列页/新建页/导航且页面可达。
-- CNKI 检索页可在浏览器面板打开；如遇验证码，用户能手动完成。
+- 浏览器控制可列页/新建页/导航且页面可达（ZCode 内置 browser-use；OMP pi-chrome 按 [pi-chrome-browser.md](pi-chrome-browser.md) §3 四项验收通过）。
+- CNKI 检索页可打开；如遇验证码，用户能手动完成。
+- OMP 后端：`/chrome doctor` 显示已连接；Cookie 回环 sink 能落盘（0600）并只报告字节数/键数。
 - Google Scholar 页面完成可达性检查。
 - 如用户选择 Zotero：Zotero Desktop/Connector 可保存测试文献。
 - 如用户选择 Zotero MCP：所选 Zotero MCP 实现可完成条目检索、元数据读取；需要全文深读时还要能读取附件全文。

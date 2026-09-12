@@ -72,6 +72,7 @@ MCP 工具不可用但 `zotero-cli` 可用时，可用 CLI 做等价操作（`zo
 | 全文深读 | PDF/EPUB | 先 `zotero_get_pdf_outline`，再 `zotero_read_pdf_pages`；确需通读才 `zotero_get_item_fulltext` | 扫描件可能无文本 |
 | 即时入库 | 新建题录 | `zotero_add_item` | 必须带 `abstractNote` |
 | 挂 PDF | 本地文件 | `zotero_attach_file` | 文件已在 `papers/` 或用户路径 |
+| MinerU 全文笔记 | md → 子笔记 | `zotero_manage_note`（create/查重用 `zotero_get_notes`） | 见 §5b，纯文本骨架 |
 | 项目集合 | 归入本次论文 | `zotero_create_collection`、`zotero_set_item_collections` | 集合名用项目 slug，不写个人信息 |
 | Phase 2 | 已有高亮/笔记 | `zotero_get_annotations`、`zotero_synthesize_annotations`、`zotero_get_notes` | 只作证据线索，仍要回查原文 |
 | 书目导出 | 交接 write/submission | `zotero_export_bibliography` | 体例由 submission 最终裁定 |
@@ -120,6 +121,36 @@ zotero_add_item
 已有条目不要重复创建：先 `zotero_search_items` / DOI 匹配，命中则 `zotero_update_item` 补 `abstractNote`、集合和标签。
 
 ---
+
+## 5b. PDF 入集合与 MinerU 全文笔记（Step 11）
+
+用户启用 Zotero 且 Top-N 全文化完成后执行：
+
+1. **项目集合自动创建**：`zotero_search_collections(query=<项目slug>)` 查重；不存在 → `zotero_create_collection(name=<项目slug>)`，key 记入搜索日志；存在 → 复用。不重复建同名集合。
+2. **挂本地 PDF**：对 `download_status=downloaded` 且已有 `item_key` 的条目，`zotero_attach_file(item_key, file_path=<papers/ 绝对路径>)`；幂等（同名/同 MD5 不重传）。附件为 **imported file（复制入 Zotero storage）**，这是实测唯一可靠通道；不要用裸 HTTP POST `linkMode=linked_file`。无条目的先 `zotero_add_item` 创建。
+3. **归集合**：`zotero_set_item_collections(item_keys=[…], add_to=[<collection key>])`；标签 `paper-master`。
+4. **MinerU 全文 md → 子笔记**：`zotero_manage_note(action=create, item_key=<父条目>, note_title="MinerU 全文 <paper_id>", note_text=<正文骨架>)`。规则：
+   - 只放纯文本骨架：去掉图片引用与 base64，标题层级、正文与参考文献完整保留；
+   - 超约 80k 字符截断，尾部注明「笔记截断，全文见 fulltext/<paper_id>/document.md」；
+   - 创建前 `zotero_get_notes(item_key)` 查重，同名笔记已存在则跳过；
+   - 失败记入注册表 `notes=zotero_note=pending`，不阻塞流程。
+
+**写入通道实测结论（2026-09-12）**：
+- 首选 MCP 工具（`zotero_attach_file`、`zotero_manage_note`）；批量脚本可复用 MCP 同款客户端：`sys.path` 指向 `~/.local/share/uv/tools/zotero-mcp-server/lib/python3.12/site-packages`，`from zotero_mcp.client import get_local_write_client`，笔记 `zot.create_items([...])`、附件 `zot.attachment_simple([path], key)`。该通道 26/26 全部持久化成功。
+- **不要**用裸 `urllib/requests` POST `/api/users/0/items` 批量写子项：返回 200 但静默不落盘（本地 API 写入竞态），且裸 GET `/items/<key>/children` 有缓存，回查结果不可信。判读唯一可信口径是用同款 pyzotero 客户端 `zot.items(parentKey=…)` 回查。
+- 重复尝试会留下重复附件/笔记，收尾必须按 parentKey 去重（保留 version 最小的一个）。
+
+```mermaid
+flowchart LR
+  P[papers/ PDF] -->|mark-download| R[registry]
+  P -->|MinerU| F[fulltext/paper_id/document.md]
+  A[zotero_add_item 题录+摘要] --> K[item_key]
+  K -->|zotero_attach_file| Z[Zotero 条目]
+  K -->|zotero_manage_note create| N[MinerU 全文子笔记]
+  Z --> C[项目集合]
+  N --> C
+  F -->|citation_intersection.py| X[参考文献交集滚雪球]
+```
 
 ## 6. 全文深读
 

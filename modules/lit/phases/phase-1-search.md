@@ -168,7 +168,7 @@ paper-workspace/02-literature/stage-syntheses.md
 
 **Zotero 摘要存储约束**：每篇进入正式论文清单且相关度为 H 或 M 的论文，必须在抓取摘要后立即尝试存入 Zotero，保存内容必须包含 `abstractNote` 或等价摘要字段。当前宿主若暴露 Zotero MCP，则优先使用 Zotero MCP；若只有 Zotero Connector 或本地导出能力，则记录连接器保存状态；若 Zotero 不可用，写入 `paper-workspace/02-literature/abstracts-pending-zotero.md`，并在搜索日志中记录 `Zotero 不可用，摘要未保存`。不得等检索结束后再批量补存摘要。
 
-**浏览器控制可用性硬约束**：进入任何 CNKI 检索动作前，必须先完成 Step 6.0 的浏览器控制可用性检查：ZCode 内置浏览器控制（browser-use）可列标签页/新建标签页/导航，能打开 `about:blank` 或 CNKI 首页并读取轻量页面状态。检查未通过时，不得进入 CNKI 检索页、不得执行任何 CNKI 页面脚本、不得写 `CNKI 已执行`。browser-use 不可用时记录 `浏览器控制不可用`，停止 CNKI 阶段并提示用户重启宿主会话；不得 kill 进程、不得用 WebSearch、Google Scholar、普通搜索、`cnki-researcher` 或 lit agents 替代 CNKI 检索结果。CNKI 需要登录、验证码或人工确认时，在用户可见的浏览器面板中完成。
+**浏览器控制可用性硬约束**：进入任何 CNKI 检索动作前，必须先完成 Step 6.0 的浏览器控制可用性检查：浏览器控制可列标签页/新建标签页/导航，能打开 `about:blank` 或 CNKI 首页并读取轻量页面状态。ZCode 用内置 browser-use；OMP 用 pi-chrome，四项验收命令与通过标准见 [pi-chrome-browser.md](references/pi-chrome-browser.md) §3。检查未通过时，不得进入 CNKI 检索页、不得执行任何 CNKI 页面脚本、不得写 `CNKI 已执行`。后端不可用时记录 `浏览器控制不可用`，停止 CNKI 阶段并按后端对应章节恢复（ZCode 提示重启宿主会话；OMP 先 `/chrome doctor` 并重载伴生扩展）；不得 kill 进程、不得用 WebSearch、Google Scholar、普通搜索、`cnki-researcher` 或 lit agents 替代 CNKI 检索结果。CNKI 需要登录、验证码或人工确认时，在用户可见的浏览器中完成。
 
 ---
 
@@ -293,3 +293,48 @@ ROW
 
 
 [Showing lines 1-300 of 689. Use :301 to continue]
+---
+
+## Step 8：CNKI 精准闭环（模式 A/B/D 终段必经；模式 E 主轨道）
+
+按 [cnki-kns8s-closed-loop.md](references/cnki-kns8s-closed-loop.md) 执行 ①检索→②分析摘要→③选择下载 三段。要点：
+
+1. **操作修正**：`li[name="majorSearch"]` 切专业检索标签、`#ModuleSearch input.btn-search` 提交、结果就地渲染在 AdvSearch 主页面、facet 走祖先点击。
+2. **>1000 命中**：先做学科边界讨论；边界清晰则用 CSSCI/北大核心/AMI 来源类别收窄，不盲目堆关键词。
+3. **双排序**：相关度（`li#FFD`）与被引（`li#CF`）各取首页，逐条打开详情页抓摘要。
+4. **锚文献扩展**：对高被引锚文献提取引证文献（前沿）与共同参考文献（学科基础）。
+5. 每轮返回必须报告命中总数与是否触发筛选收窄；语法性静默失败（跨字段 `+`）不得记为 `zero_results`。
+
+## Step 9：Top-N 归档与下载
+
+1. 候选文献先写入 `paper-registry.csv`（`literature_registry.py register`，含摘要），下载计划由 `download-plan` 子命令从注册表生成，不手写清单。
+2. CNKI 全文走 `scripts/cnki/kns8s-download.sh`（Cookie + curl），禁止浏览器下载管线；下载器完成 `.part` → PDF 魔数与页数校验 → 归档 `papers/`，失败写回 `download_status` 与原因。
+3. 每篇下载成功后 `mark-download` 回写哈希、页数；下载完成后才在注册表标记 `downloaded`。
+
+## Step 10：全文化（MinerU）
+
+用模块内置 `scripts/mineru/pdf2md.py --registry` 把 `papers/` 下 PDF 解析到 `fulltext/<paper_id>/document.md`，逐篇 `mark-parse` 回写解析状态；抽查 2–3 篇质量。协议见 [mineru-pdf2md.md](references/mineru-pdf2md.md)。解析成功后才进入 Step 11 的笔记入库与 Step 12 的参考文献交集。
+
+## Step 11：Zotero 项目集合入库与全文化笔记（用户启用 Zotero 时）
+
+按 [zotero-local-mcp.md](references/zotero-local-mcp.md) §5–§7、§11 执行，三条铁律：
+
+1. **集合自动创建**：检索目标集合（`zotero_search_collections`，名称=项目 slug）；不存在则 `zotero_create_collection` 创建，并记下集合 key。集合已存在时直接复用，不重建。
+2. **题录+PDF 入集合**：H/M 论文经 `zotero_add_item` 入库（含 `abstractNote`）后：
+   - 本地 PDF 已下载 → `zotero_attach_file` 挂到对应条目（imported file 通道，唯一实测可靠；不用裸 HTTP POST linked_file）；
+   - `zotero_set_item_collections` 归入项目集合，标签 `paper-master`；
+   - `item_key` 回写注册表 `source_id`。
+3. **MinerU 全文 md 存为 Zotero 笔记**：Step 10 解析成功且条目有 `item_key` 时，把 `fulltext/<paper_id>/document.md` 的**纯文本骨架**（去图片链接与 base64，正文+参考文献完整保留，超过约 80k 字符时截断并注明“笔记截断，全文见 fulltext/”）用 `zotero_manage_note(action=create, item_key=…, note_title="MinerU 全文 <paper_id>")` 写入该条目子笔记。同一 `item_key` 已有同名笔记时跳过，不重复创建。笔记创建结果回写注册表 `notes`（`zotero_note=created`）。
+
+Zotero 未启用或能力缺失时，本步整体记 `Zotero 不可用/暂缓`，不影响 Step 12。
+
+## Step 12：参考文献交集滚雪球（共引扩展，模式 A/B/D）
+
+1. 运行 `python3 modules/lit/scripts/citation_intersection.py --workspace <paper-workspace>`，对已解析全文的参考文献取交集，产出 `02-literature/citation-intersection.md` 与 `plans/citation-intersection.tsv`（共引频次≥2 排序）。
+2. **高重复度判读**：共引频次 ≥2 的条目 = 该研究领域的共同知识基础。逐条判读：
+   - 已在清单/本地库中 → 标记 `已有`，跳过；
+   - 未收录且题名/作者可检索 → 登记为 `paper-registry.csv` 新候选（`selection_reason=共引滚雪球，被N篇引用`），补抓摘要后准入；
+   - 条目信息不足以检索 → 记 `待核验`，不强行纳入。
+3. **二轮 CNKI 滚雪球**：对高重复度候选构造专业检索式（题名短语 `TI='…'` 或 `AU='…'`），走 Step 8 同一闭环检索下载；命中后回到 Step 9–11 归档、全文化、入库。滚雪球最多 2 轮或无新增共引≥2 条目即停，防止发散。
+4. 交集结果与滚雪球决策追加进搜索日志与 `stage-syntheses.md`；列出每条高共引文献的检索/跳过状态供用户事后审阅。
+5. **提取器兜底（2026-09-12 实测）**：知网 PDF 经 MinerU 解析后，参考文献可能是脚注式（`〇N`/`①N` 编号、无「参考文献」标题）——脚本回退到文末 25% 区域按编号标记定位；英文条目 OCR 断字变体（如 `Salanci k`）用 difflib 相似度 ≥0.85 聚类合并后计数。共引频次封顶 2 属正常（各文献引用线不同）；滚雪球以可检索的中文题名为先，英文经典专著（Pfeffer & Salancik 1978 等）标记 `外部经典`，不强求知网下载。

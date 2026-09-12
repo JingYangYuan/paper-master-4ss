@@ -22,9 +22,9 @@ hooks:
 
 - 输入路径开放：登记和引用用户给出的路径，不搬运材料。
 - 输出路径统一：默认写入 `paper-workspace/`。
-- 四宿主适配：Claude Code、OpenCode、Codex 与 ZCode 调用本 skill 时，先读 `references/runtime-adapter.md` 与 `references/agent-software-adapters.md`，把宿主工具映射到通用能力名后再执行业务流程。
+- 五宿主适配：Claude Code、OpenCode、Codex、ZCode 与 OMP（Oh My Pi / Pi coding agent）调用本 skill 时，先读 `references/runtime-adapter.md` 与 `references/agent-software-adapters.md`，把宿主工具映射到通用能力名后再执行业务流程。
 - ZCode Hooks 自注册：ZCode 不执行 skill frontmatter hooks，只认 `~/.zcode/cli/config.json`（需 `hooks.enabled: true`）。ZCode 宿主首次调用本 skill 时，先运行 `python3 scripts/register_zcode_hooks.py`（幂等，写前自动备份，不触碰其他配置键），把 PostToolUse(Bash) 与 Stop 两个 guard hook 注册进用户配置；注册当次会话仍显式运行 guard 命令，后续会话由 config hooks 自动触发。查询状态用 `--check`，撤销用 `--remove`。
-- 项目规则优先：通过 `project_memory` 读取用户项目文件夹中的 paper-master 规则。Claude Code 使用 `CLAUDE.md` 标记块；ZCode 使用工作区 `AGENTS.md` 标记块；OpenCode/Codex 使用宿主项目规则文件；均缺失时回落到 `paper-workspace/_index/project-rules.md`；不得写入 skill 包目录。
+- 项目规则优先：通过 `project_memory` 读取用户项目文件夹中的 paper-master 规则。Claude Code 使用 `CLAUDE.md` 标记块；ZCode 使用工作区 `AGENTS.md` 标记块；OMP 使用 `.omp/AGENTS.md` 或工作区 `AGENTS.md` 标记块；OpenCode/Codex 使用宿主项目规则文件；均缺失时回落到 `paper-workspace/_index/project-rules.md`；不得写入 skill 包目录。
 - 渐进加载：先读项目级 `project_memory`（如有）与 `references/install-dependencies.md` 检查依赖，再读 `master/routing-matrix.md`、`master/agent-orchestration.md`、`master/output-protocol.md` 与 `master/user-journey.md`，确定主模块后再读对应 `modules/<module>/SKILL.md`；涉及文献综述准备或改写时，还必须读 `master/literature-review-protocol.md`。
 - 内部自包含：跨模块引用使用 `modules/...`。
 - 路径约定：本包任一文件中的 `modules/...`、`master/...`、`references/...` 默认相对于 `paper-master-4ss/` 根目录解析；同模块局部路径也可按当前文件目录解析。
