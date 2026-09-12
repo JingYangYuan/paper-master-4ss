@@ -28,3 +28,4 @@ lit 模块负责文献检索、文献景观地图、研究空白识别、理论�
 - 假设推导经验优先进入 `gap-to-hypothesis.md`。
 - Zotero / 本地文献库操作经验优先进入 `references/zotero-local-mcp.md`；安装命令、授权和排障留在 `install-dependencies.md`。
 - 所有工具候选必须说明浏览器可见性（ZCode 面板或 OMP `Pi Session:` 标签）、验证码几何判据和页面可达性验证方式。Zotero MCP 候选必须说明能力检查方式、摘要准入和不替代 CNKI 的边界。
+- pi-chrome 后端版本的完整性判据（`offscreen` 权限、`offscreen.html`/`offscreen.js`、service worker 保活）属 `tooling-template` 面：源改动落到本机安装目录后，由 `scripts/export_pi_chrome_plugin.py` 重导镜像仓 <https://github.com/JingYangYuan/pi-chrome-mirror>。

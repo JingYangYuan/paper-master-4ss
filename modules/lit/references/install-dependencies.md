@@ -36,6 +36,13 @@ chrome://extensions → 开发者模式 → 加载已解压的扩展程序 → �
 /chrome doctor                    # 应显示 ✓ Chrome is connected
 ```
 
+npm 不可用、或扩展加载后 `/chrome doctor` 连不上时，改用离线镜像 <https://github.com/JingYangYuan/pi-chrome-mirror>（含 MV3 `offscreen` 保活的完整伴生扩展，逐字节复制可用构建）：
+
+```bash
+git clone https://github.com/JingYangYuan/pi-chrome-mirror.git
+omp install ./pi-chrome-mirror    # 本地路径安装，不走 npm；先 --dry-run 看计划
+```
+
 安装后检查（每次 CNKI 阶段开始前执行可用性检查）：
 
 1. 浏览器控制可列标签页/新建标签页/导航到 `about:blank` 或 `https://kns.cnki.net`，并读取 URL/title 轻量状态（OMP 四项验收命令见 [pi-chrome-browser.md](pi-chrome-browser.md) §3）。

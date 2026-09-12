@@ -31,6 +31,15 @@ pi install npm:pi-chrome     # OMP 与 pi 为同一 CLI；已安装则跳过
 - 若 OMP 正在运行：先在该会话执行 `/reload`，再使用 `/chrome` 命令。
 - 本机安装位置：`~/.omp/plugins/node_modules/pi-chrome/`（验收时为 0.15.51）。
 
+**npm 通道不可用时改用离线镜像**（公开仓 <https://github.com/JingYangYuan/pi-chrome-mirror>）：
+
+```bash
+git clone https://github.com/JingYangYuan/pi-chrome-mirror.git
+omp install ./pi-chrome-mirror      # 本地路径安装，不走 npm 下载；先 --dry-run 看计划
+```
+
+> **为什么需要镜像（2026-09-12 实测）**：npm 上 `pi-chrome@0.15.51` 的 tarball 与本机安装的同名版本**不是同一份代码**——tarball 缺 `browser-extension/offscreen.html`、`offscreen.js` 与 manifest 的 `offscreen` 权限，MV3 service worker 没有保活文档。Chrome 升级后会更快回收空闲 worker，桥接轮询随之停止，表现为**"扩展已加载但 `/chrome doctor` 连不上"**。镜像逐字节复制本机已验证可用的构建（含 offscreen 保活），并附 `checksums.sha256`。
+
 ### 2.2 Chrome 侧（手动加载伴生扩展）
 
 ```text
@@ -46,6 +55,8 @@ pi install npm:pi-chrome     # OMP 与 pi 为同一 CLI；已安装则跳过
 ```
 
 （macOS 文件夹选择器中按 Cmd+Shift+G 粘贴路径。）
+
+改用镜像时，可直接下载 [pi-chrome-mirror 的 release zip](https://github.com/JingYangYuan/pi-chrome-mirror/releases) 解压后加载该目录，或选择镜像仓库内的 `extensions/chrome-profile-bridge/browser-extension/`。
 
 ### 2.3 授权与体检
 
@@ -129,6 +140,7 @@ CNKI 流程中的硬性约束（2026-09-12 实测，本机 0.15.51）：
 | `page.navigate timed out after 25000ms` | 目标页正忙 | 等 2–3 秒重试，或先导航到 `about:blank` |
 | `Timed out after 30000ms: the Chrome extension received the command but never returned a result` | 扩展/桥异常 | `/chrome doctor`；在 `chrome://extensions` 重载 "Pi Chrome Connector"；必要时 `/chrome authorize` |
 | `Tab activation is blocked by background mode` | `hardBackground` 默认开启 | 预期行为；改由用户切标签，或临时 `/chrome background off` |
+| 扩展已加载但 `/chrome doctor` 不显示连接；工具条图标在、无轮询 | 从 npm 装的 0.15.51 缺 `offscreen.html` / `offscreen.js` 与 manifest `offscreen` 权限，MV3 worker 被回收后无保活（Chrome 升级后更易触发） | 换成含保活的构建：<https://github.com/JingYangYuan/pi-chrome-mirror>（`pi-chrome-browser.md` §2.1），重载扩展后 `/chrome doctor` 复查 |
 
 **异步脚本标准写法（模式贯穿全流程）：**
 

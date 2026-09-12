@@ -21,8 +21,11 @@ Usage:
 Sync rule: after changing any module, family table, routing, or protocol, re-export
 ALL modules (no args) and push paper-master-4ss plus every paper-*-4ss GitHub repo.
 Do not export only the module you edited; sibling READMEs share one family table.
-The same run also refreshes ../pi-chrome-cnki/ (public copy of the lit module's
-OMP pi-chrome backend doc + cookie sink); push that repo too when it changes.
+The same run also refreshes two public side repos (push them too when they change):
+- ../pi-chrome-cnki/    — lit module's OMP pi-chrome backend doc + cookie sink
+- ../pi-chrome-mirror/  — offline mirror of the working pi-chrome install (npm's
+                          0.15.51 tarball ships an older build without the MV3
+                          offscreen keepalive, which goes dormant on newer Chrome)
 """
 
 from __future__ import annotations
@@ -35,6 +38,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import export_pi_chrome_doc as pi_chrome_doc  # noqa: E402
+import export_pi_chrome_plugin as pi_chrome_mirror  # noqa: E402
 
 PKG_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = PKG_ROOT.parent
@@ -432,6 +436,17 @@ def export_pi_chrome_docs() -> None:
     print(f"[pi-chrome] 导出完成: {pi_chrome_doc.TARGET}（{len(files)} 文件）")
 
 
+def export_pi_chrome_mirror() -> None:
+    source = pi_chrome_mirror.DEFAULT_SOURCE
+    if not source.is_dir():
+        print(f"[pi-chrome-mirror] 跳过：未找到本机 pi-chrome 安装（{source}）")
+        return
+    files = pi_chrome_mirror.build(source)
+    pi_chrome_mirror.write_target(files)
+    payload = len([k for k in files if k not in {"README.md", "MIRROR.md", "checksums.sha256"}])
+    print(f"[pi-chrome-mirror] 导出完成: {pi_chrome_mirror.TARGET}（vendored {payload} 文件）")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="导出 modules/<m> 为独立 skill")
     parser.add_argument("modules", nargs="*", help="要导出的模块名（默认全部）")
@@ -456,6 +471,7 @@ def main() -> int:
                 print(f"[{m}] 路径自检通过")
         if not args.modules:
             export_pi_chrome_docs()
+            export_pi_chrome_mirror()
         return 0
 
     failed = False
@@ -482,6 +498,19 @@ def main() -> int:
                 print(f"  - {item}")
         else:
             print(f"[pi-chrome] 已同步: {pi_chrome_doc.TARGET}")
+
+        source = pi_chrome_mirror.DEFAULT_SOURCE
+        if not source.is_dir():
+            print(f"[pi-chrome-mirror] 跳过：未找到本机 pi-chrome 安装（{source}）")
+        else:
+            mirror_drift = pi_chrome_mirror.check_target(pi_chrome_mirror.build(source))
+            if mirror_drift:
+                failed = True
+                print(f"[pi-chrome-mirror] 未同步（{len(mirror_drift)} 处）:")
+                for item in mirror_drift[:10]:
+                    print(f"  - {item}")
+            else:
+                print(f"[pi-chrome-mirror] 已同步: {pi_chrome_mirror.TARGET}")
     return 1 if failed else 0
 
 

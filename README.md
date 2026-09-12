@@ -104,23 +104,27 @@ python3 scripts/export_standalone.py            # 全部（默认）
 python3 scripts/export_standalone.py --check    # 只检查路径
 ```
 
-无参数导出会同时刷新 `../pi-chrome-cnki/`（lit 模块 OMP pi-chrome 后端文档的对外公开副本，见下）。推送用：
+无参数导出会同时刷新 `../pi-chrome-cnki/`（lit 模块 OMP pi-chrome 后端文档的对外公开副本）与 `../pi-chrome-mirror/`（可离线安装的 pi-chrome 完整镜像，见下）。推送用：
 
 ```bash
-python3 scripts/publish_family.py               # 全部 10 个仓库（含 pi-chrome-cnki）
+python3 scripts/publish_family.py               # 全部 11 个仓库（含两个公开侧仓）
 python3 scripts/publish_family.py --dry-run
-python3 scripts/publish_family.py lit pi-chrome # 只推指定仓库
+python3 scripts/publish_family.py lit pi-chrome pi-chrome-mirror
 ```
 
 导出结果写到与本包同级的 `paper-<module>-4ss/`。独立包里的 `master/`、部分 `references/` 是快照；跨模块路径仍指向同级安装的 `paper-master-4ss/`。随后同步 GitHub：`paper-master-4ss` 与 `paper-design-4ss`、`paper-lit-4ss`、`paper-outline-4ss`、`paper-analysis-4ss`、`paper-write-4ss`、`paper-check-4ss`、`paper-submission-4ss`、`paper-update-4ss`。
 
-## 公开文档：pi-chrome × CNKI
+## 公开文档与离线镜像：pi-chrome × CNKI
 
 CNKI 阶段的 OMP 浏览器后端用 [pi-chrome](https://github.com/tianrendong/pi-chrome)；其安装、授权、目标模型、失败恢复与 Cookie 回环 sink 有一份对外公开副本，可直接分享：
 
 **[github.com/JingYangYuan/pi-chrome-cnki](https://github.com/JingYangYuan/pi-chrome-cnki)**
 
 源文件是 `modules/lit/references/pi-chrome-browser.md` 与 `modules/lit/scripts/cnki/cookie_sink.py`，由 `scripts/export_pi_chrome_doc.py` 导出（路径改写为 GitHub 绝对链接）。改源文件后重跑导出与推送，不要直接编辑该仓库。
+
+**离线镜像**：**[github.com/JingYangYuan/pi-chrome-mirror](https://github.com/JingYangYuan/pi-chrome-mirror)** 逐字节复制本机已验证可用的 pi-chrome 安装（含伴生 Chrome 扩展），供 npm 不可用或"扩展装了连不上"时使用。由 `scripts/export_pi_chrome_plugin.py` 导出（内置完整性闸门：缺 `offscreen.html`/`offscreen.js` 或 manifest 无 `offscreen` 权限即拒绝导出），并附 `checksums.sha256` 与 release zip。
+
+> 为什么需要镜像：npm 上 `pi-chrome@0.15.51` 的 tarball 是**同一版本号下的旧构建**，缺 MV3 `offscreen` 保活，Chrome 升级后 worker 被回收即停止轮询 `127.0.0.1:17318`。详见镜像仓 `MIRROR.md`。
 
 ## 目录
 
@@ -142,7 +146,7 @@ paper-master-4ss/
 └── docs/banner.svg
 ```
 
-(同级目录 `pi-chrome-cnki/` 是 lit 模块 pi-chrome 后端文档的公开导出物，不属本包。)
+(同级目录 `pi-chrome-cnki/` 与 `pi-chrome-mirror/` 是 lit 模块 pi-chrome 相关的公开导出物，不属本包。)
 
 协议入口：`master/routing-matrix.md`、`master/agent-orchestration.md`、`master/output-protocol.md`、`master/user-journey.md`、`master/literature-review-protocol.md`。
 

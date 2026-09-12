@@ -137,8 +137,8 @@ zotero_add_item
 
 **写入通道实测结论（2026-09-12）**：
 - 首选 MCP 工具（`zotero_attach_file`、`zotero_manage_note`）；批量脚本可复用 MCP 同款客户端：`sys.path` 指向 `~/.local/share/uv/tools/zotero-mcp-server/lib/python3.12/site-packages`，`from zotero_mcp.client import get_local_write_client`，笔记 `zot.create_items([...])`、附件 `zot.attachment_simple([path], key)`。该通道 26/26 全部持久化成功。
-- **不要**用裸 `urllib/requests` POST `/api/users/0/items` 批量写子项：返回 200 但静默不落盘（本地 API 写入竞态），且裸 GET `/items/<key>/children` 有缓存，回查结果不可信。判读唯一可信口径是用同款 pyzotero 客户端 `zot.items(parentKey=…)` 回查。
-- 重复尝试会留下重复附件/笔记，收尾必须按 parentKey 去重（保留 version 最小的一个）。
+- **不要**用裸 `urllib/requests` POST `/api/users/0/items` 批量写子项：返回 200 但静默不落盘（本地 API 写入竞态），且裸 GET `/items/<key>/children` 有缓存，回查结果不可信。回查唯一可信口径是同款 pyzotero 客户端的 `zot.children(key)`（`/items/<key>/children` 端点）；**不要**用 `zot.items(parentKey=…)`——本地 API 会忽略该参数并返回库内前 N 条，造成“已就位”假阳性。
+- 重复尝试会留下重复附件/笔记，收尾必须按 `zot.children(key)` 逐条目去重（保留 version 最小的一个），并核对附件题名与论文题名一致，防止张冠李戴。
 
 ```mermaid
 flowchart LR

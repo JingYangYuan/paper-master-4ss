@@ -39,6 +39,7 @@ TARGETS = [
     ("submission", "paper-submission-4ss", "paper-submission-4ss"),
     ("update", "paper-update-4ss", "paper-update-4ss"),
     ("pi-chrome", "pi-chrome-cnki", "pi-chrome-cnki"),
+    ("pi-chrome-mirror", "pi-chrome-mirror", "pi-chrome-mirror"),
 ]
 
 COMMIT_MESSAGE = "sync: 重导独立包，引用 pi-chrome CNKI 公开文档（github.com/{owner}/pi-chrome-cnki）"
