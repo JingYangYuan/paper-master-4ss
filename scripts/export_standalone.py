@@ -21,11 +21,10 @@ Usage:
 Sync rule: after changing any module, family table, routing, or protocol, re-export
 ALL modules (no args) and push paper-master-4ss plus every paper-*-4ss GitHub repo.
 Do not export only the module you edited; sibling READMEs share one family table.
-The same run also refreshes two public side repos (push them too when they change):
-- ../pi-chrome-cnki/    — lit module's OMP pi-chrome backend doc + cookie sink
-- ../pi-chrome-mirror/  — offline mirror of the working pi-chrome install (npm's
-                          0.15.51 tarball ships an older build without the MV3
-                          offscreen keepalive, which goes dormant on newer Chrome)
+The same run also refreshes ../pi-chrome-mirror/ — the offline pi-chrome distribution
+repo (installable plugin + lit module's OMP backend doc + cookie sink). Push it too when
+it changes: upstream's published 0.15.51 build lacks the MV3 offscreen keepalive, which
+goes dormant on newer Chrome, so the repo is the sole supported install channel.
 """
 
 from __future__ import annotations
@@ -37,8 +36,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import export_pi_chrome_doc as pi_chrome_doc  # noqa: E402
-import export_pi_chrome_plugin as pi_chrome_mirror  # noqa: E402
+import export_pi_chrome_repo as pi_chrome_repo  # noqa: E402
 
 PKG_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = PKG_ROOT.parent
@@ -191,7 +189,7 @@ Zotero 是可选增强。启用后按 `references/zotero-local-mcp.md` 做能力
 
 CNKI 依赖可见浏览器控制，后端二选一：ZCode 内置 browser-use（无需安装），或 OMP pi-chrome（一次性加载伴生 Chrome 扩展，见 `references/pi-chrome-browser.md`）。Google Scholar 用 WebFetch/WebSearch。
 
-OMP 后端的安装与适配有公开文档副本，可直接分享：<https://github.com/JingYangYuan/pi-chrome-cnki>（由本包 `scripts/export_pi_chrome_doc.py` 同步导出）。
+OMP 后端的插件本体与适配文档在同一发行仓：<https://github.com/JingYangYuan/pi-chrome-mirror>（由本包 `scripts/export_pi_chrome_repo.py` 同步导出，含完整插件与伴生扩展）。
 """,
     "outline": """
 ## 它做什么
@@ -430,21 +428,16 @@ def export(module: str) -> tuple[list[str], int, int]:
     return broken, rewritten, sum(1 for _ in target.rglob("*") if _.is_file())
 
 
-def export_pi_chrome_docs() -> None:
-    files = pi_chrome_doc.build()
-    pi_chrome_doc.write_target(files)
-    print(f"[pi-chrome] 导出完成: {pi_chrome_doc.TARGET}（{len(files)} 文件）")
-
-
-def export_pi_chrome_mirror() -> None:
-    source = pi_chrome_mirror.DEFAULT_SOURCE
+def export_pi_chrome_repo() -> None:
+    """刷新离线发行仓：插件本体 + CNKI 适配文档。"""
+    source = pi_chrome_repo.DEFAULT_SOURCE
     if not source.is_dir():
         print(f"[pi-chrome-mirror] 跳过：未找到本机 pi-chrome 安装（{source}）")
         return
-    files = pi_chrome_mirror.build(source)
-    pi_chrome_mirror.write_target(files)
-    payload = len([k for k in files if k not in {"README.md", "MIRROR.md", "checksums.sha256"}])
-    print(f"[pi-chrome-mirror] 导出完成: {pi_chrome_mirror.TARGET}（vendored {payload} 文件）")
+    files = pi_chrome_repo.build(source)
+    pi_chrome_repo.write_target(files)
+    vendored = len([k for k in files if k in pi_chrome_repo.VENDOR_FILES])
+    print(f"[pi-chrome-mirror] 导出完成: {pi_chrome_repo.TARGET}（vendored {vendored} + 生成 {len(files) - vendored} 文件）")
 
 
 def main() -> int:
@@ -470,8 +463,7 @@ def main() -> int:
             else:
                 print(f"[{m}] 路径自检通过")
         if not args.modules:
-            export_pi_chrome_docs()
-            export_pi_chrome_mirror()
+            export_pi_chrome_repo()
         return 0
 
     failed = False
@@ -490,27 +482,18 @@ def main() -> int:
         else:
             print(f"[{m}] 路径自检通过: {target}")
     if not args.modules:
-        drift = pi_chrome_doc.check_target(pi_chrome_doc.build())
-        if drift:
-            failed = True
-            print(f"[pi-chrome] 未同步（{len(drift)} 处）:")
-            for item in drift[:10]:
-                print(f"  - {item}")
-        else:
-            print(f"[pi-chrome] 已同步: {pi_chrome_doc.TARGET}")
-
-        source = pi_chrome_mirror.DEFAULT_SOURCE
+        source = pi_chrome_repo.DEFAULT_SOURCE
         if not source.is_dir():
             print(f"[pi-chrome-mirror] 跳过：未找到本机 pi-chrome 安装（{source}）")
         else:
-            mirror_drift = pi_chrome_mirror.check_target(pi_chrome_mirror.build(source))
-            if mirror_drift:
+            drift = pi_chrome_repo.check_target(pi_chrome_repo.build(source))
+            if drift:
                 failed = True
-                print(f"[pi-chrome-mirror] 未同步（{len(mirror_drift)} 处）:")
-                for item in mirror_drift[:10]:
+                print(f"[pi-chrome-mirror] 未同步（{len(drift)} 处）:")
+                for item in drift[:10]:
                     print(f"  - {item}")
             else:
-                print(f"[pi-chrome-mirror] 已同步: {pi_chrome_mirror.TARGET}")
+                print(f"[pi-chrome-mirror] 已同步: {pi_chrome_repo.TARGET}")
     return 1 if failed else 0
 
 

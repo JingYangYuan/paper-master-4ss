@@ -10,7 +10,7 @@
 
 用法：
     python3 scripts/publish_family.py                 # 同步并推送全部
-    python3 scripts/publish_family.py lit pi-chrome   # 只推送指定仓库
+    python3 scripts/publish_family.py lit pi-chrome-mirror  # 只推送指定仓库
     python3 scripts/publish_family.py --dry-run       # 只显示将发生的变化
 """
 
@@ -38,11 +38,10 @@ TARGETS = [
     ("check", "paper-check-4ss", "paper-check-4ss"),
     ("submission", "paper-submission-4ss", "paper-submission-4ss"),
     ("update", "paper-update-4ss", "paper-update-4ss"),
-    ("pi-chrome", "pi-chrome-cnki", "pi-chrome-cnki"),
     ("pi-chrome-mirror", "pi-chrome-mirror", "pi-chrome-mirror"),
 ]
 
-COMMIT_MESSAGE = "sync: 重导独立包，引用 pi-chrome CNKI 公开文档（github.com/{owner}/pi-chrome-cnki）"
+COMMIT_MESSAGE = "sync: 重导独立包与 pi-chrome 离线发行仓（github.com/{owner}/pi-chrome-mirror）"
 
 
 def run(cmd: list[str], cwd: Path | None = None, check: bool = True) -> subprocess.CompletedProcess[str]:

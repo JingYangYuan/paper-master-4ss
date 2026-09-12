@@ -19,14 +19,15 @@ CNKI 阶段必须由浏览器控制完成，后端按宿主选择：
 | 后端 | 宿主 | 安装 | 适配文件 |
 |---|---|---|---|
 | `ZCode` | ZCode 桌面版 | 内置能力，**无需安装** | [cnki-kns8s-closed-loop.md](cnki-kns8s-closed-loop.md) §2.1 |
-| `OMP` | OMP（Oh My Pi / Pi coding agent） | 需一次性加载伴生 Chrome 扩展，约 10 分钟；公开文档 <https://github.com/JingYangYuan/pi-chrome-cnki> | **[pi-chrome-browser.md](pi-chrome-browser.md)** |
+| `OMP` | OMP（Oh My Pi / Pi coding agent） | 需一次性加载伴生 Chrome 扩展，约 10 分钟；发行仓 <https://github.com/JingYangYuan/pi-chrome-mirror>（自带完整插件，不使用上游官方安装通道） | **[pi-chrome-browser.md](pi-chrome-browser.md)** |
 
 `ZCode` 后端：浏览器控制（browser-use，`mcp__node_repl__js` + browser client）由 ZCode 桌面版自带，浏览器面板对用户可见，验证码和登录由用户在面板中手动完成。
 
-`OMP` 后端：pi-chrome 通过伴生 Chrome 扩展驱动用户已登录的 Chrome profile，登录态与下载权限天然可用。安装与授权见 [pi-chrome-browser.md](pi-chrome-browser.md) §2，最小序列：
+`OMP` 后端：pi-chrome 通过伴生 Chrome 扩展驱动用户已登录的 Chrome profile，登录态与下载权限天然可用。安装源是本项目的离线发行仓（自带完整插件本体，含 MV3 `offscreen` 保活），安装与授权见 [pi-chrome-browser.md](pi-chrome-browser.md) §2：
 
 ```bash
-pi install npm:pi-chrome          # 已运行会话需 /reload
+git clone https://github.com/JingYangYuan/pi-chrome-mirror.git
+cd pi-chrome-mirror && omp install .   # 无外部下载通道；先 --dry-run 看计划
 ```
 
 ```text
@@ -36,12 +37,7 @@ chrome://extensions → 开发者模式 → 加载已解压的扩展程序 → �
 /chrome doctor                    # 应显示 ✓ Chrome is connected
 ```
 
-npm 不可用、或扩展加载后 `/chrome doctor` 连不上时，改用离线镜像 <https://github.com/JingYangYuan/pi-chrome-mirror>（含 MV3 `offscreen` 保活的完整伴生扩展，逐字节复制可用构建）：
-
-```bash
-git clone https://github.com/JingYangYuan/pi-chrome-mirror.git
-omp install ./pi-chrome-mirror    # 本地路径安装，不走 npm；先 --dry-run 看计划
-```
+> 不使用上游官方安装通道：上游发布的 0.15.51 缺 `offscreen.html` / `offscreen.js` 与 manifest 的 `offscreen` 权限，MV3 worker 被回收后不再轮询 `127.0.0.1:17318`（"装了连不上"）。发行仓逐字节提供已实测可用的构建，附 `checksums.sha256` 与 `NOTICE.md` 对照表。
 
 安装后检查（每次 CNKI 阶段开始前执行可用性检查）：
 

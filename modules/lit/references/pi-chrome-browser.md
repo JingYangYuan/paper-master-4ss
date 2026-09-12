@@ -1,6 +1,6 @@
 # pi-chrome 浏览器控制后端（OMP 宿主）
 
-> **公开文档**：https://github.com/JingYangYuan/pi-chrome-cnki — 本文件与该仓库的 `pi-chrome-browser.md` 同步，由 `scripts/export_pi_chrome_doc.py` 生成对外发布版。可直接分享该链接给需要看适配说明的人。
+> **分发**：<https://github.com/JingYangYuan/pi-chrome-mirror> — 该仓库提供可离线安装的**完整插件本体**（含伴生 Chrome 扩展）与本文件的同步副本，由 `scripts/export_pi_chrome_repo.py` 生成。安装只走该仓库，不使用上游官方安装通道（原因见 2.1）。
 
 本文件是 `browser_control` 通用能力在 OMP（Oh My Pi / Pi coding agent）宿主上的后端配置与适配协议。CNKI kns8s 闭环（[cnki-kns8s-closed-loop.md](cnki-kns8s-closed-loop.md)）的浏览器操纵可由本后端或 ZCode 内置 browser-use 承担，两者共用同一闭环协议与同一来源不可替代铁律。
 
@@ -24,21 +24,18 @@ pi-chrome 是 OMP 的浏览器控制扩展：通过伴生 Chrome 扩展驱动**�
 
 ### 2.1 OMP 侧
 
-```bash
-pi install npm:pi-chrome     # OMP 与 pi 为同一 CLI；已安装则跳过
-```
-
-- 若 OMP 正在运行：先在该会话执行 `/reload`，再使用 `/chrome` 命令。
-- 本机安装位置：`~/.omp/plugins/node_modules/pi-chrome/`（验收时为 0.15.51）。
-
-**npm 通道不可用时改用离线镜像**（公开仓 <https://github.com/JingYangYuan/pi-chrome-mirror>）：
+安装源是本项目的 pi-chrome 离线发行仓 <https://github.com/JingYangYuan/pi-chrome-mirror>，它自带完整插件本体：
 
 ```bash
 git clone https://github.com/JingYangYuan/pi-chrome-mirror.git
-omp install ./pi-chrome-mirror      # 本地路径安装，不走 npm 下载；先 --dry-run 看计划
+cd pi-chrome-mirror
+omp install .                       # 本地路径安装，无外部下载通道；先 --dry-run 看计划
 ```
 
-> **为什么需要镜像（2026-09-12 实测）**：npm 上 `pi-chrome@0.15.51` 的 tarball 与本机安装的同名版本**不是同一份代码**——tarball 缺 `browser-extension/offscreen.html`、`offscreen.js` 与 manifest 的 `offscreen` 权限，MV3 service worker 没有保活文档。Chrome 升级后会更快回收空闲 worker，桥接轮询随之停止，表现为**"扩展已加载但 `/chrome doctor` 连不上"**。镜像逐字节复制本机已验证可用的构建（含 offscreen 保活），并附 `checksums.sha256`。
+- 若 OMP 正在运行：先在该会话执行 `/reload`，再使用 `/chrome` 命令。
+- 安装位置：`~/.omp/plugins/node_modules/pi-chrome/`（发行仓版本 0.15.51）。
+
+> **为什么不用上游官方安装通道（2026-09-12 实测）**：上游发布通道上的 0.15.51 与本机实测可用的同名版本**不是同一份代码**——前者缺 `browser-extension/offscreen.html`、`offscreen.js` 与 manifest 的 `offscreen` 权限，MV3 service worker 没有保活文档。Chrome 回收空闲 worker 后桥接轮询即停止，表现为**"扩展已加载但 `/chrome doctor` 连不上"**；Chrome 升级会加快回收，因此问题集中在升级后暴露。离线发行仓逐字节复制已验证可用的构建（含 offscreen 保活），并附 `checksums.sha256` 与 `NOTICE.md` 对照表。
 
 ### 2.2 Chrome 侧（手动加载伴生扩展）
 
@@ -48,15 +45,14 @@ omp install ./pi-chrome-mirror      # 本地路径安装，不走 npm 下载；�
 
 对话框会显示伴生扩展目录。macOS 上 OMP 会打开 `chrome://extensions`、在 Finder 中定位该目录并把路径写入剪贴板。
 
-在 Chrome 中：开启**开发者模式** → **加载已解压的扩展程序** → 选择
+在 Chrome 中：开启**开发者模式** → **加载已解压的扩展程序** → 选择下列任一：
 
 ```text
-~/.omp/plugins/node_modules/pi-chrome/extensions/chrome-profile-bridge/browser-extension
+~/.omp/plugins/node_modules/pi-chrome/extensions/chrome-profile-bridge/browser-extension   # 安装后的路径
+<clone 的发行仓>/extensions/chrome-profile-bridge/browser-extension                        # 仓库内路径
 ```
 
-（macOS 文件夹选择器中按 Cmd+Shift+G 粘贴路径。）
-
-改用镜像时，可直接下载 [pi-chrome-mirror 的 release zip](https://github.com/JingYangYuan/pi-chrome-mirror/releases) 解压后加载该目录，或选择镜像仓库内的 `extensions/chrome-profile-bridge/browser-extension/`。
+（macOS 文件夹选择器中按 Cmd+Shift+G 粘贴路径。）也可下载发行仓 [Releases](https://github.com/JingYangYuan/pi-chrome-mirror/releases) 里的 `pi-chrome-companion-0.15.51.zip`，解压后选择解压目录。
 
 ### 2.3 授权与体检
 
@@ -69,8 +65,17 @@ omp install ./pi-chrome-mirror      # 本地路径安装，不走 npm 下载；�
 
 ### 2.4 升级
 
+发行仓按需刷新（上游修好保活后同步新构建）：
+
 ```bash
-pi update npm:pi-chrome
+cd pi-chrome-mirror && git pull
+omp install .                # 装成软链时，git pull 即时生效；装成实拷贝时需重跑
+```
+
+`omp install` 在 macOS 上遇到**同名实目录**会报 `EPERM: operation not permitted, unlink ...`（它对该目录调 `unlink` 而非 `rm -rf`，已实测复现）。遇到时先删旧目录再装：
+
+```bash
+rm -rf ~/.omp/plugins/node_modules/pi-chrome && omp install .
 ```
 
 升级后：OMP 中 `/reload`，并在 `chrome://extensions` 重载 "Pi Chrome Connector"，再跑 `/chrome doctor`。

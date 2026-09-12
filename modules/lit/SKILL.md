@@ -33,7 +33,7 @@ user-invocable: true
 
 ## 安装与依赖选择（发布版）
 
-正式安装和运行前必须先阅读 **[install-dependencies.md](modules/lit/references/install-dependencies.md)** 并完成验收。浏览器控制是 CNKI 检索的强制依赖，后端按宿主二选一：ZCode 内置 browser-use（内置能力，无需安装）或 OMP pi-chrome（一次性加载伴生 Chrome 扩展，适配见 **[pi-chrome-browser.md](modules/lit/references/pi-chrome-browser.md)**，对外公开文档 <https://github.com/JingYangYuan/pi-chrome-cnki>）；Google Scholar 用 WebFetch/WebSearch 完成；Zotero、Zotero Connector、Zotero MCP 是可选增强，只在用户需要保存题录/全文、联动本地文献库或读取 Zotero 附件全文时启用。Zotero MCP 的推荐实现与操作协议见 **[zotero-local-mcp.md](modules/lit/references/zotero-local-mcp.md)**。
+正式安装和运行前必须先阅读 **[install-dependencies.md](modules/lit/references/install-dependencies.md)** 并完成验收。浏览器控制是 CNKI 检索的强制依赖，后端按宿主二选一：ZCode 内置 browser-use（内置能力，无需安装）或 OMP pi-chrome（从本项目的离线发行仓 <https://github.com/JingYangYuan/pi-chrome-mirror> 安装，自带完整插件本体与伴生 Chrome 扩展，不使用上游官方安装通道；适配见 **[pi-chrome-browser.md](modules/lit/references/pi-chrome-browser.md)**）；Google Scholar 用 WebFetch/WebSearch 完成；Zotero、Zotero Connector、Zotero MCP 是可选增强，只在用户需要保存题录/全文、联动本地文献库或读取 Zotero 附件全文时启用。Zotero MCP 的推荐实现与操作协议见 **[zotero-local-mcp.md](modules/lit/references/zotero-local-mcp.md)**。
 
 **执行铁律：**
 
@@ -61,7 +61,7 @@ user-invocable: true
 | `假设` `hypothesis` | **D: 综述+假设** | 5轮+ | 30-60 | 2-5k字 | 是 |
 | `知网` `CNKI` `中文` | **E: 知网专项** | CNKI 网页操纵为主；WebSearch 仅可做关键词准备 | 10-30 | 无 | 否 |
 
-> **模式E执行轨道（唯一）**：使用浏览器控制走 **kns8s 闭环轨道**（检索→分析摘要→选择下载全文一体化），完整协议见 [cnki-kns8s-closed-loop.md](modules/lit/references/cnki-kns8s-closed-loop.md)（经验来源 `~/.zcode/skills/cnki-skill` 与 2026-09-12 pi-chrome 实测；下载器 `modules/lit/scripts/cnki/kns8s-download.sh`）。后端二选一：ZCode 内置 browser-use，或 OMP pi-chrome（安装与适配见 [pi-chrome-browser.md](modules/lit/references/pi-chrome-browser.md)，公开文档 <https://github.com/JingYangYuan/pi-chrome-cnki>）。浏览器控制不可用时记录 `浏览器控制不可用` 并停止 CNKI 阶段。
+> **模式E执行轨道（唯一）**：使用浏览器控制走 **kns8s 闭环轨道**（检索→分析摘要→选择下载全文一体化），完整协议见 [cnki-kns8s-closed-loop.md](modules/lit/references/cnki-kns8s-closed-loop.md)（经验来源 `~/.zcode/skills/cnki-skill` 与 2026-09-12 pi-chrome 实测；下载器 `modules/lit/scripts/cnki/kns8s-download.sh`）。后端二选一：ZCode 内置 browser-use，或 OMP pi-chrome（安装与适配见 [pi-chrome-browser.md](modules/lit/references/pi-chrome-browser.md)；插件来自离线发行仓 <https://github.com/JingYangYuan/pi-chrome-mirror>）。浏览器控制不可用时记录 `浏览器控制不可用` 并停止 CNKI 阶段。
 
 ### 理论意图检测
 
