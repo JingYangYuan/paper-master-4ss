@@ -24,6 +24,7 @@
 | write | `modules/update/references/targets/write-targets.md` | `writing-paradigm`, `workflow-protocol`, `tooling-template` | `knowledge-reference` | 章节标准、范文、写作扫描与路由 |
 | check | `modules/update/references/targets/check-targets.md` | `writing-paradigm`, `method-protocol`, `workflow-protocol` | `knowledge-reference` | 全流程审稿知识库、质量门、顾问与阶段协议 |
 | submission | `modules/update/references/targets/submission-targets.md` | `method-protocol`, `workflow-protocol`, `tooling-template` | `knowledge-reference` | 投稿样式、引用规则、Word 导出 |
+| mechanigraph | `modules/update/references/targets/mechanigraph-targets.md` | `method-protocol`, `workflow-protocol`, `tooling-template` | `knowledge-reference` | 学术机制图构型、设计系统、渲染与自检脚本（兼容 mechanismgraph 别名） |
 | update | `modules/update/references/targets/update-targets.md` | `self-update` | `self-update` | update 自身更新，必须双重审核 |
 | master | `modules/update/references/targets/master-targets.md` | `workflow-protocol` | `master-routing` | 总控路由与交接；允许文件见 master-targets.md |
 

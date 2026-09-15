@@ -38,6 +38,7 @@ TARGETS = [
     ("check", "paper-check-4ss", "paper-check-4ss"),
     ("submission", "paper-submission-4ss", "paper-submission-4ss"),
     ("update", "paper-update-4ss", "paper-update-4ss"),
+    ("mechanigraph", "paper-mechanigraph-4ss", "paper-mechanigraph-4ss"),
     ("pi-chrome-mirror", "pi-chrome-mirror", "pi-chrome-mirror"),
 ]
 

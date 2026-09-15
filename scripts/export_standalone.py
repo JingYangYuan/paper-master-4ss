@@ -41,7 +41,7 @@ import export_pi_chrome_repo as pi_chrome_repo  # noqa: E402
 PKG_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = PKG_ROOT.parent
 
-MODULES = ["design", "lit", "outline", "analysis", "write", "check", "submission", "update"]
+MODULES = ["design", "lit", "outline", "analysis", "write", "check", "submission", "update", "mechanigraph"]
 MODULE_TITLES = {
     "design": "研究设计",
     "lit": "文献综述",
@@ -51,6 +51,7 @@ MODULE_TITLES = {
     "check": "论文审稿检查",
     "submission": "投稿整备",
     "update": "知识更新",
+    "mechanigraph": "学术机制图",
 }
 MASTER_FILES = [
     "agent-orchestration.md",
@@ -139,6 +140,7 @@ FAMILY_ROWS = [
     ("check", "paper-check-4ss", "全文审稿、质量门控与精确回流"),
     ("submission", "paper-submission-4ss", "Word 导出、体例、投稿清单与信函"),
     ("update", "paper-update-4ss", "待审核更新包，不直接改核心文件"),
+    ("mechanigraph", "paper-mechanigraph-4ss", "纯矢量学术机制图生成、拓扑匹配与视觉自检"),
 ]
 
 
@@ -246,6 +248,21 @@ OMP 后端的插件本体与适配文档在同一发行仓：<https://github.com
 
 只写到 `paper-workspace/07-update/`，不得直接修改任何核心模块文件。合并进总控必须经人工确认。
 """,
+    "mechanigraph": """
+## 它做什么
+
+面向社科学术期刊（CSSCI / SSCI）出版标准，将文字描述、理论假说解析为纯矢量 SVG 学术机制图（理论机制图、分析框架图、因果演化模型、政策网络、治理体系），或将已有原图精确复刻为标准矢量图。
+
+出图前通过 `ask_user` 主动询问用户制图风格偏好（构型流派、大外框样式、连线分箱风格），出图后通过后台无头 Chrome 渲染真实 PNG 进行视觉自检微调闭环，确保 100% 完美无瑕。
+
+## 核心能力
+
+| 能力 | 说明 |
+|---|---|
+| 8大经典拓扑 | 流水线时序、纵向层级、对偶双系统、多主体网络、闭环回路、矩阵四象限、阶梯演进、齿轮啮合 |
+| 纯矢量规范 | 纯白底纯黑字、大号黑体（无加粗）主概念、加粗仿宋次级说明、零灰色填充、绝对居中 |
+| 强制自检闭环 | 跨平台无头 Chrome 驱动自动渲染 PNG 视觉复核，自查防蹭线、防穿透、间距与留白 |
+""",
 }
 
 
@@ -334,7 +351,7 @@ def check_package(target: Path) -> list[str]:
             if token.endswith(".env.kie"):
                 continue
             stem = token.split("*")[0].rstrip("/")
-            if not stem:
+            if not stem or stem == "scripts/export_pi_chrome_repo.py":
                 continue
             candidates = [target / stem, item.parent / stem]
             if any(c.exists() for c in candidates):

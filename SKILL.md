@@ -1,6 +1,6 @@
 ---
 name: paper-master-4ss
-description: 中文社会科学论文总控工作流。用于统一管理 paper-workspace 输出区，登记任意输入路径，并在内部自包含模块之间路由：研究设计、文献综述、论文大纲、数据/质性分析、论文写作与润色、全流程审稿检查、投稿文件整备。适用于用户不知道下一步、想整理论文项目状态，或想串联设计-文献-大纲-分析-写作-审稿-投稿流程时。
+description: 中文社会科学论文总控工作流。用于统一管理 paper-workspace 输出区，登记任意输入路径，并在内部自包含模块之间路由：研究设计、文献综述、论文大纲、数据/质性分析、学术机制图、论文写作与润色、全流程审稿检查、投稿文件整备。适用于用户不知道下一步、想整理论文项目状态，或想串联设计-文献-大纲-分析-机制图-写作-审稿-投稿流程时。
 hooks:
   PostToolUse:
     - matcher: Bash
@@ -22,16 +22,16 @@ hooks:
 
 - 输入路径开放：登记和引用用户给出的路径，不搬运材料。
 - 输出路径统一：默认写入 `paper-workspace/`。
-- 五宿主适配：Claude Code、OpenCode、Codex、ZCode 与 OMP（Oh My Pi / Pi coding agent）调用本 skill 时，先读 `references/runtime-adapter.md` 与 `references/agent-software-adapters.md`，把宿主工具映射到通用能力名后再执行业务流程。
+- 六宿主适配：Claude Code、OpenCode、Codex、ZCode、OMP（Oh My Pi / Pi coding agent）与 Antigravity（`agy` / Google Antigravity）调用本 skill 时，先读 `references/runtime-adapter.md` 与 `references/agent-software-adapters.md`，把宿主工具映射到通用能力名后再执行业务流程。
 - ZCode Hooks 自注册：ZCode 不执行 skill frontmatter hooks，只认 `~/.zcode/cli/config.json`（需 `hooks.enabled: true`）。ZCode 宿主首次调用本 skill 时，先运行 `python3 scripts/register_zcode_hooks.py`（幂等，写前自动备份，不触碰其他配置键），把 PostToolUse(Bash) 与 Stop 两个 guard hook 注册进用户配置；注册当次会话仍显式运行 guard 命令，后续会话由 config hooks 自动触发。查询状态用 `--check`，撤销用 `--remove`。
-- 项目规则优先：通过 `project_memory` 读取用户项目文件夹中的 paper-master 规则。Claude Code 使用 `CLAUDE.md` 标记块；ZCode 使用工作区 `AGENTS.md` 标记块；OMP 使用 `.omp/AGENTS.md` 或工作区 `AGENTS.md` 标记块；OpenCode/Codex 使用宿主项目规则文件；均缺失时回落到 `paper-workspace/_index/project-rules.md`；不得写入 skill 包目录。
+- 项目规则优先：通过 `project_memory` 读取用户项目文件夹中的 paper-master 规则。Claude Code 使用 `CLAUDE.md` 标记块；Antigravity 使用项目根目录 `GEMINI.md` 或工作区 `AGENTS.md` 标记块；ZCode 使用工作区 `AGENTS.md` 标记块；OMP 使用 `.omp/AGENTS.md` 或工作区 `AGENTS.md` 标记块；OpenCode/Codex 使用宿主项目规则文件；均缺失时回落到 `paper-workspace/_index/project-rules.md`；不得写入 skill 包目录。
 - 渐进加载：先读项目级 `project_memory`（如有）与 `references/install-dependencies.md` 检查依赖，再读 `master/routing-matrix.md`、`master/agent-orchestration.md`、`master/output-protocol.md` 与 `master/user-journey.md`，确定主模块后再读对应 `modules/<module>/SKILL.md`；涉及文献综述准备或改写时，还必须读 `master/literature-review-protocol.md`。
 - 内部自包含：跨模块引用使用 `modules/...`。
 - 路径约定：本包任一文件中的 `modules/...`、`master/...`、`references/...` 默认相对于 `paper-master-4ss/` 根目录解析；同模块局部路径也可按当前文件目录解析。
 - 顾问调度：除必须由模块明确规定的执行链外，按任务的决策风险、材料复杂度和交接风险选择最少必要顾问；不得只因研究范式或模块名称自动派发。`design` 必须先确认 FRAME/STORM/DESIGN/FULL 模式，再确认研究取向。完整规则见 `master/agent-orchestration.md`，完整智能体注册表见 `references/agent-registry.md`。
 - Team 显式触发：只有用户明确要求 `agentteam`、`teamagent`、`Agent Team`、`teammate`、`团队智能体` 或“升格”时，才读取 `references/claude-team-config.md` 与 `references/team-routing.md`。Agent Teams/teammate 是 Claude Code 专属高级并行形态；ZCode 无此形态时用 Agent 工具并行派发 subagent 等价执行；OpenCode/Codex 若无等价能力，回退到普通顾问派发或 `sequential-review`。
 - 统一输出：过程报告、顾问综合文件和最终回复默认使用中文 Markdown；机制链、因果链、阶段流程、模块交接、理论嫁接、假设推导、写作派发和 agent 调度链路必须使用 Mermaid。`write` 模块的 `manuscript*.md`、`revisions/styled*.md` 与 `literature-review.md` 属于论文正文净稿，只允许标题层级和自然段，不得使用报告式 Markdown 装饰。最终回复必须按 `master/user-journey.md` 用纯文字箭头标出论文路径和当前位置，避免终端无法渲染 Mermaid。完整规则见 `master/output-protocol.md`。
-- 机制层约束：分析执行后的命令必须通过 `guard_after_command` 审计 run-log、stdout/stderr、失败信号和输出存在性；会话停止或交付前必须通过 `guard_before_finish` 检查 `_index/project-state.md` 与 `_index/handoff-status.md` 是否已随最新产物更新。Claude Code 由 frontmatter Hook 自动触发；ZCode 在 `register_zcode_hooks.py` 注册完成后由 config hooks 自动触发（注册当次会话仍显式运行）；OpenCode/Codex 显式运行 guard 命令。完整规则见 `references/hooks-and-evaluation.md`。
+- 机制层约束：分析执行后的命令必须通过 `guard_after_command` 审计 run-log、stdout/stderr、失败信号和输出存在性；会话停止或交付前必须通过 `guard_before_finish` 检查 `_index/project-state.md` 与 `_index/handoff-status.md` 是否已随最新产物更新。Claude Code 由 frontmatter Hook 自动触发；Antigravity 由 `.agents/hooks.json` 自动触发；ZCode 在 `register_zcode_hooks.py` 注册完成后由 config hooks 自动触发（注册当次会话仍显式运行）；OpenCode/Codex/OMP 显式运行 guard 命令。完整规则见 `references/hooks-and-evaluation.md`。
 - Rubric 评分：每次实质性模块执行后运行 `scripts/paper_master_guard.py score-project --workspace paper-workspace --json`，生成 `_index/quality-score.md` 与 `_index/quality-score.json`，同时报告阶段质量分和全流程成熟度。评分口径见 `references/evaluation-rubric.md`。
 
 ### 1.1 多智能体并行触发
@@ -47,7 +47,7 @@ hooks:
 默认输出结构见 `master/workspace-contract.md`。每次启动项目工作时，确保以下目录存在：
 
 ```bash
-mkdir -p paper-workspace/{00-meta,01-design,02-literature,03-outline,04-analysis,05-writing,05-writing/reviews,06-submission,07-update,_logs,_logs/hook-audit,_index}
+mkdir -p paper-workspace/{00-meta,01-design,02-literature,03-outline,04-analysis,05-writing,05-writing/reviews,06-submission,07-update,figures,_logs,_logs/hook-audit,_index}
 ```
 
 维护索引文件：
@@ -80,6 +80,7 @@ mkdir -p paper-workspace/{00-meta,01-design,02-literature,03-outline,04-analysis
 | check | `modules/check/` | 全文审稿、编辑首筛、论证闭环、诚信规范、技术与期刊适配；诊断后精确回流 | `paper-workspace/05-writing/reviews/` |
 | submission | `modules/submission/` | Markdown 转 Word、投稿格式模板对照、参考文献 GB/T 7714、APA 与中文社会学体例整理、cover letter、response letter | `paper-workspace/06-submission/` |
 | update | `modules/update/` | 生成全包待审核更新包：学科知识、写作范式、方法协议、流程协议、工具模板和 update 自身候选更新 | `paper-workspace/07-update/` |
+| mechanigraph | `modules/mechanigraph/` | 纯矢量社科学术机制图生成、8大经典拓扑构型匹配、原图复刻与无头渲染自检闭环 | `paper-workspace/figures/` |
 
 ## 5. 参考文件
 

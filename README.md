@@ -4,13 +4,13 @@
 
 # Paper Master 4SS
 
-中文社会科学论文的总控 skill。它登记你给出的材料路径，判断当前该走哪一步，再路由到内部模块：研究设计、文献综述、大纲、数据分析、写作、全流程审稿检查、投稿。产物统一写进项目里的 `paper-workspace/`。
+中文社会科学论文的总控 skill。它登记你给出的材料路径，判断当前该走哪一步，再路由到内部模块：研究设计、文献综述、大纲、数据分析、学术机制图、写作、全流程审稿检查、投稿。产物统一写进项目里的 `paper-workspace/`。
 
 适用场景：不知道下一步、想整理论文项目状态，或要把设计—文献—大纲—分析—写作—审稿—投稿串成一条可交接的流程。
 
 ## 4SS 家族
 
-本仓库是**单一事实源**。八个业务模块可以单独安装，也可以只装总控（内部已自包含）。独立包由 `scripts/export_standalone.py` 导出，不要直接改独立仓库。
+本仓库是**单一事实源**。九个业务模块可以单独安装，也可以只装总控（内部已自包含）。独立包由 `scripts/export_standalone.py` 导出，不要直接改独立仓库。
 
 | 包 | 职责 | 默认输出 |
 |---|---|---|
@@ -22,6 +22,7 @@
 | [paper-write-4ss](https://github.com/JingYangYuan/paper-write-4ss) | 章节写作、润色、语言扫描、正文净稿 | `05-writing/` |
 | [paper-check-4ss](https://github.com/JingYangYuan/paper-check-4ss) | 全文审稿、质量门控、问题矩阵与精确回流 | `05-writing/reviews/` |
 | [paper-submission-4ss](https://github.com/JingYangYuan/paper-submission-4ss) | Word 导出、体例、投稿清单与信函 | `06-submission/` |
+| [paper-mechanigraph-4ss](https://github.com/JingYangYuan/paper-mechanigraph-4ss) | 纯矢量学术机制图生成、拓扑匹配与视觉自检 | `paper-workspace/figures/` |
 | [paper-update-4ss](https://github.com/JingYangYuan/paper-update-4ss) | 待审核更新包，不直接改核心文件 | `07-update/` |
 
 用户层路径：
@@ -45,7 +46,7 @@ git clone https://github.com/JingYangYuan/paper-master-4ss.git
 首次在某个论文项目里使用时，先建工作区：
 
 ```bash
-mkdir -p paper-workspace/{00-meta,01-design,02-literature,03-outline,04-analysis,05-writing,05-writing/reviews,06-submission,07-update,_logs,_logs/hook-audit,_index}
+mkdir -p paper-workspace/{00-meta,01-design,02-literature,03-outline,04-analysis,05-writing,05-writing/reviews,06-submission,07-update,figures,_logs,_logs/hook-audit,_index}
 ```
 
 依赖按目标模块验收，说明见 `references/install-dependencies.md`。缺依赖时停止路由，不假装已经跑通。
@@ -57,6 +58,7 @@ mkdir -p paper-workspace/{00-meta,01-design,02-literature,03-outline,04-analysis
 | analysis | 按所选语言：Stata / R / Python |
 | write | Python 3（扫描脚本） |
 | check | 无强制外部依赖 |
+| mechanigraph | Python 3；Google Chrome / Chromium（无头渲染 PNG 自检可选，支持无浏览器降级） |
 | submission | pandoc（Markdown → Word） |
 
 ## 它怎么工作
@@ -85,7 +87,7 @@ mkdir -p paper-workspace/{00-meta,01-design,02-literature,03-outline,04-analysis
 
 ## 宿主
 
-适配 Claude Code / Claude Desktop、Cursor、Oh My Pi、Windsurf，以及 OpenCode、Codex、ZCode。工具名以 `references/agent-software-adapters.md` 为准。
+适配 Claude Code / Claude Desktop、Cursor、Oh My Pi、Windsurf，以及 OpenCode、Codex、ZCode、Antigravity（`agy` / Google Antigravity）。工具名以 `references/agent-software-adapters.md` 为准。
 
 ZCode 不执行 skill frontmatter hooks。首次在 ZCode 里调用本包时运行：
 
