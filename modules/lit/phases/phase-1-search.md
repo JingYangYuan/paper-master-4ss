@@ -263,16 +263,16 @@ fi
 
 **Zotero 选择规则**：如果用户在 Step 0Q 明确暂缓 Zotero/Zotero MCP，跳过本步骤并在日志中记录 `本地文献库=用户明确暂缓`。不得要求用户为了不保存全文的轻量检索安装 Zotero。若用户选择启用 Zotero/Zotero MCP 但工具不可用，记录为 `能力缺失`，提示按 `modules/lit/references/install-dependencies.md` 安装配置，但继续后续在线检索。
 
-**Zotero MCP 使用规则**：仅当用户选择启用 Zotero MCP，且当前宿主已按安装说明配置好可用的 Zotero MCP 实现时，才检索和深读本地条目。推荐实现与逐步操作见 [zotero-local-mcp.md](modules/lit/references/zotero-local-mcp.md)。本 skill 不假设固定工具前缀；按宿主实际工具列表匹配 `zotero_search_items` 等规范名。MCP 不可用时再尝试 `zotero-cli`、Zotero Connector、本地导出、BibTeX/EndNote。
+**Zotero MCP 使用规则**：仅当用户选择启用 Zotero MCP，且当前宿主已按安装说明配置好可用的 Zotero MCP 实现时，才检索和深读本地条目。推荐实现与逐步操作见 [zotero-local-mcp.md](modules/lit/references/zotero-local-mcp.md)（zotero-agent 插件 v0.5.0+，34 工具）。本 skill 不假设固定工具前缀；按宿主实际工具列表匹配 `zotero_search` 等规范名。工具缺失时记录并向用户报告，**不得**改用本地 API 直写、Connector 保存或 `zotero-cli`。
 
 **本地库检索顺序（启用且能力检查通过）：**
 
-1. 对每个 Step 0a 已确认方向，先 `zotero_semantic_search`（limit 10–20）；该工具不可用则记 `semantic_search=能力缺失` 并改 `zotero_search_items`。
-2. 对作者、年份、专名、种子题名用短查询跑 `zotero_search_items`（`titleCreatorYear`）。
-3. 有项目集合时，用 `zotero_get_collection_items` 扫描，避免全库噪音。
-4. 命中条目用 `zotero_get_item_metadata`（含摘要）核验；无摘要且无法从附件提取等价摘要的，只进待核验。
+1. 对每个 Step 0a 已确认方向，先 `zotero_search`（mode=everything，全文索引轮，limit 10–20）。
+2. 对作者、年份、专名、种子题名用短查询跑 `zotero_search`（默认标题/作者/年份模式）。
+3. 有项目集合时，用 `zotero_get_collection_items` 扫描（可传集合名或 key），避免全库噪音。
+4. 命中条目用 `zotero_get_item`（含摘要）核验；无摘要且无法从附件提取等价摘要的，只进待核验。
 5. 与 `paper-registry.csv` 按 DOI / 题名作者年 / Zotero `item_key` 去重后登记；`source=zotero-local-mcp`，`source_id=<item_key>`。
-6. 种子文献或 H 档需要深读时：`zotero_get_pdf_outline` → `zotero_read_pdf_pages`；不要默认 `zotero_get_item_fulltext`。
+6. 种子文献或 H 档需要深读时：`zotero_get_fulltext` 小窗分页（`offset`/`max_chars`）定位，不要默认一次抽全文。
 
 **如果未检测到任何文献管理工具**（Zotero MCP / CLI / Connector / Mendeley / BibTeX / EndNote），跳过此步，继续 Step 4。若用户原本选择启用 Zotero/Zotero MCP，状态记为 `能力缺失`；若用户选择轻量检索，状态记为 `用户明确暂缓`。
 
@@ -320,11 +320,11 @@ ROW
 按 [zotero-local-mcp.md](references/zotero-local-mcp.md) §5–§7、§11 执行，三条铁律：
 
 1. **集合自动创建**：检索目标集合（`zotero_search_collections`，名称=项目 slug）；不存在则 `zotero_create_collection` 创建，并记下集合 key。集合已存在时直接复用，不重建。
-2. **题录+PDF 入集合**：H/M 论文经 `zotero_add_item` 入库（含 `abstractNote`）后：
-   - 本地 PDF 已下载 → `zotero_attach_file` 挂到对应条目（imported file 通道，唯一实测可靠；不用裸 HTTP POST linked_file）；
-   - `zotero_set_item_collections` 归入项目集合，标签 `paper-master`；
+2. **题录+PDF 入集合**：H/M 论文经 `zotero_add_item` 入库（纯元数据一次写全：`item_type` + `fields`（含 `abstractNote`、卷期页、DOI）+ `creators`（中文 `{name}`，西文 `{firstName,lastName}`）+ 集合 + 标签；不确定字段名先 `zotero_get_schema`，写完检查返回的 `skippedFields`）后：
+   - 本地 PDF 已下载 → `zotero_attach_file(key, path)` 挂到对应条目（默认 import 复制入 storage）；
+   - `zotero_set_item_collections(key, collections=[<项目集合>], mode=add)` 归入项目集合（add 保留原分类），标签 `paper-master`；
    - `item_key` 回写注册表 `source_id`。
-3. **MinerU 全文 md 存为 Zotero 笔记**：Step 10 解析成功且条目有 `item_key` 时，把 `fulltext/<paper_id>/document.md` 的**纯文本骨架**（去图片链接与 base64，正文+参考文献完整保留，超过约 80k 字符时截断并注明“笔记截断，全文见 fulltext/”）用 `zotero_manage_note(action=create, item_key=…, note_title="MinerU 全文 <paper_id>")` 写入该条目子笔记。同一 `item_key` 已有同名笔记时跳过，不重复创建。笔记创建结果回写注册表 `notes`（`zotero_note=created`）。
+3. **MinerU 全文 md 存为 Zotero 笔记**：Step 10 解析成功且条目有 `item_key` 时，把 `fulltext/<paper_id>/document.md` 的**纯文本骨架**（去图片链接与 base64，正文+参考文献完整保留，超过约 80k 字符时截断并注明“笔记截断，全文见 fulltext/”）用 `zotero_add_note(key=<item_key>, html=<骨架>)` 写入该条目子笔记。先 `zotero_get_children(key)` 查重，已有同名（“MinerU 全文 <paper_id>”）笔记时跳过，不重复创建。笔记创建结果回写注册表 `notes`（`zotero_note=created`）。
 
 Zotero 未启用或能力缺失时，本步整体记 `Zotero 不可用/暂缓`，不影响 Step 12。
 

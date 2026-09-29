@@ -41,8 +41,8 @@ user-invocable: true
 - CNKI 检索、摘要抓取和全文下载必须通过浏览器控制 + Cookie/curl 完成，PDF 不得走浏览器下载管线。Cookie 只落盘给下载器使用（0600），用完即删；禁止把 `document.cookie` 内容回传对话或写入日志——OMP 后端用回环 sink（`modules/lit/scripts/cnki/cookie_sink.py`）。
 - Phase 0/Step 0Q 必须询问用户是否启用 Zotero 和 Zotero MCP。
 - 用户不想保存论文全文或不使用本地库时，不得强制安装 Zotero；本地文献库阶段记录为 `用户明确暂缓`，继续在线检索。
-- 若用户选择 Zotero/Zotero MCP，则按 `modules/lit/references/install-dependencies.md` 完成 Zotero Desktop、Connector、MCP 工具验收后再执行本地库或全文保存阶段。
-- 验收通过后，本地库检索、摘要即时入库、全文深读和集合登记按 `modules/lit/references/zotero-local-mcp.md` 执行；不得用 WebSearch 或顾问意见冒充 Zotero 完成状态。
+- 若用户选择 Zotero/Zotero MCP，则按 `modules/lit/references/install-dependencies.md` 完成 Zotero Desktop 与 zotero-agent MCP 插件验收后再执行本地库或全文保存阶段。
+- 验收通过后，本地库检索、摘要即时入库、全文深读和集合登记按 `modules/lit/references/zotero-local-mcp.md` 执行（zotero-agent 插件 v0.5.0+，34 工具；一切 Zotero 操作走 `zotero_*` 工具，禁止直调本地 API/Connector）；不得用 WebSearch 或顾问意见冒充 Zotero 完成状态。
 - 所有安装验收和失败处理以 `modules/lit/references/install-dependencies.md` 为准。
 
 ## 参数
@@ -154,7 +154,7 @@ options: [
 - **Step 8 CNKI 精准闭环**：操作修正（`li[name="majorSearch"]` 切标签、`#ModuleSearch input.btn-search` 提交、结果渲染在 AdvSearch 主页面 body、facet 祖先点击）+ **>1000 命中先做学科边界讨论，边界清晰则用 CSSCI/北大核心/AMI 来源类别收窄** + **相关度与被引双排序、两种排序第一页逐条打开详情页抓摘要** + **高被引锚文献的引证文献（前沿）与共同参考文献（学科基础）**。详见 [phase-1-search.md](modules/lit/phases/phase-1-search.md) Step 8。
 - **Step 9 Top-N 归档**：候选文献先写入 paper-registry.csv，下载计划由注册表生成。CNKI 走 modules/lit/scripts/cnki/kns8s-download.sh（Cookie + curl）；下载完成后才写入 papers/，并由注册表记录哈希、页数、状态和失败原因。
 - **Step 10 全文化与证据映射**：用模块内置 modules/lit/scripts/mineru/pdf2md.py 加 --registry 解析至 fulltext/paper_id/document.md，逐篇回写解析状态。核读后把可用判断与原文定位写进 review-evidence.csv；关键主张必须逐条可回查，不使用“全文主张比例”替代溯源。不得引用外部 MinerU skill 路径。
-- **Step 11 Zotero 集合归档与全文笔记**：目标集合（项目 slug）不存在则 `zotero_create_collection` 自动创建；H/M 条目 `zotero_add_item`（含 abstractNote）后 `zotero_attach_file` 挂 papers/ 本地 PDF、`zotero_set_item_collections` 归入项目集合；MinerU 全文 md 以纯文本骨架经 `zotero_manage_note` 写成条目子笔记（`zotero_get_notes` 同名查重、约 80k 字符截断）。协议见 [zotero-local-mcp.md](modules/lit/references/zotero-local-mcp.md) §5b。
+- **Step 11 Zotero 集合归档与全文笔记**：目标集合（项目 slug）不存在则 `zotero_create_collection` 自动创建；H/M 条目 `zotero_add_item` 纯元数据一次写全（fields 含 abstractNote/卷期页/DOI + creators + 集合 + 标签，写完检查 `skippedFields`）后 `zotero_attach_file` 挂 papers/ 本地 PDF、`zotero_set_item_collections`（mode=add）归入项目集合；MinerU 全文 md 以纯文本骨架经 `zotero_add_note` 写成条目子笔记（`zotero_get_children` 同名查重、约 80k 字符截断）。协议见 [zotero-local-mcp.md](modules/lit/references/zotero-local-mcp.md) §5b。
 - **Step 12 参考文献交集滚雪球**：`python3 modules/lit/scripts/citation_intersection.py --workspace <paper-workspace>` 对已解析全文的参考文献取交集，产出 `02-literature/citation-intersection.md`；共引频次 ≥2 的高重复度条目逐条判读（已有/新增候选/待核验），未收录者登记注册表并补抓摘要，再以专业检索式回 CNKI 滚雪球检索下载（最多 2 轮或无新增共引即停）。
 - **英文检索 exa 首选**：`web_search_exa`/`web_fetch_exa` 为英文文献主动首选通道（语义化 query + 批量摘要抓取），WebSearch 做中文与交叉验证；协议见 [search-strategies.md](modules/lit/references/search-strategies.md) exa 节。
 
