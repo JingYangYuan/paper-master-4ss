@@ -26,7 +26,7 @@
 | 未观测混淆敏感性（Oster `psacalc`、`sensemakr`） | 提供 | 提供（`robomit`、`sensemakr`） | **不提供** |
 | 多重检验的 Romano-Wolf / Westfall-Young | 提供（`rwolf`、`wyoung`） | 不提供（用 `p.adjust` 的 Holm/BH） | 不提供（用 `statsmodels` 的 Holm/BH） |
 | 面板空间效应分解（`margins predict(direct/indirect/total)`） | 提供 | 不提供等价实现（以 `impacts` 口径为主） | 不提供等价实现 |
-| 空间权重构造 | `spmatrix`/`spatwmat` | `spdep`（不依赖 `sf`） | `libpysal`（不依赖 `geopandas`） |
+| 空间权重构造 | `spmatrix`/`spatwmat` | base R 线性代数（行标准化 K 近邻 W；`spdep` 可用时自动优先使用） | `libpysal`（不依赖 `geopandas`） |
 | AME 口径 | `margins` | `marginaleffects::slopes` | `statsmodels.get_margeff`/手写 AME |
 
 **Python 不实现的四项**（Tobit、Heckman/样本选择、面板选择模型、Oster `psacalc` 敏感性分析）仅由 Stata/R 模板提供；Python 模板中**直接删除**对应方法块，**不得**用近似模型冒充。R 与 Stata 的 AME、多重检验校正与空间效应分解口径不同，表注必须写明所用软件与 VCE，**不得**为对齐数值而统一改用非聚类口径。

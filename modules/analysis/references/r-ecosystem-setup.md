@@ -115,7 +115,7 @@ if (length(missing) > 0) install.packages(missing)
 - `nloptr`（`lme4` → `car` → `sampleSelection` 的传递依赖）需要 **CMake**。若系统无 CMake，`nloptr` 报 `CMAKE NOT FOUND`；macOS 可用 `pip install cmake` 后把 `cmake` 放进 `PATH`。
 - `units`（`sf` → `s2`/`spdep` 的传递依赖）需要 **libudunits2**。若 `brew` 瓶下载失败，可从源码构建 UDUNITS-2 并 `install_name_tool -id` 修正 install name。
 - `sf`/`s2` 需要 **pkg-config** 与 CMake 才能编译内置 Abseil。
-- 空间权重**不需要** `sf`：R 模板用 `spdep::knearneigh`/`knearneigh`/`dnearneigh` 从坐标直接构造 `nb`/`listw`；但 `spdep` 自身 `Depends: sf`，故 `sf` 仍需装成功。
+- **空间计量的实测结论**：本机 `spdep` 全系（含 0.8-1 起的各版本）`Depends: sf`，而 `sf` 需要系统 **GDAL**；GDAL 在本环境无法取得（Homebrew 瓶下载校验失败、源码构建耗时不可行），故 `spdep`/`spatialreg`/`splm` 均无法安装。R 模板因此把空间权重、Moran's I 与 SAR/SEM/SDM **改为 base R 线性代数实现**（`_shared/r_common.R` 的 `pm_knn_weights`/`run_moran`/`run_spatial_cs`/`run_spatial_sdm`/`run_spatial_panel`：行标准化 K 近邻 W + 极大似然 + 直接/间接/总效应分解），不引入外部空间依赖；若目标环境能装上 `spdep`/`spatialreg`，`r_common.R` 会自动优先使用它们（见 `.pm_sar_fun`）。
 - `fwildclusterboot` 在 CRAN 上可能无当前 R 版本对应的二进制/源码版本；从 GitHub release（`s3alfisc/fwildclusterboot`）或 CRAN Archive 安装，并先装其依赖 `summclust`。
 - 本环境 R 为源码构建（无 CRAN 二进制仓库），所有包都从源码编译，安装耗时长且对网络超时敏感；建议 `options(timeout = 1800)` 并在失败时逐包重试。
 

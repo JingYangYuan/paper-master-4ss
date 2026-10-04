@@ -130,7 +130,7 @@ IV 的三条件必须同时满足：
 2. 截面空间回归（先 `collapse` 到空间单元层面，`spset` 要求空间单元 ID 唯一）：`spregress <Y> <X> <C>, gs2sls dvarlag(Wm)` 为 SAR；追加 `ivarlag(Wm: <X>)` 为 SDM（最通用）；`spregress ..., ml dvarlag(Wm)` 为极大似然 SAR。
 3. 面板空间回归（`xtset <ID> <TIME>` 后）：`xsmle <Y> <X> <C>, wmat(Wm) model(sdm) fe type(ind)` 为个体固定效应 SDM，`model(sar)` 为 SAR，`model(sdm) re` 为随机效应。
 4. 效应分解：对 `xsmle` 结果依次调用 `margins, dydx(<X>) predict(direct)`、`predict(indirect)`、`predict(total)`，分别得到直接效应、间接效应（空间溢出）与总效应。三者均含空间滞后反馈项，**不能**等同于非空间模型系数。
-5. R 侧用 `spdep::knearneigh`/`dnearneigh` 从坐标直接构造 `nb`/`listw`（不依赖 `sf`），`spatialreg::lagsarlm`/`errorsarlm` 做截面 SAR/SEM，`splm::spml` 做面板空间回归；Python 侧用 `libpysal` + `spreg` 的 `ML_Lag`/`ML_Error` 与 `Panel_FE_Lag`。
+5. R 侧：`_shared/r_common.R` 默认用 base R 线性代数从坐标直接构造行标准化 K 近邻 W，并做 Moran's I、SAR/SEM/SDM 与面板 SAR（不依赖 `sf`/GDAL）；若目标环境能装上 `spdep`/`spatialreg`，`r_common.R` 会自动优先使用它们（见 `.pm_sar_fun`）。Python 侧用 `libpysal` + `spreg` 的 `ML_Lag`/`ML_Error` 与 `Panel_FE_Lag`。
 
 空间计量必须报告：权重矩阵类型（邻接/反距离/距离带）、行标准化方式、稀疏度、莫兰指数及其显著性，以及直接/间接/总效应分解。三语言的效应分解口径不完全一致（Stata 用 `margins predict(...)`，R/Python 以参数与 `impacts` 口径为主），表注必须标明所用软件与 VCE。
 
