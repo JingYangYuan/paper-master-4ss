@@ -31,3 +31,25 @@ program define pa_log
     file write fh "| `c(current_date)' | `step' | `status' | `outputs' | `note' |" _n
     file close fh
 end
+
+* ---- 顶刊 CSV 宽表导出统一规范 ----
+* 所有 esttab 导出语句必须包含：substitute("=" "") nogaps compress replace
+* 目的：杜绝 CSV 单元格出现 ="公式" 文本；变量名纯英文，标量行/固定效应行/表注用规范中文。
+* 示例：esttab m1 m2 using "table.csv", b(3) t(3) star(* 0.05 ** 0.01 *** 0.001) label ///
+*     nogaps compress substitute("=" "") stats(N r2 r2_within, fmt(0 3 3) ///
+*     labels("观测值" "R²" "Within R²")) replace
+
+* ---- 依赖守卫：高维固定效应与工具变量命令 ----
+capture program drop pa_require
+program define pa_require
+    syntax, cmd(string)
+    capture which `cmd'
+    if _rc {
+        capture ssc install `cmd'
+        capture which `cmd'
+        if _rc {
+            display as error "pa_require: 缺少依赖命令 `cmd'，请安装后重试。"
+            exit 199
+        }
+    }
+end

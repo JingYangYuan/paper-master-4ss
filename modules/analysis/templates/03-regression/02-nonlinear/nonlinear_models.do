@@ -58,7 +58,7 @@ if !_rc {
 
 if "`stored_ame'" != "" {
     capture esttab `stored_ame' using "${OUT_ROOT}/tables/table3-nonlinear-marginal-effects.csv", ///
-        b(3) z(3) star(* 0.05 ** 0.01 *** 0.001) label nogaps ///
+        b(3) z(3) star(* 0.05 ** 0.01 *** 0.001) label nogaps compress substitute("=" "") ///
         stats(N, fmt(0) labels("观测值")) ///
         addnotes("注：非线性模型必须报告边际效应或预测概率；括号内为 z 值。") replace
 }

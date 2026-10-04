@@ -52,11 +52,18 @@ foreach v of varlist _all {
     }
 }
 duplicates drop
+
+* 连续变量缩尾：仅对 $Y $X $C 角色变量、排除 0/1 虚拟变量，执行 1%/99% 双侧缩尾
 capture which winsor2
 if !_rc {
-    foreach v of varlist _all {
+    foreach v in $Y $X $C {
         capture confirm numeric variable `v'
-        if !_rc capture winsor2 `v', cuts(1 99) replace
+        if !_rc {
+            quietly summarize `v'
+            if !(r(min) == 0 & r(max) == 1) {
+                capture winsor2 `v', cuts(1 99) replace
+            }
+        }
     }
 }
 
@@ -97,11 +104,11 @@ file close fd
 
 estpost summarize $Y $X $C, detail
 esttab using "${OUT_ROOT}/tables/table1-descriptives.csv", ///
-    cells("mean(fmt(3)) sd(fmt(3)) min(fmt(3)) max(fmt(3)) count(fmt(0))") replace
+    cells("mean(fmt(3)) sd(fmt(3)) min(fmt(3)) max(fmt(3)) count(fmt(0))") nogaps compress substitute("=" "") replace
 
 capture pwcorr $Y $X $C, star(0.05)
 capture estpost correlate $Y $X $C, matrix
-capture esttab using "${OUT_ROOT}/tables/table1c-correlation.csv", replace
+capture esttab using "${OUT_ROOT}/tables/table1c-correlation.csv", nogaps compress substitute("=" "") replace
 
 capture histogram $Y, name(hist_y, replace) normal
 capture graph export "${OUT_ROOT}/figures/dist-${Y}.png", replace width(1600)

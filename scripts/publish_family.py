@@ -26,7 +26,6 @@ PKG_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = PKG_ROOT.parent
 CACHE_ROOT = Path.home() / ".skills-manager" / ".publish-cache"
 OWNER = "JingYangYuan"
-COMMIT_AUTHOR = ("JingYangYuan", "181913286+JingYangYuan@users.noreply.github.com")
 
 # (键, 本地导出目录名, GitHub 仓库名)
 TARGETS = [
@@ -63,11 +62,6 @@ def ensure_clone(repo: str, dry_run: bool) -> Path:
         print(f"  [dry-run] 将克隆 {url} 到 {clone}")
         return clone
     run(["git", "clone", "--quiet", url, str(clone)])
-    # Cache clones are fresh checkouts; give them a commit identity so commits
-    # work on machines without a global git config (e.g. Windows hosts).
-    name, email = COMMIT_AUTHOR
-    run(["git", "-C", str(clone), "config", "user.name", name])
-    run(["git", "-C", str(clone), "config", "user.email", email])
     return clone
 
 
@@ -95,20 +89,7 @@ def sync_and_push(local: Path, repo: str, dry_run: bool, message: str) -> str:
             f"{local}/", f"{clone}/",
         ])
     else:
-        # Windows fallback: robocopy /MIR mirrors with exclusions.
-        # robocopy exit codes 0-7 are successes (1 = files copied); >= 8 is failure.
-        robocopy = shutil.which("robocopy")
-        if not robocopy:
-            raise SystemExit("缺少 rsync 与 robocopy；无法同步")
-        local_win = str(local).replace("/", "\\")
-        clone_win = str(clone).replace("/", "\\")
-        result = run([
-            robocopy, local_win, clone_win, "/MIR", "/NFL", "/NDL", "/NJH", "/NJS", "/NP",
-            "/XD", ".git", ".zcode", "__pycache__",
-            "/XF", ".DS_Store",
-        ], check=False)
-        if result.returncode >= 8:
-            raise SystemExit(f"robocopy 失败 ({result.returncode}): {result.stdout.strip()[:300]}")
+        raise SystemExit("缺少 rsync；请安装 rsync 后重试")
 
     run(["git", "-C", str(clone), "add", "-A"])
     staged = run(["git", "-C", str(clone), "diff", "--cached", "--quiet"], check=False)

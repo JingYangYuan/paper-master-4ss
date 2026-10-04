@@ -72,7 +72,7 @@ while IFS=$'\t' read -r paper_id pdf_rel url; do
     rm -f "$part"
     note="HTTP ${code}; content-type=${ctype:-unknown}；疑似 Cookie、令牌或频控页"
     python3 "$REGISTRY_TOOL" mark-download-failure --workspace "$WORKSPACE" --paper-id "$paper_id" --status blocked --note "$note" >/dev/null
-    echo "$paper_id: BLOCKED $note；停止本批，等待用户完成可见验证码或风控冷却。" >&2
+    echo "$paper_id: BLOCKED ${note}；停止本批，等待用户完成可见验证码或风控冷却。" >&2
     blocked=1
     break
   fi

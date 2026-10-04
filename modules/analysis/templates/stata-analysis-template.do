@@ -31,6 +31,9 @@ display "04-qual/qual_analysis.do"
 display "05-mixed/mixed_methods.do"
 display "06-export/export_quality.do"
 display "Copy/adapt concrete subflow scripts into paper-workspace/04-analysis/scripts/ before production execution."
+display "生产交付双总代码（默认架构）：01_clean_and_prepare_master.do + 02_empirical_analysis_master.do"
+display `"CSV 导出统一规范：esttab ... , substitute("=" "") nogaps compress replace"'
+display "机制默认江艇（2022）两步法；调节默认四列递进规范；高维固定效应统一 reghdfe/ivreghdfe。"
 
 capture file open flog using "${RUN_LOG}", write append
 if _rc == 0 {

@@ -1,6 +1,6 @@
 ---
 name: paper-lit-4ss
-description: 中英文双语文献综述与假设推导一体化技能。支持五种模式：完整文献地图（A）、定向综述（B）、快速概览（C）、文献综述+假设推导（D）、知网专项搜索（E）。自动搜索本地文献库、CNKI 中文文献（浏览器控制 kns8s 专业检索，后端为 ZCode 内置 browser-use 或 OMP pi-chrome）、Google Scholar、WebSearch、Annual Reviews，生成结构化文献景观地图；收到理论、规范或阐释设计报告时在既有流程中组织支持立场、竞争立场和反例材料，不强制假设推导。当用户需要写文献综述、做系统回顾、找研究空白、提出研究假设、搜索中英文文献时使用。
+description: 中英文双语文献综述与假设推导一体化技能。支持五种模式：完整文献地图（A）、定向综述（B）、快速概览（C）、文献综述+假设推导（D）、知网专项搜索（E）。自动搜索本地文献库、CNKI 中文文献（浏览器控制 kns8s 专业检索，后端为 ZCode 内置 browser-use、OMP pi-chrome 或 OMP Eval 备选）、Google Scholar、WebSearch、Annual Reviews，生成结构化文献景观地图；收到理论、规范或阐释设计报告时在既有流程中组织支持立场、竞争立场和反例材料，不强制假设推导。当用户需要写文献综述、做系统回顾、找研究空白、提出研究假设、搜索中英文文献时使用。
 argument-hint: "[研究主题] [可选: 完整|定向|快速|假设|知网] [可选: 目标期刊]"
 user-invocable: true
 ---
@@ -33,16 +33,16 @@ user-invocable: true
 
 ## 安装与依赖选择（发布版）
 
-正式安装和运行前必须先阅读 **[install-dependencies.md](modules/lit/references/install-dependencies.md)** 并完成验收。浏览器控制是 CNKI 检索的强制依赖，后端按宿主二选一：ZCode 内置 browser-use（内置能力，无需安装）或 OMP pi-chrome（从本项目的离线发行仓 <https://github.com/JingYangYuan/pi-chrome-mirror> 安装，自带完整插件本体与伴生 Chrome 扩展，不使用上游官方安装通道；适配见 **[pi-chrome-browser.md](modules/lit/references/pi-chrome-browser.md)**）；Google Scholar 用 WebFetch/WebSearch 完成；Zotero、Zotero Connector、Zotero MCP 是可选增强，只在用户需要保存题录/全文、联动本地文献库或读取 Zotero 附件全文时启用。Zotero MCP 的推荐实现与操作协议见 **[zotero-local-mcp.md](modules/lit/references/zotero-local-mcp.md)**。
+正式安装和运行前必须先阅读 **[install-dependencies.md](modules/lit/references/install-dependencies.md)** 并完成验收。浏览器控制是 CNKI 检索的强制依赖，后端按宿主选取：ZCode 内置 browser-use（内置能力，无需安装）；OMP 首选 pi-chrome（从本项目的离线发行仓 <https://github.com/JingYangYuan/pi-chrome-mirror> 安装，自带完整插件本体与伴生 Chrome 扩展，不使用上游官方安装通道；适配见 **[pi-chrome-browser.md](modules/lit/references/pi-chrome-browser.md)**）；OMP 在 `chrome_*` 工具集不可用或 relay 扩展不连通时，用 Eval `browser` 备选后端（独立 profile Chrome 或 relay，见 [cnki-kns8s-closed-loop.md](modules/lit/references/cnki-kns8s-closed-loop.md) §2.4）；Google Scholar 用 WebFetch/WebSearch 完成；Zotero、Zotero Connector、Zotero MCP 是可选增强，只在用户需要保存题录/全文、联动本地文献库或读取 Zotero 附件全文时启用。Zotero MCP 的推荐实现与操作协议见 **[zotero-local-mcp.md](modules/lit/references/zotero-local-mcp.md)**。
 
 **执行铁律：**
 
 - CNKI 检索页必须对用户可见可操作：CNKI 登录、验证码由用户手动完成。ZCode 后端浏览器面板常驻可见；OMP pi-chrome 默认后台运行，用户切到 `Pi Session:` 分组标签完成登录/验证码，需要前台跟随时再 `/chrome background off`。
-- CNKI 检索、摘要抓取和全文下载必须通过浏览器控制 + Cookie/curl 完成，PDF 不得走浏览器下载管线。Cookie 只落盘给下载器使用（0600），用完即删；禁止把 `document.cookie` 内容回传对话或写入日志——OMP 后端用回环 sink（`modules/lit/scripts/cnki/cookie_sink.py`）。
+- CNKI 检索、摘要抓取和全文下载必须通过浏览器控制 + Cookie/curl 完成，PDF 不得走浏览器下载管线。Cookie 只落盘给下载器使用（0600），用完即删；禁止把 `document.cookie` 内容回传对话或写入日志——OMP pi-chrome 后端用回环 sink（`modules/lit/scripts/cnki/cookie_sink.py`），OMP Eval 后端可在 kernel 侧直接落盘（0600，不回传对话）。
 - Phase 0/Step 0Q 必须询问用户是否启用 Zotero 和 Zotero MCP。
 - 用户不想保存论文全文或不使用本地库时，不得强制安装 Zotero；本地文献库阶段记录为 `用户明确暂缓`，继续在线检索。
-- 若用户选择 Zotero/Zotero MCP，则按 `modules/lit/references/install-dependencies.md` 完成 Zotero Desktop 与 zotero-agent MCP 插件验收后再执行本地库或全文保存阶段。
-- 验收通过后，本地库检索、摘要即时入库、全文深读和集合登记按 `modules/lit/references/zotero-local-mcp.md` 执行（zotero-agent 插件 v0.5.0+，34 工具；一切 Zotero 操作走 `zotero_*` 工具，禁止直调本地 API/Connector）；不得用 WebSearch 或顾问意见冒充 Zotero 完成状态。
+- 若用户选择 Zotero/Zotero MCP，则按 `modules/lit/references/install-dependencies.md` 完成 Zotero Desktop、Connector、MCP 工具验收后再执行本地库或全文保存阶段。
+- 验收通过后，本地库检索、摘要即时入库、全文深读和集合登记按 `modules/lit/references/zotero-local-mcp.md` 执行；不得用 WebSearch 或顾问意见冒充 Zotero 完成状态。
 - 所有安装验收和失败处理以 `modules/lit/references/install-dependencies.md` 为准。
 
 ## 参数
@@ -61,7 +61,7 @@ user-invocable: true
 | `假设` `hypothesis` | **D: 综述+假设** | 5轮+ | 30-60 | 2-5k字 | 是 |
 | `知网` `CNKI` `中文` | **E: 知网专项** | CNKI 网页操纵为主；WebSearch 仅可做关键词准备 | 10-30 | 无 | 否 |
 
-> **模式E执行轨道（唯一）**：使用浏览器控制走 **kns8s 闭环轨道**（检索→分析摘要→选择下载全文一体化），完整协议见 [cnki-kns8s-closed-loop.md](modules/lit/references/cnki-kns8s-closed-loop.md)（经验来源 `~/.zcode/skills/cnki-skill` 与 2026-09-12 pi-chrome 实测；下载器 `modules/lit/scripts/cnki/kns8s-download.sh`）。后端二选一：ZCode 内置 browser-use，或 OMP pi-chrome（安装与适配见 [pi-chrome-browser.md](modules/lit/references/pi-chrome-browser.md)；插件来自离线发行仓 <https://github.com/JingYangYuan/pi-chrome-mirror>）。浏览器控制不可用时记录 `浏览器控制不可用` 并停止 CNKI 阶段。
+> **模式E执行轨道（唯一）**：使用浏览器控制走 **kns8s 闭环轨道**（检索→分析摘要→选择下载全文一体化），完整协议见 [cnki-kns8s-closed-loop.md](modules/lit/references/cnki-kns8s-closed-loop.md)（经验来源 `~/.zcode/skills/cnki-skill`、2026-09-12 pi-chrome 实测与 2026-09-27 OMP Eval 实测；下载器 `modules/lit/scripts/cnki/kns8s-download.sh`）。后端：ZCode 内置 browser-use；OMP 首选 pi-chrome（安装与适配见 [pi-chrome-browser.md](modules/lit/references/pi-chrome-browser.md)；插件来自离线发行仓 <https://github.com/JingYangYuan/pi-chrome-mirror>）；备选 OMP Eval `browser`（独立 profile Chrome 或 relay，见闭环协议 §2.4）。浏览器控制不可用时记录 `浏览器控制不可用` 并停止 CNKI 阶段。
 
 ### 理论意图检测
 
@@ -137,15 +137,15 @@ options: [
 - **阶段确认铁律**：每完成一个搜索阶段，必须使用 ask_user 汇报新增论文、疑似噪音、当前空白和下一步建议，等待用户确认后再进入下一阶段。
 - **摘要铁律**：所有进入论文清单、文献地图、综述草稿或假设推导的论文都必须有摘要或等价的全文摘要信息；标题、作者、期刊、引用数只能用于候选排序，不能用于正式纳入。没有摘要的文献只能列入"待核验/排除候选"，不得作为证据使用。
 - **CNKI/Scholar 后置但不跳过铁律**：CNKI 和 Google Scholar 仍放在后段精准补充，避免宽泛堆积；但不得默认跳过任一来源。两者必须在日志中有明确状态，并对可达且未暂缓的来源执行精准检索。
-- **浏览器控制可用性铁律**：任何 CNKI 检索、关键词落地、结果解析、详情页摘要抓取或下载之前，必须先完成可用性检查：浏览器控制可列标签页/新建标签页/导航，能打开 `about:blank` 或 CNKI 首页并读取轻量页面状态。通过后才可记录 `浏览器控制正常` 并进入 CNKI 检索页。可用性检查与后端映射：ZCode 用内置 browser-use；OMP 用 pi-chrome，命令序列见 [pi-chrome-browser.md](modules/lit/references/pi-chrome-browser.md) §3。不可用时记录 `浏览器控制不可用` 并停止 CNKI 阶段，不得执行 CNKI 页面脚本、不得写 `CNKI 已执行`。
+- **浏览器控制可用性铁律**：任何 CNKI 检索、关键词落地、结果解析、详情页摘要抓取或下载之前，必须先完成可用性检查：浏览器控制可列标签页/新建标签页/导航，能打开 `about:blank` 或 CNKI 首页并读取轻量页面状态。通过后才可记录 `浏览器控制正常` 并进入 CNKI 检索页。可用性检查与后端映射：ZCode 用内置 browser-use；OMP 首选 pi-chrome（命令序列见 [pi-chrome-browser.md](modules/lit/references/pi-chrome-browser.md) §3），`chrome_*` 不可用或扩展不连通时用 OMP Eval 备选（[cnki-kns8s-closed-loop.md](modules/lit/references/cnki-kns8s-closed-loop.md) §2.4 的四项验收）。不可用时记录 `浏览器控制不可用` 并停止 CNKI 阶段，不得执行 CNKI 页面脚本、不得写 `CNKI 已执行`。
 - **CNKI 检索入口铁律**：CNKI 正式检索默认且只默认专业检索页 `https://kns.cnki.net/starter/advanced`（跳转 `kns.cnki.net/kns8s/AdvSearch` 后切「专业检索」标签）。基础检索框只允许做单个自然短语、专名或站点可达性临时测试。不得把 WebSearch/Google Scholar 布尔串粘进基础检索框。多关键词先拆概念组转专业检索式：同义/近义词用 `+` 并入同一 `SU=(...)`，不同概念分轮宽检索，只有结果过大且用户确认跨概念收窄时才用 `*`。
-- **CNKI 结果量控制铁律（不可跳过）**：专业检索触发后默认点「学术期刊N」筛选只保留期刊论文；结果仍过大时默认按被引排序（`li#CF`）取高影响文献。若宽检索命中为 0，立即回退上一轮宽松检索式，不继续叠加限制。**每轮 CNKI 检索返回后，必须在回复中显式报告命中总数和是否触发筛选收窄，作为阶段确认的一部分。**
+- **CNKI 结果量控制铁律（不可跳过）**：专业检索触发后默认点「学术期刊N」筛选只保留期刊论文；结果仍过大时的收窄顺序：**结果页 facet（来源类别 CSSCI/北大核心 与 学科，点击即时生效、可回读、可取消）→ 被引排序取高影响文献（排序为开关，须回读 DESC）**；表单侧检索设置面板（复选框）为备选且不稳定，仅"预置后再检索"时使用。若宽检索命中为 0，立即回退上一轮宽松检索式，不继续叠加限制。**每轮 CNKI 检索返回后，必须在回复中显式报告命中总数和是否触发筛选收窄，作为阶段确认的一部分。**
 - **CNKI 来源不可替代铁律**：CNKI 阶段只能由浏览器控制中的 CNKI（kns8s）网页操纵完成，包括专业检索页、结果页、详情页、期刊页或导出页。WebSearch、Google Scholar、普通搜索引擎、`cnki-researcher` 或 lit agents 只能做关键词准备、概念组设计和筛选建议；这些来源不得标记为 CNKI 完成状态，也不得填充 CNKI 论文清单字段。
 - **Zotero 摘要存储铁律**：每篇进入正式论文清单（相关度 H 或 M）的论文，必须在抓取摘要后**立即**通过当前可用的 Zotero MCP 或 Zotero Connector 存入 Zotero，且包含 `abstractNote` 字段。不得等所有检索结束后批量补存。存入后记录 Zotero `item_key` 或连接器保存状态到搜索日志的论文清单中，并写入 `paper-registry.csv` 的 `source_id`（来源 `zotero-local-mcp`）。若 Zotero MCP/Connector 不可用，记录 `Zotero 不可用，摘要未保存` 并写入 `paper-workspace/02-literature/abstracts-pending-zotero.md` 待后续补存。操作步骤见 [zotero-local-mcp.md](modules/lit/references/zotero-local-mcp.md)。
 - **阶段判断更新规则**：每个检索阶段完成后，记录新文献改变或限制了哪些既有判断、需要补哪类证据；写入 stage-syntheses.md 仅作过程记录。不得按数据库来源直接拼接为综述正文。
 - WebSearch 检索策略详见 **[search-strategies.md](modules/lit/references/search-strategies.md)**
 - CNKI 闭环协议详见 **[cnki-kns8s-closed-loop.md](modules/lit/references/cnki-kns8s-closed-loop.md)**；免弹窗下载器为 `modules/lit/scripts/cnki/kns8s-download.sh`，按需读取协议对应章节，不得一次性加载全部代码。
-- **面板可见铁律**：CNKI 登录、验证码由用户在可见浏览器中手动完成；自动化遇到人工闸门时停止并询问，不得后台绕过。ZCode 后端浏览器面板常驻可见；OMP pi-chrome 在默认后台模式下不抢焦点，用户切到 `Pi Session:` 分组标签操作即可。
+- **面板可见铁律**：CNKI 登录、验证码由用户在可见浏览器中手动完成；自动化遇到人工闸门时停止并询问，不得后台绕过。ZCode 后端浏览器面板常驻可见；OMP pi-chrome 在默认后台模式下不抢焦点，用户切到 `Pi Session:` 分组标签操作即可；OMP Eval（独立 profile Chrome）是普通可见窗口，登录/验证码/筛选点击均由用户在该窗口完成。
 - **CNKI 验证码铁律**：只有通过 [cnki-kns8s-closed-loop.md](modules/lit/references/cnki-kns8s-closed-loop.md) 的几何可见性判据（验证码容器在视口内且尺寸有效）确认真实可见时，才停止自动化并请用户在浏览器面板手动完成。隐藏预加载 DOM、0 结果、空结果表、页面未加载完或检索式过窄不得按验证码处理。
 
 **搜索后评估**：论文数不足模式目标则追加检索。
@@ -154,7 +154,7 @@ options: [
 - **Step 8 CNKI 精准闭环**：操作修正（`li[name="majorSearch"]` 切标签、`#ModuleSearch input.btn-search` 提交、结果渲染在 AdvSearch 主页面 body、facet 祖先点击）+ **>1000 命中先做学科边界讨论，边界清晰则用 CSSCI/北大核心/AMI 来源类别收窄** + **相关度与被引双排序、两种排序第一页逐条打开详情页抓摘要** + **高被引锚文献的引证文献（前沿）与共同参考文献（学科基础）**。详见 [phase-1-search.md](modules/lit/phases/phase-1-search.md) Step 8。
 - **Step 9 Top-N 归档**：候选文献先写入 paper-registry.csv，下载计划由注册表生成。CNKI 走 modules/lit/scripts/cnki/kns8s-download.sh（Cookie + curl）；下载完成后才写入 papers/，并由注册表记录哈希、页数、状态和失败原因。
 - **Step 10 全文化与证据映射**：用模块内置 modules/lit/scripts/mineru/pdf2md.py 加 --registry 解析至 fulltext/paper_id/document.md，逐篇回写解析状态。核读后把可用判断与原文定位写进 review-evidence.csv；关键主张必须逐条可回查，不使用“全文主张比例”替代溯源。不得引用外部 MinerU skill 路径。
-- **Step 11 Zotero 集合归档与全文笔记**：目标集合（项目 slug）不存在则 `zotero_create_collection` 自动创建；H/M 条目 `zotero_add_item` 纯元数据一次写全（fields 含 abstractNote/卷期页/DOI + creators + 集合 + 标签，写完检查 `skippedFields`）后 `zotero_attach_file` 挂 papers/ 本地 PDF、`zotero_set_item_collections`（mode=add）归入项目集合；MinerU 全文 md 以纯文本骨架经 `zotero_add_note` 写成条目子笔记（`zotero_get_children` 同名查重、约 80k 字符截断）。协议见 [zotero-local-mcp.md](modules/lit/references/zotero-local-mcp.md) §5b。
+- **Step 11 Zotero 集合归档与全文笔记**：目标集合（项目 slug）不存在则 `zotero_create_collection` 自动创建；H/M 条目 `zotero_add_item`（含 abstractNote）后 `zotero_attach_file` 挂 papers/ 本地 PDF、`zotero_set_item_collections` 归入项目集合；MinerU 全文 md 以纯文本骨架经 `zotero_manage_note` 写成条目子笔记（`zotero_get_notes` 同名查重、约 80k 字符截断）。协议见 [zotero-local-mcp.md](modules/lit/references/zotero-local-mcp.md) §5b。
 - **Step 12 参考文献交集滚雪球**：`python3 modules/lit/scripts/citation_intersection.py --workspace <paper-workspace>` 对已解析全文的参考文献取交集，产出 `02-literature/citation-intersection.md`；共引频次 ≥2 的高重复度条目逐条判读（已有/新增候选/待核验），未收录者登记注册表并补抓摘要，再以专业检索式回 CNKI 滚雪球检索下载（最多 2 轮或无新增共引即停）。
 - **英文检索 exa 首选**：`web_search_exa`/`web_fetch_exa` 为英文文献主动首选通道（语义化 query + 批量摘要抓取），WebSearch 做中文与交叉验证；协议见 [search-strategies.md](modules/lit/references/search-strategies.md) exa 节。
 
@@ -238,7 +238,7 @@ options: [
 | Phase 0 | [phase-0-init.md](modules/lit/phases/phase-0-init.md) | 初始化+模式解析 |
 | Phase 1 | [phase-1-search.md](modules/lit/phases/phase-1-search.md) | 七步搜索流程 |
 | Phase 1 | [cnki-kns8s-closed-loop.md](modules/lit/references/cnki-kns8s-closed-loop.md) | CNKI kns8s 检索→分析→下载闭环协议（后端中立）+ `modules/lit/scripts/cnki/kns8s-download.sh` |
-| Phase 1 | [pi-chrome-browser.md](modules/lit/references/pi-chrome-browser.md) | OMP pi-chrome 后端的安装、授权、能力映射与失败恢复；ZCode 宿主用 §2.1 |
+| Phase 1 | [pi-chrome-browser.md](modules/lit/references/pi-chrome-browser.md) | OMP pi-chrome 后端的安装、授权、能力映射与失败恢复；ZCode 宿主用 §2.1；OMP 无 `chrome_*` 时用闭环协议 §2.4（Eval 备选） |
 | Phase 1 | [phase-1-search.md](modules/lit/phases/phase-1-search.md) Step 8–12 | 实测修正协议：操作修正、>1000 来源类别收窄、双排序首页摘要、引证/共引、Top-N 下载与 CSV、MinerU 全文化、Zotero 集合与全文笔记、参考文献交集滚雪球 |
 | Phase 0/1 | [zotero-local-mcp.md](modules/lit/references/zotero-local-mcp.md) | 本地库检索、摘要即时入库、全文深读、集合登记 |
 | Phase 1 | [search-strategies.md](modules/lit/references/search-strategies.md) exa 节 | 英文文献 exa MCP 首选协议 |

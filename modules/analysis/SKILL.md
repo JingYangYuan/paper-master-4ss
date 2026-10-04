@@ -98,7 +98,7 @@ analysis 模块只保留三类资源：
 - 模型选择与诊断：[quantitative-model-router.md](modules/analysis/references/quantitative-model-router.md) — 含快速决策树、因变量类型路由、诊断阈值、内生性判断框架、面板模型选择逻辑、空间依赖判断框架
 - 模板库索引：[templates/README.md](modules/analysis/templates/README.md)；回归子流程索引：[03-regression/README.md](modules/analysis/templates/03-regression/README.md) — 先由 `00-plan-dispatch` 读取 `analysis-execution-plan`，再按主回归、非线性、面板、因果识别、机制/异质性、稳健性和导出子流程运行
 - 质性方法：[qualitative-methods.md](modules/analysis/references/qualitative-methods.md) — **路由索引**，按研究阶段分发到四个分文件：`qualitative-routing-design.md`（路由与设计）、`qualitative-data-collection.md`（数据收集协议）、`qualitative-analysis-methods.md`（扎根理论/主题分析/框架分析/内容分析/编码本/LLM编码）、`qualitative-quality-integration.md`（可信性保证/过程追踪/混合方法/个案/行动研究/口述史/引文规则/反模式）
-- 报告规范：[quantitative-reporting-standards.md](modules/analysis/references/quantitative-reporting-standards.md) — 含数值格式规范、7种模型表模板(OLS/Logit/面板/IV/DID/RDD/空间)、所有诊断结果的报告位置与格式、稳健性报告结构、图形规范(配色/DPI/注) 、10类段落模板(基准/非线性/FE/IV/DID/多期DID/RDD/空间/中介/稳健性)、质性+混合方法段模板、补充材料与可复现性声明、英文段落模板、避免事项总表
+- 报告规范：[quantitative-reporting-standards.md](modules/analysis/references/quantitative-reporting-standards.md) — 含数值格式规范、9种模型表模板(OLS/Logit/面板/IV/DID/RDD/空间/中介/调节)、所有诊断结果的报告位置与格式、稳健性报告结构、图形规范(配色/DPI/注) 、11类段落模板(基准/非线性/FE/IV/DID/多期DID/RDD/空间/中介/调节/稳健性)、质性+混合方法段模板、补充材料与可复现性声明、英文段落模板、避免事项总表
 - Python 运行环境与依赖安装：[python-ecosystem-setup.md](modules/analysis/references/python-ecosystem-setup.md)
 - R 运行环境与依赖安装：[r-ecosystem-setup.md](modules/analysis/references/r-ecosystem-setup.md)
 - Stata 执行通道（statamcp 优先）与依赖安装：[stata-ecosystem-setup.md](modules/analysis/references/stata-ecosystem-setup.md)
@@ -114,6 +114,10 @@ analysis 模块只保留三类资源：
 | Python | `python3 "script.py"` | 若无 `python3`，按 `python-ecosystem-setup.md` 安装；依赖缺失时创建 venv 并用 `pip` 安装 |
 
 所有表格、图形、统计数值和结果段落必须来自已执行脚本。若 statamcp、许可、数据或依赖导致无法执行，只能交付阻断日志、可复现脚本和安装/补数步骤，不得伪造结果。
+
+### 4.2 Stata 双总代码交付协议（默认生产架构）
+
+Stata 生产交付默认采用双总代码体系：`paper-workspace/04-analysis/scripts/01_clean_and_prepare_master.do`（全量数据导入、审计真实性、变量标准化、缩尾、导出表 1-3 描述与共线性诊断）与 `paper-workspace/04-analysis/scripts/02_empirical_analysis_master.do`（reghdfe/ivreghdfe 全套实证回归、导出表 4 至表 N 全部宽表，可另附绘图脚本）。两个总代码均经 statamcp `stata_run_file` 实际执行并写入 run-log；`templates/03-regression/` 子流程模板保留为构建素材与派发参考。高维固定效应统一 `reghdfe`、工具变量统一 `ivreghdfe`；机制默认江艇（2022）两步法；调节默认四列递进规范。
 
 ## 5. 核心边界
 
