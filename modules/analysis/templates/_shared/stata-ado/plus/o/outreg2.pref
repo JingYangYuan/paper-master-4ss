@@ -1,0 +1,3 @@
+ 8 Mar 2026
+using `"Robustness_Results.doc"'
+append ctitle("Rural_Rob") dec(3) tstat bdec(3) excel addtext(FE, NO, Robust, YES)

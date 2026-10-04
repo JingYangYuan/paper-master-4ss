@@ -120,6 +120,22 @@ net install scpi, from("https://raw.githubusercontent.com/nppackages/scpi/main/s
 
 社区包在 statamcp 会话内安装一次即可（用 `stata_run_selection` 运行安装命令），后续所有会话共享同一 ado 路径。
 
+---
+
+## 4.1 随包分发的 ado 快照（免安装路径）
+
+本 skill 在 `templates/_shared/stata-ado/plus/` 下附带了一份本地 `ado/plus` 的完整快照
+（2503 文件 / 83 MB，含全部上述社区包及其 `.ado`/`.sthlp`/`.mata`/`.mlib`/`.plugin`），
+用于在**无法联网或不想逐个安装**的环境里让 `03-regression` 模板开箱即用：
+
+```stata
+adopath + "<skill 根目录>/modules/analysis/templates/_shared/stata-ado/plus"
+```
+
+- 两种方式**二选一**：已用 `ssc install` 装好依赖时不要再加载本目录，避免版本混用。
+- `.plugin` 是平台相关二进制；加载失败时报 `Could not load plugin`，对该命令 `ssc install <pkg>, replace` 即可。
+- 详细内容、平台注意与许可说明见 `templates/_shared/stata-ado/README.md`；该目录**不含** Stata 官方 base ado。
+
 模板不再在运行期守卫依赖；上表社区包必须在执行分析前装好，缺失时 Stata 直接报 unrecognized command。
 
 ---

@@ -1,0 +1,173 @@
+{smcl}
+{* 11dec2019}{...}
+{cmd:help xtfesing}{right: ({browse "https://doi.org/10.1177/1536867X20976326":SJ20-4: st0623})}
+{hline}
+
+{marker title}{...}
+{title:Title}
+
+{p2colset 5 17 19 2}{...}
+{p2col:{cmd:xtfesing} {hline 2}}Fixed-effects estimation exploiting singleton
+information{p_end}
+
+
+{marker syntax}{...}
+{title:Syntax}
+
+{p 8 16 2} 
+{cmd:xtfesing} 
+{depvar}
+[{indepvars}]
+{ifin}
+[{cmd:,} {cmdab:i:d(}{it:varname}{cmd:)}
+{cmdab:now:indmeiejer} 
+{opt l:evel(#)}]
+
+{pstd}
+where {it:depvar} represents the dependent variable and {it:indepvars}
+the list of independent variables.  A subsample of the data can be
+specified using the {cmd:if} or {cmd:in} qualifier, as usual.
+
+
+{title:Description}
+
+{pstd}
+{cmd:xtfesing} performs the generalized method of moments (GMM) estimators
+proposed by Bruno, Magazzini, and Stampini (2020) to perform fixed-effects
+estimation of a panel-data model exploiting singleton units (that is, those
+units observed in one time period only).  The singleton units are disregarded
+with {cmd:xtreg, fe} because the within-group transformation of singleton
+units is identically equal to zero.  The estimator is implemented as a
+two-step GMM estimator, under the assumption that the ordinary least-squares
+bias for the units observed more than once is the same as the ordinary
+least-squares bias of the singleton units.
+
+
+{title:Options}
+
+{phang}
+{opt id(varname)} specifies {it:varname} identifying the grouping variable.
+The option can be omitted when the variables identifying the panel dimensions
+have been specified with the {cmd:xtset} command.  In this case, the variable
+identifying the panel units is considered (if the option is omitted but no
+{cmd:xtset} command has been defined before {cmd:xtfesing}, an error message
+is displayed).
+
+{phang}
+{cmd:nowindmeijer} specifies that the default standard errors computed by
+Stata's {cmd:gmm} command be reported.  By default, they are computed using
+Windmeijer's (2005) correction.
+
+{phang}
+{opt level(#)} specifies the confidence level.  The default is
+{cmd:level(95)}.
+
+
+{title:Postestimation command}
+
+{pstd}
+The postestimation command {cmd:predict} can be used after {cmd:xtfesing}.
+The following options can be specified:
+
+{col 8}{cmd:xb}{col 25}a + x'beta, fitted values (the default)
+{col 8}{cmd:ue}{col 25}u_i + e_it, the combined residual
+
+
+
+{title:Example}
+
+{phang}
+{cmd:. xi: xtfesing lnY lnK lnL i.survey, id(idpanel)}
+
+
+{title:Stored results}
+
+{pstd}
+{cmd:xtfesing} stores the following in {cmd:e()}:
+
+{synoptset 20 tabbed}{...}
+{p2col 4 20 19 2: Scalars}{p_end}
+{synopt:{cmd:e(N)}}number of observations{p_end}
+{synopt:{cmd:e(k)}}number of estimated parameters{p_end}
+{synopt:{cmd:e(N_clust)}}number of clusters{p_end}
+{synopt:{cmd:e(rank)}}rank of {cmd:e(V)}{p_end}
+{synopt:{cmd:e(converged)}}{cmd:1} if converged, {cmd:0} otherwise{p_end}
+{synopt:{cmd:e(Q)}}value of minimized GMM criterion{p_end}
+{synopt:{cmd:e(J)}}value of J-test of overidentifying restrictions{p_end}
+{synopt:{cmd:e(J_df)}}degrees of freedom of J-test{p_end}
+{synopt:{cmd:e(N_eq)}}number of equations passed to {cmd:gmm} command, equal to three{p_end}
+{synopt:{cmd:e(n_moments)}}number of moment conditions{p_end}
+{synopt:{cmd:e(F_hom)}}value of F statistic for regression-based test of homogeneity{p_end}
+{synopt:{cmd:e(F_hom_p)}}p-value of F statistics for homogeneity{p_end}
+{synopt:{cmd:e(NS)}}number of singletons{p_end}
+
+{p2col 4 20 19 2: Macros}{p_end}
+{synopt:{cmd:e(cmd)}}{cmd:xtfesing}{p_end}
+{synopt:{cmd:e(cmdline)}}command as typed{p_end}
+{synopt:{cmd:e(depvar)}}name of dependent variable{p_end}
+{synopt:{cmd:e(rhs)}}list of the independent variables{p_end}
+{synopt:{cmd:e(clustvar)}}name of clustering variable; also used to identify singletons{p_end}
+{synopt:{cmd:e(vce)}}{cmd:cluster}{p_end}
+{synopt:{cmd:e(vcetype)}}{cmd:Robust}{p_end}
+{synopt:{cmd:e(predict)}}{cmd:xtfesing_p}, name of the command used for {cmd:predict}{p_end}
+{synopt:{cmd:e(wmatrix)}}name of {it:clustvar}, equal to {it:varname} in the {cmd:id()} option{p_end}
+{synopt:{cmd:e(estimator)}}{cmd:twostep}{p_end}
+{synopt:{cmd:e(winit)}}{cmd:Unadjusted}{p_end}
+{synopt:{cmd:e(nocommonesample)}}{cmd:nocommonesample}{p_end}
+{synopt:{cmd:e(properties)}}{cmd:b V}{p_end}
+
+{p2col 4 20 19 2: Matrices}{p_end}
+{synopt:{cmd:e(b)}}vector of the estimated coefficients{p_end}
+{synopt:{cmd:e(V)}}variance-covariance matrix of the coefficients{p_end}
+{synopt:{cmd:e(Vunc)}}uncorrected variance-covariance matrix of the
+coefficients, if {cmd:e(V)} computed according to Windmeijer (2005){p_end}
+{synopt:{cmd:e(W)}}weight matrix used for final round of estimation{p_end}
+{synopt:{cmd:e(S)}}moment covariance matrix used in robust VCE
+computations{p_end}
+{synopt:{cmd:e(init)}}initial values of the estimators{p_end}
+
+
+{title:References}
+
+{phang}
+Bruno, R. L., L. Magazzini, and M. Stampini. 2020. Exploiting information from
+singletons in panel data analysis: A GMM approach.
+{it:Economics Letters} 186: Article 108519. 
+{browse "https://doi.org/10.1016/j.econlet.2019.07.004"}.
+
+{phang}
+Windmeijer, F. 2005. A finite sample correction for the variance of linear
+efficient two-step GMM estimators.
+{it:Journal of econometrics} 126: 25-51.
+{browse "https://doi.org/10.1016/j.jeconom.2004.02.005"}.
+
+
+{marker authors}{...}
+{title:Authors}
+
+{pstd}
+Laura Magazzini{break}
+Institute of Economics{break}
+Sant'Anna School of Advanced Studies{break}
+Pisa, Italy{break}
+laura.magazzini@santannapisa.it
+
+{pstd}
+Randolph Luca Bruno{break}
+School of Slavonic and East European Studies{break}
+University College London{break}
+London, UK{break}
+Fondazione Rodolfo DeBenedetti and Institute for the Study of Labor (IZA)
+
+{pstd}
+Marco Stampini{break}
+Social Protection and Health Division{break}
+Inter-American Development Bank{break}
+Washington, DC
+
+
+{marker alsosee}{...}
+{title:Also see}
+
+{p 4 14 2}
+Article:  {it:Stata Journal}, volume 20, number 4: {browse "https://doi.org/10.1177/1536867X20976326":st0623}{p_end}

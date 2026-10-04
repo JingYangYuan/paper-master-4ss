@@ -1,0 +1,50 @@
+<pre>
+-------------------------------------------------------------------------------
+help for <b>sgmediation</b>
+-------------------------------------------------------------------------------
+<p>
+<b><u>Sobel-Goodman mediation tests</u></b>
+<p>
+        <b>sgmediation</b> <i>depvar</i> [<b>if</b> <i>exp</i>] [<b>in</b> <i>range</i>] <b>,</b> <b>mv(</b><i>mediatorvar</i><b>)</b> <b>iv(</b><i>indvar</i><b>)</b>
+                [ <b>cv(</b><i>covarlist</i><b>)</b> <b><u>boot</u></b><b>strap</b> <b>reps(</b><i># reps</i><b>)</b> <b>level(</b><i>#</i><b>)</b> ]
+<p>
+<b><u>Description</u></b>
+<p>
+    The purpose of the Sobel-Goodman tests are to test whether a mediator
+    carries the influence of an IV to a DV.
+<p>
+    A variable may be considered a mediator to the extent to which it carries
+    the influence of a given independent variable (IV) to a given dependent
+    variable (DV). Generally speaking, mediation can be said to occur when
+    (1) the IV significantly affects the mediator, (2) the IV significantly
+    affects the DV in the absence of the mediator, (3) the mediator has a
+    significant unique effect on the DV, and (4) the effect of the IV on the
+    DV shrinks upon the addition of the mediator to the model. More formally,
+    the Sobel-Goodman tests are statistically based methods by which
+    mediation may be assessed.
+<p>
+<b><u>Options</u></b>
+    <b>cv(</b><i>covarlist</i><b>)</b> Optional list of covariate variables.
+    <b>bootstrap</b> Computes percentile and bias-corrected bootstrap confidence
+        intervals.
+    <b>reps(</b><i>#</i><b>)</b> Number of replications for bootstrap.  The default is 200.
+    <b>level(</b><i>#</i><b>)</b> Confidence level for bootstrap.  The default is 95%.
+<p>
+<b><u>Examples</u></b>
+<p>
+    <b>. sgmediation write, mv(ses) iv(read)</b>
+    <b>. sgmediation write, mv(ses) iv(read) bootstrap</b>
+    <b>. sgmediation write, mv(ses) iv(read) cv(black hispanic) bootstrap</b>
+        <b>reps(500) level(99)</b>
+<p>
+<b><u>References</u></b>
+<p>
+    MacKinnon, D. P., &amp; Dwyer, J. H. (1993). Estimating mediated effects in
+        prevention studies.<i>  Evaluation Review</i>,<i> 17</i>, 144-158.
+    MacKinnon, D. P., Warsi, G., &amp; Dwyer, J. H. (1995). A simulation study of
+        mediated effect measures. <i>Multivariate Behavioral Research</i>, <i>30</i>(1),
+        41-62.
+    Preacher, K. J., &amp; Hayes, A. F. (2004).  SPSS and SAS procedures for
+        estimating indirect effects in simple mediation models. <i>Behavior</i>
+        <i>Research Methods, Instruments, &amp; Computers</i>, <i>36</i>(4), 717-731.
+</pre>

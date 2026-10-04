@@ -1,0 +1,37 @@
+{smcl}
+{* 5 Sep 2023}{...}
+{hline}
+help for {hi:easyclick}
+{hline}
+
+{title:Title}
+{p 4 4 2}
+{bf:easyclick} —— 一键截面数据分析（至少输入两个变量，第一个作为Y，之后的作为X）
+One-click cross-section data analysis (enter at least two variables, the first as Y and the subsequent as X)
+
+{title:Syntax}
+{p 4 4 2}
+{cmdab:easyclick} {varlist}, save(path)
+
+{title:Description}
+{p 4 4 2}
+{cmd:easyclick} 一键进行截面数据分析并导出结果：
+包括描述数据、相关性分析、OLS基准回归、计算VIF值、reset检验、信息准则、异方差检验及处理（若有）。
+请确保一些基础外部命令得到安装，如estab、asdoc、outreg2等，还有连玉君老师的pwcorr_a命令，具体安装方法请自行查阅网页。
+save中的路径是必填的，否则存储位置会比较乱。
+
+ One-click to perform cross-section data analysis and export the results:
+Including describing the data, correlation analysis, OLS baseline regression, calculating the VIF value, reset test, information criterion, heteroscedasticity test and processing (if any). 
+Input at least two variables, the first one as Y and the subsequent one as X. Please make sure some basic external commands are installed, such as estab, asdoc, outreg2, etc.
+Please check the webpage by yourself for the specific installation method, and the paths in SAVE are required, otherwise the storage location will be messy.
+
+{title:Examples}
+{p 4 4 2} *-使用示例数据集auto,dta，以gear_ratio为因变量，以weight和length为自变量进行分析
+Use the sample data set auto,dta, with gear_ratio as the dependent variable and weight and length as the independent variables for analysis {p_end}
+{p 4 4 2}{inp:.} {stata `"sysuse auto.dta,clear"'}{p_end}
+{p 4 4 2}{inp:.} {stata `"easyclick gear_ratio weight length, save(D:\) "'}{p_end}
+
+{title:Author}
+{p 4 4 2}
+{hi: Author }{p_end}
+{hline}

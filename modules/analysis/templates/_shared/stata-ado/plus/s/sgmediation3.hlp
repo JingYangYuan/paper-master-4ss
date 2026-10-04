@@ -1,0 +1,156 @@
+{smcl}
+{* 17jul2025}{...}
+{hline}
+help for {hi:sgmediation3}
+{hline}
+
+{title:Sobel-Goodman mediation tests with fixed effects and clustered SEs}
+
+{p 8 16 2}{cmd:sgmediation3}
+  {it:depvar} [{cmd:if} {it:exp}] [{cmd:in} {it:range}]
+  {cmd:,}
+  {cmd:mv(}{it:mediatorvar}{cmd:)}
+  {cmd:iv(}{it:indvar}{cmd:)}
+    [ {cmd:cv(}{it:covarlist}{cmd:)}
+      {cmd:absorb(}{it:fevars}{cmd:)}
+      {cmd:cluster(}{it:clustervar}{cmd:)}
+      {cmd:prefix(}{it:commandprefix}{cmd:)}
+      {cmd:quietly}
+      {cmd:level(}{it:#}{cmd:)} ]
+
+{title:Description}
+
+{p 4 4 2}
+{cmd:sgmediation3} performs a Sobel-Goodman mediation test, enhanced to support fixed effects 
+models via {cmd:reghdfe}, clustered standard errors, and prefix integration for use with post-estimation tools.
+
+{p 4 4 2}
+The command implements three approaches to estimating the significance of indirect effects 
+in mediation analysis: the classic Sobel test, Goodman-1 (Aroian), and Goodman-2. It 
+computes and reports indirect, direct, and total effects, along with the proportion of 
+the total effect mediated.
+
+{p 4 4 2}
+This command is an update and extension of the original {cmd:sgmediation}. Use {cmd: help sgmediation} to find details.
+
+{title:Options}
+
+{p 4 8 2}{cmd:mv(}{it:mediatorvar}{cmd:)}  
+  The variable hypothesized to mediate the relationship between the independent and dependent variables.
+
+{p 4 8 2}{cmd:iv(}{it:indvar}{cmd:)}  
+  The independent (treatment) variable.
+
+{p 4 8 2}{cmd:cv(}{it:covarlist}{cmd:)}  
+  Optional control variables to include in each model.
+
+{p 4 8 2}{cmd:absorb(}{it:fevars}{cmd:)}  
+  Variables to absorb as fixed effects (requires {cmd:reghdfe}).
+
+{p 4 8 2}{cmd:cluster(}{it:clustervar}{cmd:)}  
+  Clustered standard errors. Only one clustering variable allowed.
+
+{p 4 8 2}{cmd:prefix(}{it:commandprefix}{cmd:)}  
+  Optional prefix to run before each regression (e.g., {cmd:eststo:}).
+
+{p 4 8 2}{cmd:quietly}  
+  Suppresses regression output.
+
+{p 4 8 2}{cmd:level(}{it:#}{cmd:)}  
+  Confidence level for significance tests (default: 95).
+
+{title:Examples}
+
+{p 4 8 2}{cmd:. sgmediation3 y, iv(x) mv(m)}{p_end}
+{p 4 8 2}{cmd:. sgmediation3 y, iv(x) mv(m) cv(age gender)}{p_end}
+{p 4 8 2}{cmd:. sgmediation3 y, iv(x) mv(m) absorb(schoolid)}{p_end}
+{p 4 8 2}{cmd:. sgmediation3 y, iv(x) mv(m) cluster(classid) prefix(eststo:)}{p_end}
+
+{p 4 8 2}{cmd:* bootstrap example}{p_end}
+{p 4 8 2}{cmd:. bootstrap r(ind_eff) r(dir_eff), reps(1000): sgmediation3 y, iv(x) mv(m)}{p_end}
+
+{title:Remarks}
+
+{p 4 4 2}
+All regressions are estimated using {cmd:reghdfe}, which is required and must be installed 
+prior to use. Install it with {cmd:ssc install reghdfe}.
+
+{p 4 4 2}
+This command does not currently support interaction terms or nonlinear models.
+
+{title:Author}
+
+{p 4 4 2}Yuan Jingyang
+
+{title:固定效应与聚类标准误的 Sobel-Goodman 中介效应检验}
+
+{p 8 16 2}{cmd:sgmediation3}
+  {it:因变量} [{cmd:if} {it:条件}] [{cmd:in} {it:范围}]
+  {cmd:,}
+  {cmd:mv(}{it:中介变量}{cmd:)}
+  {cmd:iv(}{it:自变量}{cmd:)}
+    [ {cmd:cv(}{it:控制变量列表}{cmd:)}
+      {cmd:absorb(}{it:固定效应变量}{cmd:)}
+      {cmd:cluster(}{it:聚类变量}{cmd:)}
+      {cmd:prefix(}{it:回归前缀命令}{cmd:)}
+      {cmd:quietly}
+      {cmd:level(}{it:置信水平}{cmd:)} ]
+
+{title:简介}
+
+{p 4 4 2}
+{cmd:sgmediation3} 用于执行 Sobel-Goodman 中介效应检验，并扩展支持固定效应模型（通过 {cmd:reghdfe} 实现）、聚类标准误，以及与后估计命令结合使用的前缀命令（如 {cmd:eststo:}）。
+
+{p 4 4 2}
+该命令实现了三种检验间接效应显著性的方法：传统 Sobel 检验、Goodman-1（Aroian 修正）以及 Goodman-2。命令会输出间接效应、直接效应、总效应及其比例等统计量。
+
+{p 4 4 2}
+本命令是在原始 {cmd:sgmediation} 基础上的扩展和升级版本。使用 {cmd： help sgmediation} 查找详细信息。
+
+{title:选项说明}
+
+{p 4 8 2}{cmd:mv(}{it:中介变量}{cmd:)}  
+  假设在自变量与因变量之间起中介作用的变量
+
+{p 4 8 2}{cmd:iv(}{it:自变量}{cmd:)}  
+  自变量（也称处理变量）
+
+{p 4 8 2}{cmd:cv(}{it:控制变量列表}{cmd:)}  
+  可选的协变量列表，会被加入每个回归模型中
+
+{p 4 8 2}{cmd:absorb(}{it:固定效应变量}{cmd:)}  
+  需要吸收的固定效应变量（需使用 {cmd:reghdfe}）
+
+{p 4 8 2}{cmd:cluster(}{it:聚类变量}{cmd:)}  
+  设置聚类标准误，仅支持一个聚类变量
+
+{p 4 8 2}{cmd:prefix(}{it:回归前缀命令}{cmd:)}  
+  在每次回归之前运行的可选前缀命令（如 {cmd:eststo:}）
+
+{p 4 8 2}{cmd:quietly}  
+  抑制中间回归的输出结果，仅输出最终检验结果
+
+{p 4 8 2}{cmd:level(}{it:#}{cmd:)}  
+  设置显著性检验的置信水平（默认为 95）
+
+{title:示例}
+
+{p 4 8 2}{cmd:. sgmediation3 y, iv(x) mv(m)}{p_end}
+{p 4 8 2}{cmd:. sgmediation3 y, iv(x) mv(m) cv(age gender)}{p_end}
+{p 4 8 2}{cmd:. sgmediation3 y, iv(x) mv(m) absorb(schoolid)}{p_end}
+{p 4 8 2}{cmd:. sgmediation3 y, iv(x) mv(m) cluster(classid) prefix(eststo:)}{p_end}
+
+{p 4 8 2}{cmd:* bootstrap 示例}{p_end}
+{p 4 8 2}{cmd:. bootstrap r(ind_eff) r(dir_eff), reps(1000): sgmediation3 y, iv(x) mv(m)}{p_end}
+
+{title:说明}
+
+{p 4 4 2}
+所有回归均通过 {cmd:reghdfe} 执行，因此使用前请确保已安装该命令。可使用以下命令安装：{cmd:ssc install reghdfe}
+
+{p 4 4 2}
+目前版本不支持交互项或非线性模型。
+
+{title:作者}
+
+{p 4 4 2}元景阳
