@@ -30,7 +30,8 @@ rules <- list(
   panel = c("id", "time", "panel", "FE", "RE", "Hausman", "面板"),
   causal = c("instrument", "treatment", "post", "running", "cutoff", "IV", "DID", "RDD", "PSM", "CEM", "IPW", "SCM"),
   mechanism_heterogeneity = c("mediator", "mechanism", "moderator", "heterogeneity", "threshold", "中介", "机制", "调节", "异质性", "门槛", "交互", "分组"),
-  robustness = c("robustness", "placebo", "sensitivity", "替代变量", "替代样本", "替代模型", "稳健性", "安慰剂")
+  robustness = c("robustness", "placebo", "sensitivity", "替代变量", "替代样本", "替代模型", "稳健性", "安慰剂"),
+  spatial = c("spatial", "空间", "Moran", "邻接", "反距离", "SDM", "SAR")
 )
 rows <- do.call(rbind, lapply(names(rules), function(task) {
   hit <- rules[[task]][vapply(rules[[task]], grepl, logical(1), x = txt, ignore.case = TRUE, fixed = TRUE)]

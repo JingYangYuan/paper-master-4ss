@@ -31,6 +31,7 @@ TASK_RULES = {
     "causal": ["instrument", "treatment", "post", "running", "cutoff", "IV", "DID", "RDD", "PSM", "CEM", "IPW", "SCM"],
     "mechanism_heterogeneity": ["mediator", "mechanism", "moderator", "heterogeneity", "threshold", "中介", "机制", "调节", "异质性", "门槛", "交互", "分组"],
     "robustness": ["robustness", "placebo", "sensitivity", "替代变量", "替代样本", "替代模型", "稳健性", "安慰剂"],
+    "spatial": ["spatial", "空间", "Moran", "邻接", "反距离", "SDM", "SAR"],
 }
 
 

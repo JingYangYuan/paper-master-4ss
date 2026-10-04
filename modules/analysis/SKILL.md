@@ -78,7 +78,7 @@ analysis 模块只保留三类资源：
 |---|---|
 | `phases/` | 执行流程：初始化、清洗、回归、质性、混合方法、导出门控 |
 | `references/` | 按需读取的知识库：模型路由与诊断阈值、质性方法、报告规范、语言生态、R 运行与绘图、Stata 执行通道（statamcp 优先） |
-| `templates/` | 按流程与子流程拆分的三语言模板库 (Stata/R/Python)：`01-init`、`02-clean-describe`、`03-regression` 八个子流程、`04-qual`、`05-mixed`、`06-export` |
+| `templates/` | 按流程与子流程拆分的三语言模板库 (Stata/R/Python)：`01-init`、`02-clean-describe`、`03-regression` 九个子流程（含 `08-spatial`）、`04-qual`、`05-mixed`、`06-export` |
 
 ## 4. 工作流路由
 
@@ -148,7 +148,7 @@ Stata 生产交付默认采用双总代码体系：`paper-workspace/04-analysis/
 |---|---|---|
 | 初始化 | `templates/01-init/` | 创建 `paper-workspace/04-analysis` 输出结构和初始化报告 |
 | 清洗描述 | `templates/02-clean-describe/` | 真实读取数据、清洗、变量字典、样本流失表、清洗报告和描述统计 |
-| 回归执行 | `templates/03-regression/README.md` | 八个真实可执行子流程：dispatch、主回归、非线性、面板、因果、机制/异质性、稳健性、导出 |
+| 回归执行 | `templates/03-regression/README.md` | 九个真实可执行子流程：dispatch、主回归、非线性、面板、因果、机制/异质性、稳健性、空间计量（`templates/03-regression/08-spatial/`）、导出 |
 | 质性分析 | `templates/04-qual/` | 去标识化、编码本、编码数据、备忘录和信度报告 |
 | 混合方法 | `templates/05-mixed/` | joint display 和整合解释 |
 | 导出门控 | `templates/06-export/` | 质量门控、可声称内容和产物追溯 |

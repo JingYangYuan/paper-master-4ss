@@ -5,7 +5,7 @@ clear all
 set more off
 
 local project_root : env PROJECT_ROOT
-if "`project_root'" != "" cd "`project_root'"
+if "`project_root'" != "" & fileexists("`project_root'") cd "`project_root'"
 global OUT_ROOT "paper-workspace/04-analysis"
 global DATA "${OUT_ROOT}/data/analysis-data.dta"
 global Y "outcome"

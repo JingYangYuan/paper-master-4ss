@@ -73,7 +73,50 @@ ssc install pstest, replace
 ssc install outreg2, replace
 ssc install xtabond2, replace
 ssc install csdid, replace
+* 模型扩展所需的社区包（03-regression 全部子流程）
+ssc install xtdpdgmm, replace
+ssc install xtbcfe, replace
+ssc install xtcdf, replace
+ssc install xtcd2, replace
+ssc install xtcd, replace
+ssc install xtdcce2, replace
+ssc install xthst, replace
+ssc install kmatch, replace
+ssc install moremata, replace
+ssc install paramed, replace
+ssc install sdid, replace
+ssc install ritest, replace
+ssc install rwolf, replace
+ssc install wyoung, replace
+ssc install sensemakr, replace
+ssc install konfound, replace
+ssc install gologit2, replace
+ssc install oglm, replace
+ssc install fmlogit, replace
+ssc install betafit, replace
+ssc install stpm2, replace
+ssc install bdiff, replace
+ssc install weakiv, replace
+ssc install jwdid, replace
+ssc install did_multiplegt_dyn, replace
+* 空间计量：官方 sp*（spset/spmatrix/spregress/spxtregress）已内置于 Stata 15+，无需安装；
+* 旧式权重矩阵与全局 Moran's I 与面板空间需要以下 SSC 包：
+ssc install spatwmat, replace
+ssc install spatgsa, replace
+ssc install spatreg, replace
+ssc install xsmle, replace
+* 合成控制：synth 的插件是平台相关的编译产物，缺失时 install name 与二进制架构不符会报
+* "Could not load plugin: .../synthopt.plugin"，用 replace 重装可修复：
+ssc install synth, replace
+* SSC 无 scpi，经 GitHub 源安装：
+net install scpi, from("https://raw.githubusercontent.com/nppackages/scpi/main/stata") replace
 ```
+
+**依赖差异与构建前置**（实测）：
+
+- `moremata` 是 Mata 函数库而不是 ado 命令，`which moremata` 必然失败；用依赖它的 `kmatch` 实际估计成功作为功能验收标准。
+- `synth` 的 `synthopt.plugin` 是平台相关的编译插件：装成 Windows PE 或 x86_64 版本会在 macOS arm64 上报 `Could not load plugin`。`ssc install synth, replace` 可重新拉到 universal Mach-O 版本。
+- `honestdid` 依赖编译插件，验收用 `honestdid _plugin_check`（加载 `honestosqp`/`honestecos` 插件成功即通过）。
 
 社区包在 statamcp 会话内安装一次即可（用 `stata_run_selection` 运行安装命令），后续所有会话共享同一 ado 路径。
 

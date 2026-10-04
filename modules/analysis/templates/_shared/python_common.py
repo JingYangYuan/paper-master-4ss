@@ -45,6 +45,15 @@ class Roles:
     moderator: str | None = None
     heterogeneity: str | None = None
     threshold: str | None = None
+    lat: str | None = None
+    lon: str | None = None
+    outcome_bin: str | None = None
+    outcome_ord: str | None = None
+    outcome_multi: str | None = None
+    outcome_count: str | None = None
+    prop_outcome: str | None = None
+    duration: str | None = None
+    event_flag: str | None = None
 
 
 def add_common_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
@@ -255,6 +264,15 @@ def infer_roles(df, dict_path: str | Path | None = None) -> Roles:
         moderator=first("moderator", ["moderator"]),
         heterogeneity=first("heterogeneity", ["group", "subgroup", "heterogeneity"]),
         threshold=first("threshold", ["threshold"]),
+        lat=first("lat", ["lat", "latitude"]),
+        lon=first("lon", ["lon", "longitude"]),
+        outcome_bin=("outcome_bin" if "outcome_bin" in cols else None),
+        outcome_ord=("outcome_ord" if "outcome_ord" in cols else None),
+        outcome_multi=("outcome_multi" if "outcome_multi" in cols else None),
+        outcome_count=("outcome_count" if "outcome_count" in cols else None),
+        prop_outcome=("prop_outcome" if "prop_outcome" in cols else None),
+        duration=("duration" if "duration" in cols else None),
+        event_flag=("event" if "event" in cols else None),
     )
 
 
@@ -488,14 +506,421 @@ def run_ipw_ate(df, roles: Roles):
     return smf.wls(f"{roles.y} ~ {roles.treat}", data=data, weights=weights).fit(cov_type="HC1")
 
 
-def run_mediation_baron_kenny(df, roles: Roles) -> dict[str, Any]:
+def run_mediation(df, roles: Roles, reps: int = 500) -> dict[str, Any]:
+    """江艇（2022）两步法：第一步 X→Y，第二步 X→M。
+
+    不得把机制/中介变量 M 放进 Y 的回归方程（坏控制变量偏误）。
+    间接效应仅作为补充证据，用 bootstrap 单独计算并命名为 indirect_boot。
+    """
     if not roles.mediator:
         raise ValueError("Mediation requires mediator role")
-    return {
-        "total": run_ols(df, roles.y, roles.x, roles.controls, roles.fe, roles.cluster),
-        "path_a": run_ols(df, roles.mediator, roles.x, roles.controls, roles.fe, roles.cluster),
-        "path_b": run_ols(df, roles.y, roles.mediator, [roles.x, *roles.controls], roles.fe, roles.cluster),
+    import numpy as np
+
+    total = run_ols(df, roles.y, roles.x, roles.controls, roles.fe, roles.cluster)
+    path_a = run_ols(df, roles.mediator, roles.x, roles.controls, roles.fe, roles.cluster)
+
+    data = df[[v for v in [roles.y, roles.mediator, roles.x, *roles.controls] if v in df.columns]].dropna()
+    rng = np.random.default_rng(20240601)
+    est = np.empty(reps, dtype=float)
+    n = len(data)
+    for i in range(reps):
+        idx = rng.integers(0, n, n)
+        b = data.iloc[idx]
+        a = _coef_of(run_ols(b, roles.mediator, roles.x, roles.controls, None, None), roles.x)
+        bcoef = _coef_of(run_ols(b, roles.y, roles.mediator, [roles.x, *roles.controls], None, None), roles.mediator)
+        est[i] = np.nan if (a is None or bcoef is None) else a * bcoef
+    est = est[~np.isnan(est)]
+    indirect = {
+        "estimate": float(np.mean(est)) if est.size else float("nan"),
+        "ci_low": float(np.quantile(est, 0.025)) if est.size else float("nan"),
+        "ci_high": float(np.quantile(est, 0.975)) if est.size else float("nan"),
+        "reps": int(est.size),
     }
+    return {"total": total, "path_a": path_a, "indirect_boot": indirect}
+
+
+def _coef_of(model, term: str):
+    params = getattr(model, "params", None)
+    if params is None or term not in params:
+        return None
+    return float(params[term])
+
+
+# ---- 02 nonlinear 新增估计量（Python 不提供 Tobit / Heckman / 面板选择） ----
+def run_ologit(df, y: str, x: str, controls: list[str] | None = None, cluster: str | None = None):
+    import statsmodels.miscmodels.ordinal_model as om
+
+    data = df[[v for v in [y, x, *(controls or []), cluster] if v and v in df.columns]].dropna()
+    mod = om.OrderedModel(data[y], data[[x, *(controls or [])]].astype(float), distr="logit").fit(disp=False)
+    return _pm_result(mod, "OrderedModel", data, cluster)
+
+
+def run_oprobit(df, y: str, x: str, controls: list[str] | None = None, cluster: str | None = None):
+    import statsmodels.miscmodels.ordinal_model as om
+
+    data = df[[v for v in [y, x, *(controls or []), cluster] if v and v in df.columns]].dropna()
+    mod = om.OrderedModel(data[y], data[[x, *(controls or [])]].astype(float), distr="probit").fit(disp=False)
+    return _pm_result(mod, "OrderedModel", data, cluster)
+
+
+def run_mlogit(df, y: str, x: str, controls: list[str] | None = None, cluster: str | None = None):
+    import statsmodels.api as sm
+
+    data = df[[v for v in [y, x, *(controls or []), cluster] if v and v in df.columns]].dropna()
+    endog = data[y].astype("category").cat.codes
+    exog = sm.add_constant(data[[x, *(controls or [])]].astype(float))
+    mod = sm.MNLogit(endog, exog).fit(disp=False)
+    return _pm_result(mod, "MNLogit", data, cluster)
+
+
+def run_nbreg(df, y: str, x: str, controls: list[str] | None = None, cluster: str | None = None):
+    import statsmodels.api as sm
+
+    data = df[[v for v in [y, x, *(controls or []), cluster] if v and v in df.columns]].dropna()
+    mod = sm.NegativeBinomial(data[y], sm.add_constant(data[[x, *(controls or [])]].astype(float))).fit(disp=False)
+    return _pm_result(mod, "NegativeBinomial", data, cluster)
+
+
+def run_fracreg(df, y: str, x: str, controls: list[str] | None = None, cluster: str | None = None):
+    import statsmodels.api as sm
+
+    data = df[[v for v in [y, x, *(controls or []), cluster] if v and v in df.columns]].dropna()
+    mod = sm.GLM(data[y], sm.add_constant(data[[x, *(controls or [])]].astype(float)),
+                 family=sm.families.Binomial()).fit()
+    result = _pm_result(mod, "GLM-Binomial", data, cluster)
+    try:
+        result.get_margeff = mod.get_margeff  # type: ignore[attr-defined]
+    except Exception:
+        pass
+    return result
+
+
+def run_duration(df, y: str, x: str, controls: list[str] | None = None, event: str | None = None):
+    from lifelines import CoxPHFitter, WeibullAFTFitter
+
+    cols = [y, x, *(controls or [])] + ([event] if event else [])
+    data = df[[v for v in cols if v and v in df.columns]].dropna()
+    if event and event in data.columns:
+        fitter = CoxPHFitter().fit(data, duration_col=y, event_col=event)
+    else:
+        fitter = WeibullAFTFitter().fit(data, duration_col=y)
+    return _PMResult(fitter)
+
+
+def _pm_result(mod, kind: str, data, cluster: str | None):
+    return _PMResult(mod, kind=kind, cluster=cluster, data=data)
+
+
+class _PMResult:
+    """轻量包装：让 statsmodels / lifelines 结果能走同一套导出与取数路径。"""
+
+    def __init__(self, inner, kind: str = "", cluster: str | None = None, data=None):
+        self.inner = inner
+        self.kind = kind
+        self.cluster = cluster
+        self.data = data
+
+    @staticmethod
+    def _flat(value):
+        """把 numpy/pandas/字典/linearmodels 结果统一压成 {名称: 标量}。"""
+        import numpy as np
+
+        if value is None:
+            return {}
+        if hasattr(value, "to_dict") and not isinstance(value, (dict,)):
+            value = value.to_dict()
+        if isinstance(value, dict):
+            out = {}
+            for k, v in value.items():
+                if isinstance(v, dict):
+                    for k2, v2 in v.items():
+                        try:
+                            out[str(k2)] = float(v2)
+                        except Exception:
+                            continue
+                else:
+                    try:
+                        out[str(k)] = float(v)
+                    except Exception:
+                        continue
+            return out
+        try:
+            arr = np.asarray(value, dtype=float).ravel()
+        except Exception:
+            return {}
+        names = getattr(value, "index", None)
+        if names is not None:
+            return {str(n): float(a) for n, a in zip(list(names), arr)}
+        names = getattr(value, "name", None)
+        if names is not None:
+            return {str(names): float(arr[0])}
+        return {str(i): float(a) for i, a in enumerate(arr)}
+
+    @property
+    def params(self):
+        return self._flat(getattr(self.inner, "params", None))
+
+    @property
+    def pvalues(self):
+        v = getattr(self.inner, "pvalues", None)
+        if v is None:
+            v = getattr(self.inner, "pvalues_", None)
+        return self._flat(v)
+
+    @property
+    def tvalues(self):
+        for attr in ("tvalues", "zvalues", "tstats", "zstats"):
+            v = getattr(self.inner, attr, None)
+            if v is not None:
+                return self._flat(v)
+        return {}
+
+    @property
+    def nobs(self):
+        for attr in ("nobs", "n"):
+            v = getattr(self.inner, attr, None)
+            if callable(v):
+                try:
+                    v = v()
+                except Exception:
+                    continue
+            if v is not None:
+                try:
+                    return int(v)
+                except Exception:
+                    continue
+        d = getattr(self.inner, "_n_examples", None)
+        return int(d) if d is not None else 0
+
+    def summary(self):
+        return getattr(self.inner, "summary", lambda: str(self.inner))()
+
+
+# ---- 03 panel 新增估计量 ----
+def run_panel_fe_py(df, roles: Roles):
+    """linearmodels PanelOLS：个体 + 时间效应，聚类稳健标准误。"""
+    from linearmodels.panel import PanelOLS
+
+    cols = [roles.y, roles.x, *roles.controls, roles.id, roles.time]
+    if roles.cluster:
+        cols.append(roles.cluster)
+    data = df[[v for v in cols if v and v in df.columns]].dropna()
+    data = data.set_index([roles.id, roles.time])
+    y = data[roles.y]
+    x = data[[roles.x, *roles.controls]]
+    mod = PanelOLS(y, x, entity_effects=True, time_effects=True)
+    if roles.cluster and roles.cluster in data.columns:
+        res = mod.fit(cov_type="clustered", clusters=data[roles.cluster])
+    else:
+        res = mod.fit(cov_type="clustered", cluster_entity=True)
+    return _PMResult(res, "PanelOLS", cluster=roles.cluster)
+
+
+def run_panel_long_py(df, roles: Roles):
+    """长面板（N 小 T 大）：PanelOLS + Driscoll-Kraay（kernel）标准误。"""
+    from linearmodels.panel import PanelOLS
+
+    cols = [roles.y, roles.x, *roles.controls, roles.id, roles.time]
+    data = df[[v for v in cols if v and v in df.columns]].dropna()
+    data = data.set_index([roles.id, roles.time])
+    mod = PanelOLS(data[roles.y], data[[roles.x, *roles.controls]], entity_effects=True)
+    res = mod.fit(cov_type="kernel", kernel="bartlett", bandwidth=2)
+    return _PMResult(res, "PanelOLS-DK")
+
+
+def run_pgmm(df, roles: Roles):
+    """动态面板 GMM：pydynpd。"""
+    import pydynpd
+
+    data = df[[v for v in [roles.y, roles.x, *roles.controls, roles.id, roles.time] if v and v in df.columns]].dropna()
+    data = data.rename(columns={roles.id: "id", roles.time: "year"})
+    cmd = f"{roles.y} L1.{roles.y} {' '.join(roles.x if isinstance(roles.x, str) else [roles.x])}"
+    for c in roles.controls:
+        cmd += f" {c}"
+    mod = pydynpd.pydynpd(cmd, data, "id year")
+    res = mod.estimate()
+    return mod
+
+
+def run_xtiv_py(df, roles: Roles):
+    """面板 IV：linearmodels IV2SLS + 个体/时间虚拟变量吸收的等价实现（within 变换）。"""
+    from linearmodels.iv import IV2SLS
+
+    if not roles.endog or not roles.instrument:
+        raise ValueError("panel IV requires endog and instrument")
+    cols = [roles.y, roles.endog, roles.instrument, *roles.controls]
+    data = df[[v for v in cols if v in df.columns]].dropna()
+    exog = data[roles.controls] if roles.controls else None
+    res = IV2SLS(data[roles.y], exog, data[roles.endog], data[roles.instrument]).fit(cov_type="robust")
+    return _PMResult(res, "IV2SLS")
+
+
+def run_panel_nl_py(df, roles: Roles):
+    """面板非线性：pyfixest::feglm。"""
+    import pyfixest as pf
+
+    controls = " + ".join(roles.controls)
+    fml = f"{roles.y} ~ {roles.x}" + (f" + {controls}" if controls else "") + f" | {roles.id}"
+    return pf.feglm(fml, data=df, family="logit")
+
+
+# ---- 04 causal 新增估计量 ----
+def run_iv(df, roles: Roles):
+    return run_iv_2sls(df, roles)
+
+
+def run_event_study_py(df, roles: Roles):
+    """事件研究：pyfixest + sunab（不依赖 pydynpd/statsmodels）。"""
+    import pyfixest as pf
+
+    gvar = roles.gvar or roles.treat
+    if not gvar:
+        raise ValueError("event study requires gvar")
+    fml = f"{roles.y} ~ sunab({gvar}, {roles.time}) | {roles.id} + {roles.time}"
+    return pf.feols(fml, data=df, vcov={"CRV1": roles.id} if roles.id else "hetero")
+
+
+def run_cs_did_py(df, roles: Roles):
+    """Callaway-Sant'Anna：differences::att_gt。"""
+    from differences import ATTgt
+
+    gvar = roles.gvar or roles.treat
+    mod = ATTgt(data=df, cohort_column=gvar, time_column=roles.time, id_column=roles.id,
+                outcome_column=roles.y, control_group="never_treated")
+    return mod.fit()
+
+
+def run_rd_py(df, roles: Roles, cutoff: float = 0.0, bandwidth: float | None = None):
+    from rdrobust import rdrobust
+
+    out = rdrobust(y=df[roles.y], x=df[roles.running], c=cutoff, h=bandwidth)
+    return out
+
+
+def run_psm_py(df, roles: Roles):
+    """倾向得分最近邻匹配（statsmodels logit + sklearn NearestNeighbors）。"""
+    import numpy as np
+    import statsmodels.api as sm
+    from sklearn.neighbors import NearestNeighbors
+
+    data = df[[v for v in [roles.y, roles.treat, *roles.controls] if v in df.columns]].dropna()
+    ps = sm.Logit(data[roles.treat], sm.add_constant(data[roles.controls].astype(float))).fit(disp=False)
+    p = ps.predict(sm.add_constant(data[roles.controls].astype(float)))
+    treated = data[data[roles.treat] == 1]
+    control = data[data[roles.treat] == 0]
+    if len(control) == 0 or len(treated) == 0:
+        raise ValueError("PSM requires both treated and control units")
+    nn = NearestNeighbors(n_neighbors=1).fit(p.loc[control.index].to_numpy().reshape(-1, 1))
+    idx = nn.kneighbors(p.loc[treated.index].to_numpy().reshape(-1, 1), return_distance=False).ravel()
+    matched_control = control.iloc[idx]
+    att = float(np.mean(treated[roles.y].to_numpy() - matched_control[roles.y].to_numpy()))
+    return {"att": att, "n_treated": int(len(treated)), "n_control_matched": int(len(matched_control)),
+            "ps_model": ps, "matched": matched_control}
+
+
+def run_ipw_py(df, roles: Roles):
+    """IPW/AIPW：statsmodels 倾向得分 + sklearn 加权回归。"""
+    import numpy as np
+    import statsmodels.api as sm
+
+    data = df[[v for v in [roles.y, roles.treat, *roles.controls] if v in df.columns]].dropna()
+    ps = sm.Logit(data[roles.treat], sm.add_constant(data[roles.controls].astype(float))).fit(disp=False)
+    p = np.clip(ps.predict(sm.add_constant(data[roles.controls].astype(float))), 0.01, 0.99)
+    w = data[roles.treat] / p + (1 - data[roles.treat]) / (1 - p)
+    res = sm.WLS(data[roles.y], sm.add_constant(data[[roles.treat]]), weights=w).fit(cov_type="HC1")
+    return _PMResult(res, "WLS-IPW")
+
+
+def run_scm_py(df, roles: Roles):
+    """合成控制：pysyncon。"""
+    from pysyncon import Dataprep, Synth
+
+    unit = "pid" if "pid" in df.columns else roles.id
+    treated_unit = int(df[unit].iloc[0])
+    dataprep = Dataprep(
+        foo=df,
+        predictors=roles.controls,
+        predictors_op="mean",
+        time_predictors_prior=sorted(df[roles.time].unique())[:3],
+        special_predictors=None,
+        dependent=roles.y,
+        unit_variable=unit,
+        time_variable=roles.time,
+        treatment_identifier=treated_unit,
+        controls_identifier=[u for u in df[unit].unique() if u != treated_unit],
+        time_optimize_ssr=sorted(df[roles.time].unique())[:3],
+        time_plot=sorted(df[roles.time].unique()),
+    )
+    synth = Synth()
+    synth.fit(dataprep)
+    return {"loss": float(synth.loss(verbose=False)) if hasattr(synth, "loss") else None, "synth": synth}
+
+
+# ---- 06 robustness 新增估计量 ----
+def run_wild_boot_py(df, roles: Roles, reps: int = 9999):
+    """Wild cluster bootstrap：wildboottest。"""
+    import wildboottest
+
+    return wildboottest.WildBootTest(
+        data=df, y=roles.y, x=[roles.x, *roles.controls],
+        cluster=roles.cluster, B=reps, param=roles.x,
+    ).fit()
+
+
+def run_multiplicity_py(pvalues, method: str = "holm"):
+    from statsmodels.stats.multitest import multipletests
+
+    return multipletests(pvalues, method=method)[1]
+
+
+# ---- 08 spatial 新增估计量（spreg / libpysal，不依赖 geopandas） ----
+def run_spatial_py(df, roles: Roles, model: str = "lag"):
+    """截面空间回归：libpysal 权重 + spreg ML_Lag/ML_Error。"""
+    import numpy as np
+    from libpysal.weights import KNN
+    from spreg import ML_Error, ML_Lag
+
+    unit = "pid" if "pid" in df.columns else roles.id
+    cross = df.drop_duplicates(subset=[unit]).dropna(subset=[roles.y, roles.x, *roles.controls, roles.lat, roles.lon])
+    coords = cross[[roles.lon, roles.lat]].to_numpy(dtype=float)
+    w = KNN.from_array(coords, k=5)
+    w.transform = "r"
+    y = cross[roles.y].to_numpy(dtype=float).reshape(-1, 1)
+    x = cross[[roles.x, *roles.controls]].to_numpy(dtype=float)
+    mod = ML_Lag(y, x, w=w) if model == "lag" else ML_Error(y, x, w=w)
+    return {"model": mod, "weights": w, "coef": np.asarray(mod.betas).ravel(),
+            "z": np.asarray(mod.z_stat), "n": int(mod.n)}
+
+
+def run_spatial_panel_py(df, roles: Roles, model: str = "lag"):
+    """面板空间回归：spreg Panel_FE_Lag / Panel_FE_Error。"""
+    import numpy as np
+    from libpysal.weights import KNN
+    from spreg import Panel_FE_Error, Panel_FE_Lag
+
+    cross = df.drop_duplicates(subset=[roles.id])
+    coords = cross[[roles.lon, roles.lat]].to_numpy(dtype=float)
+    w = KNN.from_array(coords, k=5)
+    w.transform = "r"
+    data = df.dropna(subset=[roles.y, roles.x, *roles.controls, roles.time]).sort_values([roles.id, roles.time])
+    y = data[roles.y].to_numpy(dtype=float).reshape(-1, 1)
+    x = data[[roles.x, *roles.controls]].to_numpy(dtype=float)
+    t = data[roles.time].to_numpy()
+    mod = Panel_FE_Lag(y, x, w=w, t=t) if model == "lag" else Panel_FE_Error(y, x, w=w, t=t)
+    return {"model": mod, "weights": w, "coef": np.asarray(mod.betas).ravel(), "n": int(mod.n)}
+
+
+def run_moran_py(df, roles: Roles):
+    """全局 Moran's I：libpysal + esda。"""
+    from esda.moran import Moran
+    from libpysal.weights import KNN
+
+    unit = "pid" if "pid" in df.columns else roles.id
+    cross = df.drop_duplicates(subset=[unit]).dropna(subset=[roles.y, roles.lat, roles.lon])
+    w = KNN.from_array(cross[[roles.lon, roles.lat]].to_numpy(dtype=float), k=5)
+    w.transform = "r"
+    mo = Moran(cross[roles.y].to_numpy(dtype=float), w)
+    return {"moran": mo, "weights": w, "I": float(mo.I), "p": float(mo.p_sim)}
 
 
 def run_interaction(df, roles: Roles):

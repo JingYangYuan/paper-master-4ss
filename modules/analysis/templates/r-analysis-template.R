@@ -15,6 +15,7 @@ templates <- c(
   "03-regression/05-mechanism-heterogeneity/mechanism_heterogeneity.R",
   "03-regression/06-robustness/robustness.R",
   "03-regression/07-regression-export/regression_export.R",
+  "03-regression/08-spatial/spatial_models.R",
   "04-qual/qual_analysis.R",
   "05-mixed/mixed_methods.R",
   "06-export/export_quality.R"

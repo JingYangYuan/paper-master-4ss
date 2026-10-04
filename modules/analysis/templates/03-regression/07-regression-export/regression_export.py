@@ -31,6 +31,9 @@ REQUIRED = [
     "tables/table3-mechanism-mediation-moderation.csv",
     "tables/table4-heterogeneity-threshold-nonlinear.csv",
     "tables/tableA1-causal-robustness.csv",
+    "tables/tableS1-spatial-weights.csv",
+    "tables/tableS2-spatial-cross-section.csv",
+    "tables/tableS3-spatial-panel.csv",
 ]
 
 
@@ -41,7 +44,7 @@ def main() -> int:
     missing = [x for x in REQUIRED if not (p["root"] / x).exists()]
     script_index = common.script_index(args.out_root, [
         "00-plan-dispatch", "01-main-models", "02-nonlinear", "03-panel",
-        "04-causal", "05-mechanism-heterogeneity", "06-robustness", "07-regression-export",
+        "04-causal", "05-mechanism-heterogeneity", "06-robustness", "08-spatial", "07-regression-export",
     ])
     fig_index = common.write_markdown(p["reports"] / "figure-index.md", "Figure Index", {"图形": "\n".join(str(x.relative_to(p["root"])) for x in p["figures"].glob("*")) or "未发现图形。"})
     missing_report = common.write_markdown(p["reports"] / "missing-regression-products.md", "Missing Regression Products", {"缺失产物": "\n".join(f"- {x}" for x in missing) or "无缺失产物。"})

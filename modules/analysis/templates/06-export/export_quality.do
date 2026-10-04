@@ -4,7 +4,7 @@ version 16
 clear all
 
 local project_root : env PROJECT_ROOT
-if "`project_root'" != "" cd "`project_root'"
+if "`project_root'" != "" & fileexists("`project_root'") cd "`project_root'"
 global OUT_ROOT "paper-workspace/04-analysis"
 
 capture mkdir "paper-workspace"
@@ -16,7 +16,7 @@ log using "${OUT_ROOT}/reports/export_quality.log", replace text
 
 file open fq using "${OUT_ROOT}/reports/analysis-quality-gates-`c(current_date)'.md", write replace
 file write fq "# Analysis Quality Gates" _n _n
-foreach f in "data/analysis-data.csv" "data/variable-dictionary.csv" "tables/sample-flow.csv" "tables/table1-descriptives.csv" "tables/table2-main-regression.csv" {
+foreach f in "data/analysis-data.csv" "data/variable-dictionary.csv" "tables/sample-flow.csv" "tables/table1-descriptives.csv" "tables/table2-main-regression.csv" "tables/tableS2-spatial-cross-section.csv" {
     capture confirm file "${OUT_ROOT}/`f'"
     if _rc file write fq "- 缺失：`f'" _n
     else file write fq "- 通过：`f'" _n

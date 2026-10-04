@@ -23,6 +23,7 @@ TEMPLATES = [
     "03-regression/05-mechanism-heterogeneity/mechanism_heterogeneity.py",
     "03-regression/06-robustness/robustness.py",
     "03-regression/07-regression-export/regression_export.py",
+    "03-regression/08-spatial/spatial_models.py",
     "04-qual/qual_analysis.py",
     "05-mixed/mixed_methods.py",
     "06-export/export_quality.py",

@@ -89,6 +89,36 @@ missing <- required[!vapply(required, requireNamespace, logical(1), quietly = TR
 if (length(missing) > 0) install.packages(missing)
 ```
 
+`03-regression` 模型扩展所需的包：
+
+```r
+expanded <- c(
+  "AER",              # ivreg / tobit
+  "censReg", "sampleSelection",  # 删失与样本选择
+  "plm", "fixest",    # 面板与高维固定效应
+  "did",              # Callaway-Sant'Anna
+  "MatchIt", "WeightIt", "cobalt",   # PSM / CEM / 熵平衡 / IPW
+  "Synth",            # 合成控制
+  "sensemakr", "robomit",            # 未观测混淆敏感性（Oster 等价）
+  "spdep", "spatialreg", "splm",     # 空间计量
+  "quantreg", "lmtest", "sandwich", "car",
+  "rdrobust",         # 断点回归
+  "marginaleffects",  # 统一 AME
+  "fwildclusterboot"  # wild cluster bootstrap
+)
+missing <- expanded[!vapply(expanded, requireNamespace, logical(1), quietly = TRUE)]
+if (length(missing) > 0) install.packages(missing)
+```
+
+**实测的构建前置与坑**（缺失会导致 `install.packages` 静默失败）：
+
+- `nloptr`（`lme4` → `car` → `sampleSelection` 的传递依赖）需要 **CMake**。若系统无 CMake，`nloptr` 报 `CMAKE NOT FOUND`；macOS 可用 `pip install cmake` 后把 `cmake` 放进 `PATH`。
+- `units`（`sf` → `s2`/`spdep` 的传递依赖）需要 **libudunits2**。若 `brew` 瓶下载失败，可从源码构建 UDUNITS-2 并 `install_name_tool -id` 修正 install name。
+- `sf`/`s2` 需要 **pkg-config** 与 CMake 才能编译内置 Abseil。
+- 空间权重**不需要** `sf`：R 模板用 `spdep::knearneigh`/`knearneigh`/`dnearneigh` 从坐标直接构造 `nb`/`listw`；但 `spdep` 自身 `Depends: sf`，故 `sf` 仍需装成功。
+- `fwildclusterboot` 在 CRAN 上可能无当前 R 版本对应的二进制/源码版本；从 GitHub release（`s3alfisc/fwildclusterboot`）或 CRAN Archive 安装，并先装其依赖 `summclust`。
+- 本环境 R 为源码构建（无 CRAN 二进制仓库），所有包都从源码编译，安装耗时长且对网络超时敏感；建议 `options(timeout = 1800)` 并在失败时逐包重试。
+
 空间与交互图按需安装：
 
 ```r

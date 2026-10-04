@@ -6,7 +6,7 @@ clear all
 set more off
 
 local project_root : env PROJECT_ROOT
-if "`project_root'" != "" cd "`project_root'"
+if "`project_root'" != "" & fileexists("`project_root'") cd "`project_root'"
 global OUT_ROOT "paper-workspace/04-analysis"
 global DATA "${OUT_ROOT}/data/analysis-data.dta"
 global Y "outcome"
@@ -116,5 +116,62 @@ esttab het_g0 het_g1 het_risk0 het_risk1 het_belt1 het_belt2 het_belt3 het_coast
     using "${OUT_ROOT}/tables/table4-heterogeneity-threshold-nonlinear.csv", ///
     b(3) t(3) star(* 0.05 ** 0.01 *** 0.001) label nogaps compress substitute("=" "") ///
     stats(N r2 r2_within, fmt(0 3 3) labels("观测值" "R²" "Within R²")) replace
+
+di "--> 表3s：中介效应稳健性（Imai 因果中介、KHB 分解、参数化中介）"
+* medeff 的方程顺序必须是中介变量方程在前，否则报 Mediate variable not the dependent variable in equation 1。
+medeff (regress $MECH1 $X $C) (regress $Y $MECH1 $X $C), mediate($MECH1) treat($X) sims(1000)
+khb regress $Y $X || $MECH1
+qui paramed $Y, avar($X) mvar($MECH1) a0(0) a1(1) m(0) yreg(linear) mreg(linear) bootstrap reps(200)
+
+file open f3s using "${OUT_ROOT}/tables/table3s-mediation-robustness.csv", write replace
+file write f3s "方法,内容" _n
+file write f3s "Imai 因果中介分析 (medeff),见日志：ACME/ACME(平均直接效应)/总效应的点估计与 95% 区间（sims=1000）" _n
+file write f3s "KHB 分解 (khb),见日志：总效应/直接效应/间接效应及其占比" _n
+file write f3s "参数化中介 (paramed),见日志：自然直接效应/自然间接效应（bootstrap 200 次）" _n
+file write f3s "注,主识别为江艇（2022）两步法（table3-mechanism-mediation-moderation.csv 的 mech_* 列）；本表为补充证据" _n
+file close f3s
+
+di "--> 表4b：组间系数差异检验"
+estimates clear
+qui reghdfe $Y $X $C if $GROUP == 0, absorb($ABSORB) vce(cluster $CLUSTER)
+est store gd_g0
+qui reghdfe $Y $X $C if $GROUP == 1, absorb($ABSORB) vce(cluster $CLUSTER)
+est store gd_g1
+* 交互项检验是无需外部包的主口径
+gen byte _g1 = ($GROUP == 1)
+gen double _xg = $X * _g1
+qui reghdfe $Y $X _g1 _xg $C, absorb($ABSORB) vce(cluster $CLUSTER)
+est store gd_interact
+test _xg = 0
+local gd_p = r(p)
+* bdiff 的选项名以 help bdiff 为准（model() 内写完整回归命令）
+bdiff, group($GROUP) model(reghdfe $Y $X $C, absorb($ABSORB) vce(cluster $CLUSTER))
+
+esttab gd_g0 gd_g1 gd_interact using "${OUT_ROOT}/tables/table4b-group-difference.csv", ///
+    b(3) t(3) star(* 0.05 ** 0.01 *** 0.001) label nogaps compress substitute("=" "") ///
+    stats(N r2 r2_within, fmt(0 3 3) labels("观测值" "R²" "Within R²")) ///
+    addnotes("注：前两列为分组回归；第 3 列为全样本交互项模型，_xg 的检验 p = `gd_p'（交互项为零即组间无差异）。bdiff 的 Fisher 置换检验结果见日志。") ///
+    replace
+
+di "--> 表4c：门槛回归（候选门槛值网格搜索）"
+* xthreg/threshold 不在本机 SSC 可装范围，故用 reghdfe 在候选门槛上做分组估计（无外部依赖）。
+preserve
+keep if !missing($RISKVAR)
+estimates clear
+foreach p in 20 40 60 80 {
+    qui _pctile $RISKVAR, p(`p')
+    local thr = r(r1)
+    qui reghdfe $Y $X $C if $RISKVAR <= `thr', absorb($ABSORB) vce(cluster $CLUSTER)
+    est store thr`p'_low
+    qui reghdfe $Y $X $C if $RISKVAR > `thr', absorb($ABSORB) vce(cluster $CLUSTER)
+    est store thr`p'_high
+}
+esttab thr20_low thr20_high thr40_low thr40_high thr60_low thr60_high thr80_low thr80_high ///
+    using "${OUT_ROOT}/tables/table4c-threshold-grid.csv", ///
+    b(3) t(3) star(* 0.05 ** 0.01 *** 0.001) label nogaps compress substitute("=" "") ///
+    stats(N r2 r2_within, fmt(0 3 3) labels("观测值" "R²" "Within R²")) ///
+    addnotes("注：门槛候选为 $RISKVAR 的 20/40/60/80 分位点；每对列为该门槛下的低组与高组回归。门槛值本身见日志 _pctile 输出；改写者按项目改为专有候选门槛列表。") ///
+    replace
+restore
 
 capture log close _all

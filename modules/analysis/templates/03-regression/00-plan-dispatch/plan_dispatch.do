@@ -22,6 +22,7 @@ file write fd "panel,blocked,FE RE Hausman id time 面板,缺少 id/time 时不�
 file write fd "causal,blocked,IV DID RDD PSM CEM IPW SCM,仅按计划触发" _n
 file write fd "mechanism_heterogeneity,blocked,中介 机制 调节 异质性 门槛 交互 分组,仅按变量角色触发" _n
 file write fd "robustness,blocked,稳健性 安慰剂 敏感性,只执行 dispatch 明确任务" _n
+file write fd "spatial,blocked,spatial 空间 Moran 邻接 反距离 SDM SAR,仅按变量角色触发" _n
 file close fd
 
 capture log close _all

@@ -32,6 +32,7 @@ def main() -> int:
         p["tables"] / "sample-flow.csv",
         p["tables"] / "table1-descriptives.csv",
         p["tables"] / "table2-main-regression.csv",
+        p["tables"] / "tableS2-spatial-cross-section.csv",
         common.run_log_path(args),
     ]
     missing = [str(x) for x in required if not x.exists()]

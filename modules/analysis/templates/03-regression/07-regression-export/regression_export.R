@@ -8,8 +8,8 @@ find_shared <- function() {
 }
 source(find_shared())
 args <- parse_common_args(); ensure_dirs(args$out_root)
-required <- c("data/analysis-data.csv", "data/variable-dictionary.csv", "tables/sample-flow.csv", "tables/table1-descriptives.csv", "tables/table2-main-regression.csv", "tables/table3-nonlinear-marginal-effects.csv", "tables/table3-mechanism-mediation-moderation.csv", "tables/table4-heterogeneity-threshold-nonlinear.csv", "tables/tableA1-causal-robustness.csv")
+required <- c("data/analysis-data.csv", "data/variable-dictionary.csv", "tables/sample-flow.csv", "tables/table1-descriptives.csv", "tables/table2-main-regression.csv", "tables/table3-nonlinear-marginal-effects.csv", "tables/table3-mechanism-mediation-moderation.csv", "tables/table4-heterogeneity-threshold-nonlinear.csv", "tables/tableA1-causal-robustness.csv", "tables/tableS1-spatial-weights.csv", "tables/tableS2-spatial-cross-section.csv", "tables/tableS3-spatial-panel.csv")
 missing <- required[!file.exists(file.path(args$out_root, required))]
-script_index <- write_md(file.path(args$out_root, "reports", "script-index.md"), "Script Index", c("子流程" = "00-plan-dispatch -> 01-main-models -> 02-nonlinear -> 03-panel -> 04-causal -> 05-mechanism-heterogeneity -> 06-robustness -> 07-regression-export"))
+script_index <- write_md(file.path(args$out_root, "reports", "script-index.md"), "Script Index", c("子流程" = "00-plan-dispatch -> 01-main-models -> 02-nonlinear -> 03-panel -> 04-causal -> 05-mechanism-heterogeneity -> 06-robustness -> 08-spatial -> 07-regression-export"))
 missing_report <- write_md(file.path(args$out_root, "reports", "missing-regression-products.md"), "Missing Regression Products", c("缺失产物" = ifelse(length(missing), paste(missing, collapse = "\n"), "无缺失产物。")))
 results <- write_md(file.path(args$out_root, "reports", paste0("regression-results-", Sys.Date(), ".md")), "Regression Results", c("可声称内容" = "只声称 run-log 记录且产物存在的模型结果。", "缺失或阻断" = ifelse(length(missing), paste(missing, collapse = "\n"), "无缺失产物。")))

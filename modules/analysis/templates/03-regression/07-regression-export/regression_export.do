@@ -5,7 +5,7 @@ version 16
 clear all
 
 local project_root : env PROJECT_ROOT
-if "`project_root'" != "" cd "`project_root'"
+if "`project_root'" != "" & fileexists("`project_root'") cd "`project_root'"
 global OUT_ROOT "paper-workspace/04-analysis"
 global RESULTS "${OUT_ROOT}/reports/regression-results-`c(current_date)'.md"
 
@@ -28,11 +28,12 @@ file write fs "| 5 | 04-causal |" _n
 file write fs "| 6 | 05-mechanism-heterogeneity |" _n
 file write fs "| 7 | 06-robustness |" _n
 file write fs "| 8 | 07-regression-export |" _n
+file write fs "| 9 | 08-spatial |" _n
 file close fs
 
 file open fm using "${OUT_ROOT}/reports/missing-regression-products.md", write replace
 file write fm "# Missing Regression Products" _n _n
-foreach f in "data/analysis-data.csv" "data/variable-dictionary.csv" "tables/sample-flow.csv" "tables/table1-descriptives.csv" "tables/table2-main-regression.csv" "tables/table3-nonlinear-marginal-effects.csv" "tables/table3-mechanism-mediation-moderation.csv" "tables/table4-heterogeneity-threshold-nonlinear.csv" "tables/tableA1-causal-robustness.csv" {
+foreach f in "data/analysis-data.csv" "data/variable-dictionary.csv" "tables/sample-flow.csv" "tables/table1-descriptives.csv" "tables/table2-main-regression.csv" "tables/table3-nonlinear-marginal-effects.csv" "tables/table3-mechanism-mediation-moderation.csv" "tables/table4-heterogeneity-threshold-nonlinear.csv" "tables/tableA1-causal-robustness.csv" "tables/tableS1-spatial-weights.csv" "tables/tableS2-spatial-cross-section.csv" "tables/tableS3-spatial-panel.csv" {
     capture confirm file "${OUT_ROOT}/`f'"
     if _rc file write fm "- `f'" _n
 }

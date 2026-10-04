@@ -67,6 +67,35 @@ pip install scikit-learn                                       # ML + 倾向得�
 pip install jupyterlab                                         # 交互探索（可选）
 ```
 
+`03-regression` 模型扩展所需的包：
+
+```bash
+pip install pandas numpy scipy statsmodels linearmodels pyfixest differences \\
+  rdrobust pysyncon spreg pydynpd lifelines scikit-learn wildboottest
+```
+
+依赖说明：
+
+- `pyfixest`：R `fixest` 的 Python 端口，提供 `feols`/`feglm` 与 `sunab` 事件研究。
+- `differences`：Callaway-Sant'Anna 的 `att_gt`。
+- `pysyncon`：合成控制。
+- `spreg` + `libpysal`：截面与面板空间回归（**不依赖 geopandas/sf**，权重由坐标直接构造）。
+- `pydynpd`：动态面板 GMM。
+- `lifelines`：持续时间/生存模型。
+- `wildboottest`：wild cluster bootstrap。
+- `rdrobust`：断点回归（Python 官方端口）。
+
+**Python 不实现的方法（必须使用 Stata 或 R 模板，不得用近似模型冒充）**：
+
+| 方法 | 原因 |
+|---|---|
+| Tobit / 删失回归 | PyPI 与 `statsmodels` 均无维护实现 |
+| Heckman / 样本选择模型 | 同上 |
+| 面板选择模型（Hausman、Breusch-Pagan LM） | `linearmodels` 不提供面板设定选择检验 |
+| Oster `psacalc` 未观测混淆敏感性 | PyPI 无 `sensemakr` 等价包 |
+
+多重检验校正用 `statsmodels.stats.multitest`（Holm/BH），**不**等价于 Stata 的 `rwolf`/`wyoung`（Romano-Wolf / Westfall-Young），表注必须写明所用方法。
+
 ---
 
 ## 4. 验收命令

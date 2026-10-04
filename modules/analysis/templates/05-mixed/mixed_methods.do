@@ -4,7 +4,7 @@ version 16
 clear all
 
 local project_root : env PROJECT_ROOT
-if "`project_root'" != "" cd "`project_root'"
+if "`project_root'" != "" & fileexists("`project_root'") cd "`project_root'"
 global OUT_ROOT "paper-workspace/04-analysis"
 
 capture mkdir "paper-workspace"

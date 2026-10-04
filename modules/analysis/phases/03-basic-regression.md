@@ -121,6 +121,7 @@ flowchart TD
 - `paper-workspace/04-analysis/scripts/04-causal/`
 - `paper-workspace/04-analysis/scripts/05-mechanism-heterogeneity/`
 - `paper-workspace/04-analysis/scripts/06-robustness/`
+- `paper-workspace/04-analysis/scripts/08-spatial/`
 - `paper-workspace/04-analysis/scripts/07-regression-export/`
 
 执行顺序固定为：
@@ -132,7 +133,10 @@ flowchart TD
 5. `04-causal` 按计划触发 IV/2SLS/GMM、DID/事件研究、多期 DID、RDD、PSM/CEM/IPW 和 SCM。
 6. `05-mechanism-heterogeneity` 执行中介、机制、调节、异质性、门槛、非线性、交互和分组检验；不得并入稳健性。
 7. `06-robustness` 只执行 dispatch 中明确列出的替代变量、替代样本、替代模型、标准误/聚类、安慰剂和敏感性任务。
-8. `07-regression-export` 汇总表格、图形、`script-index.md`、缺失产物报告和 `regression-results-[date].md`；不重新估计模型。
+8. `08-spatial` 在变量角色含 `spatial/空间/Moran/邻接/反距离` 时执行空间权重矩阵、全局 Moran's I、截面 SAR/SDM 与面板空间回归，并输出直接/间接/总效应分解。
+9. `07-regression-export` 汇总表格、图形、`script-index.md`、缺失产物报告和 `regression-results-[date].md`；不重新估计模型。
+
+`08-spatial` 目录编号为 08，但运行顺序在 `07-regression-export` 之前（导出脚本汇总含空间表在内的全部产物）。
 
 Stata 生产交付默认采用双总代码体系（`01_clean_and_prepare_master.do` 清洗与前置表 + `02_empirical_analysis_master.do` 全套回归与导出，见 `SKILL.md` §4.2），不得落盘为无分段的单一长脚本；子流程模板与派发表仍作为模块化构建与拆分依据，复杂并行项目可按子流程目录拆分执行。子流程脚本直接报错而不静默跳过；失败原因、退出码与 stdout/stderr 路径由 agent 写入 `run-log-[date].md`，缺失产物写入 `regression-dispatch.csv` 或缺失产物报告。
 
@@ -188,6 +192,7 @@ python3 "paper-workspace/04-analysis/scripts/01-main-models/main_models.py"
 - `scripts/04-causal/*`
 - `scripts/05-mechanism-heterogeneity/*`
 - `scripts/06-robustness/*`
+- `scripts/08-spatial/*`
 - `scripts/07-regression-export/*`
 - `tables/table1-descriptives.csv`
 - `tables/table2-main-regression.csv`
@@ -197,6 +202,9 @@ python3 "paper-workspace/04-analysis/scripts/01-main-models/main_models.py"
 - `tables/tableA-panel-models.csv`
 - `tables/tableA-robustness.csv`
 - `tables/tableA1-causal-robustness.csv`
+- `tables/tableS1-spatial-weights.csv`
+- `tables/tableS2-spatial-cross-section.csv`
+- `tables/tableS3-spatial-panel.csv`
 - `figures/coefplot-main.*`
 - `figures/marginal-effects.*`
 - `figures/event-study.*`
