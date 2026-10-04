@@ -1,0 +1,163 @@
+ACLEDpopGDP             ACLED countries and codes with population and
+                        GDP
+Accident                Ship Accidents
+AccountantsAuditorsPct
+                        Accountants and Auditors in the US 1850-2016
+Airline                 Cost for U.S. Airlines
+Airq                    Air Quality for Californian Metropolitan Areas
+Benefits                Unemployment of Blue Collar Workers
+Bids                    Bids Received By U.S. Firms
+BudgetFood              Budget Share of Food for Spanish Households
+BudgetItaly             Budget Shares for Italian Households
+BudgetUK                Budget Shares of British Households
+Bwages                  Wages in Belgium
+CPSch3                  Earnings from the Current Population Survey
+CRANpackages            Growth of CRAN
+CRSPday                 Daily Returns from the CRSP Database
+CRSPmon                 Monthly Returns from the CRSP Database
+Capm                    Stock Market Data
+Car                     Stated Preferences for Car Choice
+Caschool                The California Test Score Data Set
+Catsup                  Choice of Brand for Catsup
+Cigar                   Cigarette Consumption
+Cigarette               The Cigarette Consumption Panel Data Set
+Clothing                Sales Data of Men's Fashion Stores
+Computers               Prices of Personal Computers
+Consumption             Quarterly Data on Consumption and Expenditure
+Cracker                 Choice of Brand for Crackers
+Crime                   Crime in North Carolina
+DM                      DM Dollar Exchange Rate
+Diamond                 Pricing the C's of Diamond Stones
+Doctor                  Number of Doctor Visits
+DoctorAUS               Doctor Visits in Australia
+DoctorContacts          Contacts With Medical Doctor
+Earnings                Earnings for Three Age Groups
+Electricity             Cost Function for Electricity Producers
+Fair                    Extramarital Affairs Data
+Fatality                Drunk Driving Laws and Traffic Deaths
+FinancialCrisisFiles    Files containing financial crisis data
+Fishing                 Choice of Fishing Mode
+Forward                 Exchange Rates of US Dollar Against Other
+                        Currencies
+FriendFoe               Data from the Television Game Show Friend Or
+                        Foe ?
+Garch                   Daily Observations on Exchange Rates of the US
+                        Dollar Against Other Currencies
+Gasoline                Gasoline Consumption
+Griliches               Wage Data
+Grunfeld                Grunfeld Investment Data
+HC                      Heating and Cooling System Choice in Newly
+                        Built Houses in California
+HHSCyberSecurityBreaches
+                        Cybersecurity breaches reported to the US
+                        Department of Health and Human Services
+HI                      Health Insurance and Hours Worked By Wives
+Heating                 Heating System Choice in California Houses
+Hedonic                 Hedonic Prices of Census Tracts in Boston
+Hmda                    The Boston HMDA Data Set
+Housing                 Sales Prices of Houses in the City of Windsor
+Hstarts                 Housing Starts
+Icecream                Ice Cream Consumption
+IncomeUK                Seasonally Unadjusted Quarterly Data on
+                        Disposable Income and Expenditure
+Index.Econometrics      Econometric fields
+Index.Economics         Economic fields
+Index.Observations      Observations
+Index.Source            Source
+Index.Time.Series       Time Series
+Irates                  Monthly Interest Rates
+Journals                Economic Journals Data Set
+Kakadu                  Willingness to Pay for the Preservation of the
+                        Kakadu National Park
+Ketchup                 Choice of Brand for Ketchup
+Klein                   Klein's Model I
+LT                      Dollar Sterling Exchange Rate
+LaborSupply             Wages and Hours Worked
+Labour                  Belgian Firms
+Longley                 The Longley Data
+MCAS                    The Massachusetts Test Score Data Set
+MW                      Growth of Disposable Income and Treasury Bill
+                        Rate
+Macrodat                Macroeconomic Time Series for the United States
+Males                   Wages and Education of Young Males
+ManufCost               Manufacturing Costs
+Mathlevel               Level of Calculus Attained for Students Taking
+                        Advanced Micro-economics
+MedExp                  Structure of Demand for Medical Care
+Metal                   Production for SIC 33
+Mishkin                 Inflation and Interest Rates
+Mode                    Mode Choice
+ModeChoice              Data to Study Travel Mode Choice
+Mofa                    International Expansion of U.S. MOFAs
+                        (majority-owned Foreign Affiliates in Fire
+                        (finance, Insurance and Real Estate)
+Money                   Money, GDP and Interest Rate in Canada
+MoneyUS                 Macroeconomic Series for the United States
+Mpyr                    Money, National Product and Interest Rate
+Mroz                    Labor Supply Data
+MunExp                  Municipal Expenditure Data
+NaturalPark             Willingness to Pay for the Preservation of the
+                        Alentejo Natural Park
+Nerlove                 Cost Function for Electricity Producers, 1955
+OCC1950                 Evolution of occupational distribution in the
+                        US
+OFP                     Visits to Physician Office
+Oil                     Oil Investment
+Orange                  The Orange Juice Data Set
+PE                      Price and Earnings Index
+PPP                     Exchange Rates and Price Indices for France and
+                        Italy
+PSID                    Panel Survey of Income Dynamics
+Participation           Labor Force Participation
+PatentsHGH              Dynamic Relation Between Patents and R&D
+PatentsRD               Patents, R&D and Technological Spillovers for a
+                        Panel of Firms
+Pound                   Pound-dollar Exchange Rate
+Pricing                 Returns of Size-based Portfolios
+Produc                  Us States Production
+RetSchool               Return to Schooling
+SP500                   Returns on Standard & Poor's 500 Index
+Schooling               Wages and Schooling
+Solow                   Solow's Technological Change Data
+Somerville              Visits to Lake Somerville
+Star                    Effects on Learning of Small Class Sizes
+Strike                  Strike Duration Data
+StrikeDur               Strikes Duration
+StrikeNb                Number of Strikes in Us Manufacturing
+SumHes                  The Penn Table
+Tbrate                  Interest Rate, GDP and Inflation
+Tobacco                 Households Tobacco Budget Share
+Train                   Stated Preferences for Train Traveling
+TranspEq                Statewide Data on Transportation Equipment
+                        Manufacturing
+Treatment               Evaluating Treatment Effect of Training on
+                        Earnings
+Tuna                    Choice of Brand for Tuna
+USFinanceIndustry       US Finance Industry Profits
+USGDPpresidents         US GDP per capita with presidents and wars
+USPS                    US Postal Service
+USclassifiedDocuments   Official Secrecy of the United States
+                        Government
+USincarcerations        US incarcerations 1925 onward
+USnewspapers            US newspaper revenue 1956 - 2020
+USstateAbbreviations    Standard abbreviations for states of the United
+                        States
+UStaxWords              Number of Words in US Tax Law
+UnempDur                Unemployment Duration
+Unemployment            Unemployment Duration
+University              Provision of University Teaching and Research
+VietNamH                Medical Expenses in Vietnam (household Level)
+VietNamI                Medical Expenses in Vietnam (individual Level)
+Wages                   Panel Data of Individual Wages
+Wages1                  Wages, Experience and Schooling
+Workinghours            Wife Working Hours
+Yen                     Yen-dollar Exchange Rate
+Yogurt                  Choice of Brand for Yogurts
+bankingCrises           Countries in Banking Crises
+breaches                Cyber Security Breaches
+coolingFromNuclearWar   Global cooling from a nuclear war
+incomeInequality        Income Inequality in the US
+nonEnglishNames         Names with Character Set Problems
+nuclearWeaponStates     Nations with nuclear weapons
+politicalKnowledge      Political knowledge in the US and Europe
+terrorism               Global Terrorism Database yearly summaries

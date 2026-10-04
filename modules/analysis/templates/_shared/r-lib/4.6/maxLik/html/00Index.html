@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head><title>R: Maximum Likelihood Estimation and Related Tools</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<link rel="stylesheet" type="text/css" href="R.css">
+</head><body><div class="container">
+<h1> Maximum Likelihood Estimation and Related Tools
+<img class="toplogo" src="../../../doc/html/Rlogo.svg" alt="[R logo]">
+</h1>
+<hr>
+<div style="text-align: center;">
+<a href="../../../doc/html/packages.html"><img class="arrow" src="../../../doc/html/left.jpg" alt="[Up]"></a>
+<a href="../../../doc/html/index.html"><img class="arrow" src="../../../doc/html/up.jpg" alt="[Top]"></a>
+</div><h2>Documentation for package &lsquo;maxLik&rsquo; version 1.6-10</h2>
+
+<ul><li><a href="../DESCRIPTION" type="text/plain">DESCRIPTION file</a></li>
+<li><a href="../doc/index.html">User guides, package vignettes and other documentation</a></li>
+<li><a href="../NEWS">Package NEWS</a></li>
+</ul>
+
+<h2>Help Pages</h2>
+
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="maxLik-package.html">maxLik-package</a></td>
+<td>Maximum Likelihood Estimation</td></tr>
+<tr><td style="width: 25%;"><a href="activePar.html">activePar</a></td>
+<td>free parameters under maximization</td></tr>
+<tr><td style="width: 25%;"><a href="activePar.html">activePar.default</a></td>
+<td>free parameters under maximization</td></tr>
+<tr><td style="width: 25%;"><a href="maxLik-methods.html">AIC.maxLik</a></td>
+<td>Methods for the various standard functions</td></tr>
+<tr><td style="width: 25%;"><a href="bread.maxLik.html">bread</a></td>
+<td>Bread for Sandwich Estimator</td></tr>
+<tr><td style="width: 25%;"><a href="bread.maxLik.html">bread.maxLik</a></td>
+<td>Bread for Sandwich Estimator</td></tr>
+<tr><td style="width: 25%;"><a href="maxLik-methods.html">coef.maxim</a></td>
+<td>Methods for the various standard functions</td></tr>
+<tr><td style="width: 25%;"><a href="maxLik-methods.html">coef.maxLik</a></td>
+<td>Methods for the various standard functions</td></tr>
+<tr><td style="width: 25%;"><a href="summary.maxLik.html">coef.summary.maxLik</a></td>
+<td>summary the Maximum-Likelihood estimation</td></tr>
+<tr><td style="width: 25%;"><a href="compareDerivatives.html">compareDerivatives</a></td>
+<td>function to compare analytic and numeric derivatives</td></tr>
+<tr><td style="width: 25%;"><a href="condiNumber.html">condiNumber</a></td>
+<td>Print matrix condition numbers column-by-column</td></tr>
+<tr><td style="width: 25%;"><a href="condiNumber.html">condiNumber.default</a></td>
+<td>Print matrix condition numbers column-by-column</td></tr>
+<tr><td style="width: 25%;"><a href="condiNumber.html">condiNumber.maxLik</a></td>
+<td>Print matrix condition numbers column-by-column</td></tr>
+<tr><td style="width: 25%;"><a href="confint.maxLik.html">confint</a></td>
+<td>confint method for maxLik objects</td></tr>
+<tr><td style="width: 25%;"><a href="confint.maxLik.html">confint.maxLik</a></td>
+<td>confint method for maxLik objects</td></tr>
+<tr><td style="width: 25%;"><a href="gradient.html">estfun</a></td>
+<td>Extract Gradients Evaluated at each Observation</td></tr>
+<tr><td style="width: 25%;"><a href="gradient.html">estfun.maxLik</a></td>
+<td>Extract Gradients Evaluated at each Observation</td></tr>
+<tr><td style="width: 25%;"><a href="fnSubset.html">fnSubset</a></td>
+<td>Call fnFull with variable and fixed parameters</td></tr>
+<tr><td style="width: 25%;"><a href="tidy.maxLik.html">glance.maxim</a></td>
+<td>tidy and glance methods for maxLik objects</td></tr>
+<tr><td style="width: 25%;"><a href="tidy.maxLik.html">glance.maxLik</a></td>
+<td>tidy and glance methods for maxLik objects</td></tr>
+<tr><td style="width: 25%;"><a href="gradient.html">gradient</a></td>
+<td>Extract Gradients Evaluated at each Observation</td></tr>
+<tr><td style="width: 25%;"><a href="gradient.html">gradient.maxim</a></td>
+<td>Extract Gradients Evaluated at each Observation</td></tr>
+<tr><td style="width: 25%;"><a href="hessian.html">hessian</a></td>
+<td>Hessian matrix</td></tr>
+<tr><td style="width: 25%;"><a href="hessian.html">hessian.default</a></td>
+<td>Hessian matrix</td></tr>
+<tr><td style="width: 25%;"><a href="logLik.maxLik.html">logLik.maxLik</a></td>
+<td>Return the log likelihood value</td></tr>
+<tr><td style="width: 25%;"><a href="logLik.maxLik.html">logLik.summary.maxLik</a></td>
+<td>Return the log likelihood value</td></tr>
+<tr><td style="width: 25%;"><a href="maxSGA.html">maxAdam</a></td>
+<td>Stochastic Gradient Ascent</td></tr>
+<tr><td style="width: 25%;"><a href="maxBFGS.html">maxBFGS</a></td>
+<td>BFGS, conjugate gradient, SANN and Nelder-Mead Maximization</td></tr>
+<tr><td style="width: 25%;"><a href="maxNR.html">maxBFGSR</a></td>
+<td>Newton- and Quasi-Newton Maximization</td></tr>
+<tr><td style="width: 25%;"><a href="maxNR.html">maxBHHH</a></td>
+<td>Newton- and Quasi-Newton Maximization</td></tr>
+<tr><td style="width: 25%;"><a href="maxBFGS.html">maxCG</a></td>
+<td>BFGS, conjugate gradient, SANN and Nelder-Mead Maximization</td></tr>
+<tr><td style="width: 25%;"><a href="maxControl.html">maxControl</a></td>
+<td>Class '"MaxControl"'</td></tr>
+<tr><td style="width: 25%;"><a href="maxControl.html">MaxControl-class</a></td>
+<td>Class '"MaxControl"'</td></tr>
+<tr><td style="width: 25%;"><a href="maxControl.html">maxControl-method</a></td>
+<td>Class '"MaxControl"'</td></tr>
+<tr><td style="width: 25%;"><a href="maximType.html">maximType</a></td>
+<td>Type of Minimization/Maximization</td></tr>
+<tr><td style="width: 25%;"><a href="maximType.html">maximType.default</a></td>
+<td>Type of Minimization/Maximization</td></tr>
+<tr><td style="width: 25%;"><a href="maximType.html">maximType.maxim</a></td>
+<td>Type of Minimization/Maximization</td></tr>
+<tr><td style="width: 25%;"><a href="maximType.html">maximType.MLEstimate</a></td>
+<td>Type of Minimization/Maximization</td></tr>
+<tr><td style="width: 25%;"><a href="maxLik.html">maxLik</a></td>
+<td>Maximum likelihood estimation</td></tr>
+<tr><td style="width: 25%;"><a href="maxBFGS.html">maxNM</a></td>
+<td>BFGS, conjugate gradient, SANN and Nelder-Mead Maximization</td></tr>
+<tr><td style="width: 25%;"><a href="maxNR.html">maxNR</a></td>
+<td>Newton- and Quasi-Newton Maximization</td></tr>
+<tr><td style="width: 25%;"><a href="maxBFGS.html">maxSANN</a></td>
+<td>BFGS, conjugate gradient, SANN and Nelder-Mead Maximization</td></tr>
+<tr><td style="width: 25%;"><a href="maxSGA.html">maxSGA</a></td>
+<td>Stochastic Gradient Ascent</td></tr>
+<tr><td style="width: 25%;"><a href="maxValue.html">maxValue</a></td>
+<td>Function value at maximum</td></tr>
+<tr><td style="width: 25%;"><a href="maxValue.html">maxValue.maxim</a></td>
+<td>Function value at maximum</td></tr>
+<tr><td style="width: 25%;"><a href="nIter.html">nIter</a></td>
+<td>Return number of iterations for iterative models</td></tr>
+<tr><td style="width: 25%;"><a href="nIter.html">nIter.default</a></td>
+<td>Return number of iterations for iterative models</td></tr>
+<tr><td style="width: 25%;"><a href="nobs.html">nobs-method</a></td>
+<td>Number of Observations</td></tr>
+<tr><td style="width: 25%;"><a href="nobs.html">nObs.maxLik</a></td>
+<td>Number of Observations</td></tr>
+<tr><td style="width: 25%;"><a href="nParam.html">nParam.maxim</a></td>
+<td>Number of model parameters</td></tr>
+<tr><td style="width: 25%;"><a href="numericGradient.html">numericGradient</a></td>
+<td>Functions to Calculate Numeric Derivatives</td></tr>
+<tr><td style="width: 25%;"><a href="numericGradient.html">numericHessian</a></td>
+<td>Functions to Calculate Numeric Derivatives</td></tr>
+<tr><td style="width: 25%;"><a href="numericGradient.html">numericNHessian</a></td>
+<td>Functions to Calculate Numeric Derivatives</td></tr>
+<tr><td style="width: 25%;"><a href="objectiveFn.html">objectiveFn</a></td>
+<td>Optimization Objective Function</td></tr>
+<tr><td style="width: 25%;"><a href="objectiveFn.html">objectiveFn.maxim</a></td>
+<td>Optimization Objective Function</td></tr>
+<tr><td style="width: 25%;"><a href="summary.maxim.html">print.maxim</a></td>
+<td>Summary method for maximization</td></tr>
+<tr><td style="width: 25%;"><a href="maxLik.html">print.maxLik</a></td>
+<td>Maximum likelihood estimation</td></tr>
+<tr><td style="width: 25%;"><a href="summary.maxim.html">print.summary.maxim</a></td>
+<td>Summary method for maximization</td></tr>
+<tr><td style="width: 25%;"><a href="returnCode.html">returnCode</a></td>
+<td>Success or failure of the optimization</td></tr>
+<tr><td style="width: 25%;"><a href="returnCode.html">returnCode.default</a></td>
+<td>Success or failure of the optimization</td></tr>
+<tr><td style="width: 25%;"><a href="returnCode.html">returnCode.maxLik</a></td>
+<td>Success or failure of the optimization</td></tr>
+<tr><td style="width: 25%;"><a href="returnCode.html">returnMessage</a></td>
+<td>Success or failure of the optimization</td></tr>
+<tr><td style="width: 25%;"><a href="returnCode.html">returnMessage.default</a></td>
+<td>Success or failure of the optimization</td></tr>
+<tr><td style="width: 25%;"><a href="returnCode.html">returnMessage.maxim</a></td>
+<td>Success or failure of the optimization</td></tr>
+<tr><td style="width: 25%;"><a href="returnCode.html">returnMessage.maxLik</a></td>
+<td>Success or failure of the optimization</td></tr>
+<tr><td style="width: 25%;"><a href="maxControl.html">show-method</a></td>
+<td>Class '"MaxControl"'</td></tr>
+<tr><td style="width: 25%;"><a href="maxLik.html">show-method</a></td>
+<td>Maximum likelihood estimation</td></tr>
+<tr><td style="width: 25%;"><a href="summary.maxim.html">show-method</a></td>
+<td>Summary method for maximization</td></tr>
+<tr><td style="width: 25%;"><a href="maxLik-methods.html">stdEr.maxLik</a></td>
+<td>Methods for the various standard functions</td></tr>
+<tr><td style="width: 25%;"><a href="storedValues.html">storedParameters</a></td>
+<td>Return the stored values of optimization</td></tr>
+<tr><td style="width: 25%;"><a href="storedValues.html">storedParameters.maxim</a></td>
+<td>Return the stored values of optimization</td></tr>
+<tr><td style="width: 25%;"><a href="storedValues.html">storedValues</a></td>
+<td>Return the stored values of optimization</td></tr>
+<tr><td style="width: 25%;"><a href="storedValues.html">storedValues.maxim</a></td>
+<td>Return the stored values of optimization</td></tr>
+<tr><td style="width: 25%;"><a href="summary.maxim.html">summary.maxim</a></td>
+<td>Summary method for maximization</td></tr>
+<tr><td style="width: 25%;"><a href="summary.maxLik.html">summary.maxLik</a></td>
+<td>summary the Maximum-Likelihood estimation</td></tr>
+<tr><td style="width: 25%;"><a href="sumt.html">sumt</a></td>
+<td>Equality-constrained optimization</td></tr>
+<tr><td style="width: 25%;"><a href="tidy.maxLik.html">tidy.maxim</a></td>
+<td>tidy and glance methods for maxLik objects</td></tr>
+<tr><td style="width: 25%;"><a href="tidy.maxLik.html">tidy.maxLik</a></td>
+<td>tidy and glance methods for maxLik objects</td></tr>
+<tr><td style="width: 25%;"><a href="vcov.maxLik.html">vcov.maxLik</a></td>
+<td>Variance Covariance Matrix of maxLik objects</td></tr>
+</table>
+</div></body></html>

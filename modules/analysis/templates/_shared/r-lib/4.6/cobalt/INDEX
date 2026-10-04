@@ -1,0 +1,41 @@
+.cens                   Mark a Censoring Indicator
+bal.compute             Efficiently compute scalar balance statistics
+bal.plot                Visualize Distributional Balance
+bal.tab                 Display Balance Statistics in a Table
+bal.tab.CBPS            Balance Statistics for 'CBPS' Objects
+bal.tab.Match           Balance Statistics for 'Matching' Objects
+bal.tab.cem.match       Balance Statistics for 'cem' Objects
+bal.tab.default         Balance Statistics for Other Objects
+bal.tab.designmatch     Balance Statistics for 'designmatch' Objects
+bal.tab.ebalance        Balance Statistics for 'ebalance' Objects
+bal.tab.formula         Balance Statistics for Data Sets
+bal.tab.matchit         Balance Statistics for 'MatchIt' Objects
+bal.tab.mimids          Balance Statistics for 'MatchThem' Objects
+bal.tab.optmatch        Balance Statistics for 'optmatch' Objects
+bal.tab.ps              Balance Statistics for 'twang' Objects
+bal.tab.sbwcau          Balance Statistics for 'sbw' Objects
+bal.tab.time.list       Balance Statistics for Longitudinal Datasets
+bal.tab.weightit        Balance Statistics for 'WeightIt' Objects
+balance-statistics      Balance Statistics in 'bal.tab' and 'love.plot'
+balance-summary         Compute Balance and Summary Statistics for
+                        Covariates
+class-bal.tab.cens      Using 'bal.tab()' with a Censoring Indicator
+class-bal.tab.cluster   Using 'bal.tab()' with Clustered Data
+class-bal.tab.imp       Using 'bal.tab()' with Multiply Imputed Data
+class-bal.tab.msm       Using 'bal.tab()' with Longitudinal Treatments
+class-bal.tab.multi     Using 'bal.tab()' with Multi-Category
+                        Treatments
+class-bal.tab.subclass
+                        Using 'bal.tab()' with Subclassified Data
+display-options         Options for Displaying 'bal.tab()' Output
+extract.bal.tab         Extract a Balance Table for Further Use
+f.build                 Convenient Formula Generation
+get.w                   Extract Weights from Preprocessing Objects
+lalonde                 Data from National Supported Work Demonstration
+                        and PSID, as analyzed by Dehejia and Wahba
+                        (1999).
+love.plot               Display Balance Statistics in a Love Plot
+print.bal.tab           Print Results of a Call to 'bal.tab()'
+set.cobalt.options      Set and Get Options in 'cobalt'
+splitfactor             Split and Unsplit Factors into Dummy Variables
+var.names               Extract Variable Names from 'bal.tab' Objects

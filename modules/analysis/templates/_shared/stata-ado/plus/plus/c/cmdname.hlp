@@ -1,0 +1,282 @@
+.-
+help for ^cmdname^                                            [STB:  STB-51 os15]
+.-
+.
+Register command name with www.stata.com
+----------------------------------------
+.
+	^cmdname^ newcmd [^, reg^ister ^n^ame^(^string^)^ ^e^mail^(^string^)^ ]
+.
+.
+    Note:  You may set the global macros S_NAME and S_EMAIL to avoid
+           specifying the ^name()^ and ^email()^ options.
+.
+.
+Description
+-----------
+.
+^cmdname^ without the ^register^ option contacts http://www.stata.com to find 
+out whether you could register the new command name newcmd.
+.
+^cmdname^ with the ^register^ option contacts http://www.stata.com and registers
+newcmd in your name if that is possible.
+.
+.
+Options
+-------
+.
+^register^ specifies that you wish to register newcmd in your name.  If ^register^
+    is not specified, a report is returned as to whether you could register
+    newcmd.
+.
+^name()^ and ^email()^ must be specified if ^register^ is specified.  ^name()^
+    specifies your name and ^email()^ your email address.  For example, you 
+    might type 
+.
+	. ^cmdname mynewcmd, register name(Bob Smith) email(bsmith@@uni.edu)^
+.
+    If you set the global macros $S_NAME and $S_EMAIL to contain your name 
+    and email address, you need not specify options ^name()^ and ^email()^:
+.
+	. ^global S_NAME "Bob Smith"^
+	. ^global S_EMAIL "bsmith@@uni.edu"^
+.
+    Many users set $S_NAME and $S_EMAIL in their profile.do file.
+.
+.
+Remarks
+-------
+.
+Very active Stata programmers, and especially those who exchange ado-files
+with others, worry about choosing unique names for their commands.  ^cmdname^
+helps to alleviate that concern.
+.
+A command-name registry maintained at www.stata.com records the names
+programmers have chosen for new commands.  You can check whether a name is
+available and you can register names you have chosen.
+.
+The registry represents a loose agreement among Stata programmers to try to
+name new commands uniquely.  
+.
+.
+The concern ^cmdname^ alleviates
+------------------------------
+.
+Say you write a new command called ^reghpb^ and somebody else on the other
+side of the world also writes a new command of that name.  Mostly when that
+occurs it does not matter because the two new commands never meet on the same
+computer.  If both programmers make their commands available to others,
+however, someone could want both.  If both commands have the same name, that
+will not be possible.
+.
+To avoid the problem, when you write ^reghpb^, you could could find out whether
+that name is available by typing
+.
+        . ^cmdname reghpb^
+.
+If it were available, you could make it yours by typing 
+.
+        . ^cmdname reghpb, register^
+.
+Now if someone else comes up with the bright idea of writing a program named
+^reghpb^, he or she should type "^cmdname reghpb^" and so discover that you
+have already registered that name.
+.
+.
+Registration rules
+------------------
+.
+    1.  You may not register a name already registered.
+.
+    2.  You may not register a name that appears in the English-language 
+        dictionary.
+.
+    3.  You may not register a name that is less than 4 characters long.
+.
+When you type "^cmdname^ word^, register^", ^cmdname^ checks that the name is not
+already registered, that the name is not an English word, and that the name is
+long enough.
+.
+In addition, there is a fourth rule that is only loosely enforced by ^cmdname^:
+.
+    4.  You may not register a name that is a word of statistical jargon that
+        is in common use.
+.
+Be careful because, in many cases ^cmdname^ will allow you to register such 
+names.  Periodically, newly registered names are reviewed by human beings.
+If you have registered a name that is deemed to be common statistical jargon, 
+your registration will be revoked and you will be sent nice email alerting 
+you to this.  (That does not mean you have to change your program; it only 
+means that the name is not registered to you.)
+.
+.
+Reason for the registration rules
+---------------------------------
+.
+The thinking is that really nice names should be reserved for really nice
+commands that are used by a large fraction of the Stata community.
+.
+That thinking is then coupled with the argument that any command that fits the
+above definition is or will become part of Stata as it is distributed by
+StataCorp.
+.
+Programmers other than StataCorp programmers can write really nice commands,
+but such commands get really nice names only after being published in the
+@STB@ or otherwise distributed under not-so-nice names and then being adopted
+for inclusion into Stata, at which point they will be renamed.  At that point,
+such programmers will also get a really nice reference in the manual.
+.
+Concerning names shorter than 4 characters, there is nothing wrong with giving
+your programs such names and the author of ^cmdname^ admits that he, himself,
+has numerous such programs, all unregistered.  StataCorp would like to keep
+short names reserved for private use and, on rare occasion, for use for really
+common commands (think of ^d^ for @describe@).  That is to say, programs with
+short names should not be traded.
+.
+.
+Administration of the command registry
+--------------------------------------
+.
+The command registry is administered by StataCorp.  Questions should be
+directed to registry@@stata.com.
+.
+.
+Registration is not a guarantee
+-------------------------------
+.
+Nobody forces other programmers to use ^cmdname^, so even if you use ^cmdname^,
+somebody else could still use "your" name.
+.
+Also understand that, even if you register your command's name, that
+registration might later be revoked.  Such action is not undertaken lightly,
+but it does happen.  We apologize but there is no appeal.  On the bright side,
+at least you will receive email alerting you of this.  And remember, there is
+nothing to stop you from continuing to call your program by an unregistered or
+revoked name.  If the name is revoked, you have merely been reminded that
+someday a command of the same name might appear in Stata.
+.
+This is all a very loose arrangement.  Nevertheless, if you do register your
+program name, you can be reasonably assured that you will be able to keep the
+name.  For instance, StataCorp will not publish an insert in the STB with the
+same name as your program.  StataCorp checks the registry and, if an STB
+insert comes in with the same name, they inform the author that the program's
+name must be changed.
+.
+.
+Examples
+--------
+.
+^cmdname^ without the ^register^ option merely checks whether a name is
+available.  For instance, you are thinking about writing a program named 
+^super^:
+.
+	. ^cmdname super^
+	(contacting http://www.stata.com)
+	super is a word in the dictionary and not available for registration
+.
+You are thinking about writing a program named ^kapwgt^:
+.
+	. ^cmdname kapwgt^
+	(contacting http://www.stata.com)
+	kapwgt already registered to Stata Corp., registry@@stata.com
+.
+@kapwgt@ is already a command of Stata.
+.
+You are thinking about writing a program named ^outreg^:
+.
+	. ^cmdname outreg^
+	(contacting http://www.stata.com)
+	outreg already registered to STB, stb@@stata.com
+.
+A command named ^outreg^ has already been published in the STB.
+.
+You are thinking about writing a program named ^vi^:
+.
+	. ^cmdname vi^
+	you may not register command names shorter than 4 characters
+	r(198);
+.
+You are thinking about writing a program named ^regdad^:
+.
+	. ^cmdname regdad^
+	(contacting http://www.stata.com)
+	regdad is available for registration
+.
+You could register that name.  (The author of this help file requests,
+however, that you do not register ^regdad^ because if you do, he will have to
+rewrite this section.)
+.
+.
+Examples of registration
+------------------------
+.
+You register names by specifying the ^register^ option.  You do not need to 
+check that the name is available first: 
+.
+	. ^cmdname kapwgt, register^
+	(contacting http://www.stata.com)
+	kapwgt already registered to Stata Corp., registry@@stata.com
+	r(110);
+.
+If ^kapwgt^ had not already been registered, you would have seen 
+.
+	. ^cmdname kapwgt, register^
+	kapwgt now registered to you (Your Name, you@@email.adr)
+.
+and, from then on, if anyone else tried to register ^kapwgt^, they would be
+told that "kapwgt already registered to Your Name, you@@email.adr".
+.
+Now actually what would happen if you tried to register ^kapwgt^ would be 
+.
+	. ^cmdname kapwgt, register^
+	must specify options -name()- and -email()- or you must set the
+	global macros S_NAME and S_EMAIL to contain your your name and
+	email address.
+	r(198);
+.
+You would either have to type 
+.
+	. ^cmdname kapwgt, register name(Your Name) email(you@@email.adr)^
+.
+or you could type 
+.
+	. ^global S_NAME "Your Name"^
+	. ^global S_EMAIL "you@@email.adr"^
+.
+	. ^cmdname kapwgt, register^
+.
+Many users put the two definitions of S_NAME and S_EMAIL in their profile.do
+file.
+.
+.
+An example you can try
+----------------------
+.
+We know you want to try registering a name and we have created a convention
+for phony names you can register.
+.
+We do not want you registering real names unless you intend to use them.
+.
+^cmdname^ allows phony names of the form "^1x^...", names starting with the
+characters ^1x^.  Names starting with the characters one-x are obviously not
+valid command names, but ^cmdname^ will let you register them.
+.
+Try this:
+.
+	. ^cmdname 1xthis, register^
+	(contacting http://www.stata.com)
+	1xthis now registered to you (Your Name, you@@email.adr)
+.
+Probably you will not be successful in registering ^1xthis^ because someone
+else reading this section has already registered it.  Try another name
+starting with "^1x^".
+.
+Any "^1x^" names you register really are registered as far as the ^cmdname^
+command is concerned, but do not worry about that.  When we review the
+registry, we remove names starting with "^1x^".
+.
+.
+Also see
+--------
+.
+On-line:  help for @net@, @search@, @stb@

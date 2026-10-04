@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Jared Huling" />
+
+<meta name="date" content="2026-08-26" />
+
+<title>Negative-Binomial, Hurdle, and Zero-Inflation with ‘fastglm’</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Negative-Binomial, Hurdle, and
+Zero-Inflation with ‘fastglm’</h1>
+<h4 class="author">Jared Huling</h4>
+<h4 class="date">2026-08-26</h4>
+
+
+
+<p>Beyond <code>family</code>-driven GLMs, <em>fastglm</em> has fitting
+functions for three count-data model types that arise often in practice
+but require model-specific machinery on top of the standard IRLS
+solver:</p>
+<ul>
+<li><strong><code>fastglm_nb()</code></strong> — negative-binomial
+regression with the dispersion <code>theta</code> estimated jointly with
+the regression coefficients, in the spirit of
+<code>MASS::glm.nb()</code>.</li>
+<li><strong><code>fastglm_hurdle()</code></strong> — a two-part count
+model with a binary zero / non-zero component and a zero-truncated
+Poisson or NB count component, the same model as
+<code>pscl::hurdle()</code>.</li>
+<li><strong><code>fastglm_zi()</code></strong> — a zero-inflated Poisson
+or NB regression, with a binary inflation component layered on the
+original (untruncated) count distribution, the same model as
+<code>pscl::zeroinfl()</code>.</li>
+</ul>
+<p>All three reuse the same C++ IRLS solver as <code>fastglm()</code>
+itself; the outer iteration (joint NB MLE, the EM loop in
+zero-inflation, the inner theta-Brent for unknown-<code>theta</code> NB
+hurdle / ZI) likewise lives in C++. Cameron and Trivedi (1998) is the
+standard textbook reference for the count-data theory underlying this
+vignette, and Zeileis, Kleiber, and Jackman (2008) gives the
+<em>pscl</em> implementation we benchmark against.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(fastglm)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>({</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>    <span class="fu">library</span>(MASS)        <span class="co"># glm.nb, rnegbin</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>    <span class="fu">library</span>(pscl)        <span class="co"># hurdle, zeroinfl, bioChemists</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>    <span class="fu">library</span>(microbenchmark)</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>})</span></code></pre></div>
+<div id="negative-binomial-regression" class="section level1">
+<h1>Negative-binomial regression</h1>
+<p><code>fastglm_nb()</code> is a drop-in alternative to
+<code>MASS::glm.nb()</code> (Venables and Ripley, 2002) for the NB2
+model with <code>Var(Y) = mu + mu^2 / theta</code>. Both
+<code>theta</code> and <code>beta</code> are estimated by maximum
+likelihood, alternating an IRLS update for <code>beta</code> at fixed
+<code>theta</code> with a 1-D Brent root-find for <code>theta</code> at
+fixed <code>beta</code>. Both loops run in C++.</p>
+<p>A small-sample comparison on <code>MASS::quine</code> (school
+absences):</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">data</span>(quine)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span> Eth <span class="sc">+</span> Sex <span class="sc">+</span> Age <span class="sc">+</span> Lrn, <span class="at">data =</span> quine)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>y <span class="ot">&lt;-</span> quine<span class="sc">$</span>Days</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>fit_f <span class="ot">&lt;-</span> <span class="fu">fastglm_nb</span>(X, y)</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>fit_m <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">glm.nb</span>(Days <span class="sc">~</span> Eth <span class="sc">+</span> Sex <span class="sc">+</span> Age <span class="sc">+</span> Lrn, <span class="at">data =</span> quine)</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="fu">c</span>(<span class="at">theta_fastglm =</span> fit_f<span class="sc">$</span>theta, <span class="at">theta_glm.nb =</span> fit_m<span class="sc">$</span>theta)</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt; theta_fastglm  theta_glm.nb </span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&gt;      1.274893      1.274893</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="fu">max</span>(<span class="fu">abs</span>(<span class="fu">unname</span>(<span class="fu">coef</span>(fit_f)) <span class="sc">-</span> <span class="fu">unname</span>(<span class="fu">coef</span>(fit_m))))</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co">#&gt; [1] 3.06728e-08</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="fu">abs</span>(<span class="fu">as.numeric</span>(<span class="fu">logLik</span>(fit_f)) <span class="sc">-</span> <span class="fu">as.numeric</span>(<span class="fu">logLik</span>(fit_m)))</span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co">#&gt; [1] 2.273737e-13</span></span></code></pre></div>
+<p>Coefficients and <code>theta</code> agree to roughly 1e-8 on the same
+MLE.</p>
+<p>A timing comparison, on a moderately sized simulated
+NB(<code>theta = 2</code>) example:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>n  <span class="ot">&lt;-</span> <span class="fl">5e4</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>X  <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="dv">1</span>, <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n <span class="sc">*</span> <span class="dv">3</span>), n, <span class="dv">3</span>))</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>mu <span class="ot">&lt;-</span> <span class="fu">exp</span>(X <span class="sc">%*%</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">0.4</span>, <span class="sc">-</span><span class="fl">0.2</span>, <span class="fl">0.3</span>))</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>y  <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">rnegbin</span>(n, <span class="at">mu =</span> mu, <span class="at">theta =</span> <span class="dv">2</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">y =</span> y, <span class="at">x1 =</span> X[, <span class="dv">2</span>], <span class="at">x2 =</span> X[, <span class="dv">3</span>], <span class="at">x3 =</span> X[, <span class="dv">4</span>])</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>mb_nb <span class="ot">&lt;-</span> <span class="fu">microbenchmark</span>(</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>    <span class="at">fastglm_nb =</span> <span class="fu">fastglm_nb</span>(X, y),</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>    <span class="at">glm.nb     =</span> MASS<span class="sc">::</span><span class="fu">glm.nb</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2 <span class="sc">+</span> x3, <span class="at">data =</span> df),</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>    <span class="at">times =</span> <span class="dv">5</span><span class="dt">L</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>)</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="fu">print</span>(mb_nb)</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt; Unit: milliseconds</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt;        expr       min       lq      mean    median        uq       max neval</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt;  fastglm_nb  40.28939  40.7235  52.77354  41.55735  43.19489  98.10259     5</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt;      glm.nb 290.36298 346.8598 359.48409 352.39361 397.11243 410.69167     5</span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt;  cld</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt;   a </span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt;    b</span></span></code></pre></div>
+<p>The native NB family kernel is also exposed directly through
+<code>negbin(theta, link)</code> for the case when <code>theta</code> is
+known (or estimated separately). Holding <code>theta</code> fixed at the
+joint MLE recovers the <code>fastglm_nb()</code> regression coefficients
+exactly, since <code>fastglm_nb()</code> is just IRLS at the converged
+<code>theta</code>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>fit_joint <span class="ot">&lt;-</span> <span class="fu">fastglm_nb</span>(X, y)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>fit_known <span class="ot">&lt;-</span> <span class="fu">fastglm</span>(X, y, <span class="at">family =</span> <span class="fu">negbin</span>(<span class="at">theta =</span> fit_joint<span class="sc">$</span>theta, <span class="at">link =</span> <span class="st">&quot;log&quot;</span>))</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="fu">max</span>(<span class="fu">abs</span>(<span class="fu">unname</span>(<span class="fu">coef</span>(fit_known)) <span class="sc">-</span> <span class="fu">unname</span>(<span class="fu">coef</span>(fit_joint))))</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt; [1] 1.624216e-07</span></span></code></pre></div>
+</div>
+<div id="hurdle-models" class="section level1">
+<h1>Hurdle models</h1>
+<p>Hurdle models, introduced by Mullahy (1986), factorize a count
+distribution into two independent pieces:</p>
+<ul>
+<li>a binary regression for <code>1(y &gt; 0)</code> over the full
+sample (the <em>zero</em> part);</li>
+<li>a zero-truncated Poisson or NB regression for <code>y &gt; 0</code>
+over the positive subset (the <em>count</em> part).</li>
+</ul>
+<p>Because the two parts share no parameters, the joint likelihood
+factorizes and they can be fit independently. <em>fastglm</em>’s C++
+driver fits both parts using the same IRLS solver as
+<code>fastglm()</code>, with new <code>FAM_POIS_TRUNC_*</code> /
+<code>FAM_NB_TRUNC_*</code> family codes that handle the truncation
+correction stably (<code>expm1</code>, <code>log1p</code> near
+<code>mu = 0</code>).</p>
+<p>The formula uses the <em>Formula</em> package convention
+<code>y ~ x1 + x2 | z1 + z2</code>; the right-hand side after
+<code>|</code> specifies the zero-part design (it defaults to the
+count-part design if absent).</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">data</span>(bioChemists, <span class="at">package =</span> <span class="st">&quot;pscl&quot;</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>fit_f <span class="ot">&lt;-</span> <span class="fu">fastglm_hurdle</span>(art <span class="sc">~</span> ., <span class="at">data =</span> bioChemists, <span class="at">dist =</span> <span class="st">&quot;poisson&quot;</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>fit_p <span class="ot">&lt;-</span> pscl<span class="sc">::</span><span class="fu">hurdle</span> (art <span class="sc">~</span> ., <span class="at">data =</span> bioChemists, <span class="at">dist =</span> <span class="st">&quot;poisson&quot;</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="fu">max</span>(<span class="fu">abs</span>(<span class="fu">unname</span>(<span class="fu">coef</span>(fit_f, <span class="st">&quot;count&quot;</span>)) <span class="sc">-</span> <span class="fu">unname</span>(fit_p<span class="sc">$</span>coefficients<span class="sc">$</span>count)))</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt; [1] 3.144497e-07</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="fu">max</span>(<span class="fu">abs</span>(<span class="fu">unname</span>(<span class="fu">coef</span>(fit_f, <span class="st">&quot;zero&quot;</span>))  <span class="sc">-</span> <span class="fu">unname</span>(fit_p<span class="sc">$</span>coefficients<span class="sc">$</span>zero)))</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt; [1] 1.27043e-10</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="fu">abs</span>(<span class="fu">as.numeric</span>(<span class="fu">logLik</span>(fit_f)) <span class="sc">-</span> <span class="fu">as.numeric</span>(<span class="fu">logLik</span>(fit_p)))</span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt; [1] 1.07093e-10</span></span></code></pre></div>
+<p><code>coef()</code> and <code>vcov()</code> accept a
+<code>model = c(&quot;full&quot;, &quot;count&quot;, &quot;zero&quot;)</code> argument so each part
+can be inspected separately:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">coef</span>(fit_f, <span class="at">model =</span> <span class="st">&quot;count&quot;</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co">#&gt; (Intercept)    femWomen  marMarried        kid5         phd        ment </span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co">#&gt;  0.67113934 -0.22858262  0.09648498 -0.14218724 -0.01272657  0.01874550</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="fu">coef</span>(fit_f, <span class="at">model =</span> <span class="st">&quot;zero&quot;</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt; (Intercept)    femWomen  marMarried        kid5         phd        ment </span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt;  0.23679601 -0.25115113  0.32623358 -0.28524872  0.02221940  0.08012135</span></span></code></pre></div>
+<p>For NB count parts, the dispersion is estimated by an inner Brent MLE
+that runs <em>between</em> outer IRLS iterations; the outer-loop
+tolerance is controlled by <code>outer.tol</code> /
+<code>outer.maxit</code>.</p>
+<p>A timing comparison on a 4000-observation simulated example:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">11</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>n  <span class="ot">&lt;-</span> <span class="dv">4000</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>x1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n);  x2 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>lam    <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="fl">0.7</span> <span class="sc">+</span> <span class="fl">0.4</span> <span class="sc">*</span> x1 <span class="sc">-</span> <span class="fl">0.3</span> <span class="sc">*</span> x2)</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>is_pos <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fu">plogis</span>(<span class="sc">-</span><span class="fl">0.4</span> <span class="sc">+</span> <span class="fl">0.5</span> <span class="sc">*</span> x1 <span class="sc">+</span> <span class="fl">0.2</span> <span class="sc">*</span> x2))</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>yt     <span class="ot">&lt;-</span> <span class="fu">integer</span>(n)</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_len</span>(n)) {</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>    <span class="cf">repeat</span> { v <span class="ot">&lt;-</span> <span class="fu">rpois</span>(<span class="dv">1</span>, lam[i]); <span class="cf">if</span> (v <span class="sc">&gt;</span> <span class="dv">0</span>) { yt[i] <span class="ot">&lt;-</span> v; <span class="cf">break</span> } }</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>}</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>y  <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(is_pos <span class="sc">==</span> <span class="dv">1</span>, yt, <span class="dv">0</span><span class="dt">L</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">y =</span> y, <span class="at">x1 =</span> x1, <span class="at">x2 =</span> x2)</span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>mb_hurdle <span class="ot">&lt;-</span> <span class="fu">microbenchmark</span>(</span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>    <span class="at">fastglm_hurdle =</span> <span class="fu">fastglm_hurdle</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> df, <span class="at">dist =</span> <span class="st">&quot;poisson&quot;</span>),</span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a>    <span class="at">pscl_hurdle    =</span> pscl<span class="sc">::</span><span class="fu">hurdle</span> (y <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> df, <span class="at">dist =</span> <span class="st">&quot;poisson&quot;</span>),</span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a>    <span class="at">times =</span> <span class="dv">5</span><span class="dt">L</span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a>)</span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="fu">print</span>(mb_hurdle)</span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="co">#&gt; Unit: milliseconds</span></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="co">#&gt;            expr       min        lq      mean    median        uq       max</span></span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="co">#&gt;  fastglm_hurdle  1.281332  1.422659  2.261191  1.442585  2.043358  5.116021</span></span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="co">#&gt;     pscl_hurdle 18.315438 18.427204 20.284570 18.536182 22.882182 23.261842</span></span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a><span class="co">#&gt;  neval cld</span></span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="co">#&gt;      5  a </span></span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a><span class="co">#&gt;      5   b</span></span></code></pre></div>
+</div>
+<div id="zero-inflated-models" class="section level1">
+<h1>Zero-inflated models</h1>
+<p>Zero inflation, introduced by Lambert (1992), differs from a hurdle
+in that the two components share a latent variable: a <code>y = 0</code>
+outcome could come from the inflation component (with probability
+<code>pi_i</code>) <em>or</em> from the count component (with
+probability <code>1 - pi_i</code> and a count-side zero). The likelihood
+for <code>y = 0</code> is</p>
+<p><span class="math display">\[
+\Pr(Y_i = 0) = \pi_i + (1 - \pi_i) f(0; \mu_i)
+\]</span></p>
+<p>and for <code>y &gt; 0</code> it is
+<code>(1 - pi_i) f(y; mu_i)</code>. The two-component mixture rules out
+a closed-form factorization, so <em>fastglm</em> uses an EM
+algorithm:</p>
+<ul>
+<li><strong>E-step</strong>: posterior
+<code>tau_i = P(Z_i = 1 | y_i)</code> for each observation, computed in
+log-space with <code>logsumexp</code> to avoid catastrophic cancellation
+when <code>pi_i</code> is near 0 or 1.</li>
+<li><strong>M-step</strong>: a binomial logit / probit / cloglog / log
+fit with response <code>tau</code> (continuous), weights 1; followed by
+a Poisson or NB fit on the <em>original</em> <code>y</code> with prior
+weights <code>1 - tau</code>. For NB, an inner Brent MLE re-estimates
+<code>theta</code> after each count-side step.</li>
+</ul>
+<p>The final observed-information <code>vcov</code> comes from a
+numerical Jacobian of the analytical observed score at the EM fixed
+point, which is stable and cheap (block-diagonal per
+<code>(gamma, beta, theta)</code>). The complete EM driver — E-step,
+both M-steps, the inner theta MLE, and the score Jacobian — runs in
+C++.</p>
+<p>The formula syntax matches <code>fastglm_hurdle()</code> exactly:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>fit_f <span class="ot">&lt;-</span> <span class="fu">fastglm_zi</span>(art <span class="sc">~</span> ., <span class="at">data =</span> bioChemists, <span class="at">dist =</span> <span class="st">&quot;poisson&quot;</span>,</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>                    <span class="at">em.tol =</span> <span class="fl">1e-10</span>, <span class="at">em.maxit =</span> <span class="dv">300</span><span class="dt">L</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>fit_p <span class="ot">&lt;-</span> pscl<span class="sc">::</span><span class="fu">zeroinfl</span>(art <span class="sc">~</span> ., <span class="at">data =</span> bioChemists, <span class="at">dist =</span> <span class="st">&quot;poisson&quot;</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="fu">max</span>(<span class="fu">abs</span>(<span class="fu">unname</span>(<span class="fu">coef</span>(fit_f, <span class="st">&quot;count&quot;</span>)) <span class="sc">-</span> <span class="fu">unname</span>(fit_p<span class="sc">$</span>coefficients<span class="sc">$</span>count)))</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt; [1] 2.654454e-06</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="fu">max</span>(<span class="fu">abs</span>(<span class="fu">unname</span>(<span class="fu">coef</span>(fit_f, <span class="st">&quot;zero&quot;</span>))  <span class="sc">-</span> <span class="fu">unname</span>(fit_p<span class="sc">$</span>coefficients<span class="sc">$</span>zero)))</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; [1] 1.835971e-05</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="fu">abs</span>(<span class="fu">as.numeric</span>(<span class="fu">logLik</span>(fit_f)) <span class="sc">-</span> <span class="fu">as.numeric</span>(<span class="fu">logLik</span>(fit_p)))</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt; [1] 1.010903e-09</span></span></code></pre></div>
+<p>EM is iterative, so the agreement is slightly looser than for hurdle
+(where the two parts are closed-form independent fits), but coefficients
+and the joint log-likelihood still match to about 1e-5.</p>
+<p>A timing comparison on a simulated zero-inflated Poisson:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">21</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>n  <span class="ot">&lt;-</span> <span class="dv">3000</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>x1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n);  x2 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>eta_c <span class="ot">&lt;-</span> <span class="fl">0.7</span> <span class="sc">+</span> <span class="fl">0.4</span> <span class="sc">*</span> x1 <span class="sc">-</span> <span class="fl">0.3</span> <span class="sc">*</span> x2</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>eta_z <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">0.4</span> <span class="sc">+</span> <span class="fl">0.5</span> <span class="sc">*</span> x1 <span class="sc">+</span> <span class="fl">0.2</span> <span class="sc">*</span> x2</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>z     <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fu">plogis</span>(eta_z))</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>y     <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(z <span class="sc">==</span> <span class="dv">1</span>, <span class="dv">0</span><span class="dt">L</span>, <span class="fu">rpois</span>(n, <span class="fu">exp</span>(eta_c)))</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>df    <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">y =</span> y, <span class="at">x1 =</span> x1, <span class="at">x2 =</span> x2)</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>mb_zi <span class="ot">&lt;-</span> <span class="fu">microbenchmark</span>(</span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>    <span class="at">fastglm_zi =</span> <span class="fu">fastglm_zi</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> df, <span class="at">dist =</span> <span class="st">&quot;poisson&quot;</span>),</span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>    <span class="at">pscl_zi    =</span> pscl<span class="sc">::</span><span class="fu">zeroinfl</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> df, <span class="at">dist =</span> <span class="st">&quot;poisson&quot;</span>),</span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>    <span class="at">times =</span> <span class="dv">5</span><span class="dt">L</span></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a>)</span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="fu">print</span>(mb_zi)</span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="co">#&gt; Unit: milliseconds</span></span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co">#&gt;        expr       min        lq      mean    median        uq       max neval</span></span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="co">#&gt;  fastglm_zi  5.784034  6.104777  6.233632  6.129541  6.398583  6.751224     5</span></span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a><span class="co">#&gt;     pscl_zi 32.258841 33.269614 35.642784 35.234375 35.524532 41.926559     5</span></span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a><span class="co">#&gt;  cld</span></span>
+<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a><span class="co">#&gt;   a </span></span>
+<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a><span class="co">#&gt;    b</span></span></code></pre></div>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<ul>
+<li><p>Cameron, A. C. and Trivedi, P. K. (1998). <em>Regression Analysis
+of Count Data</em>. Cambridge University Press.</p></li>
+<li><p>Mullahy, J. (1986). Specification and testing of some modified
+count data models. <em>Journal of Econometrics</em>, 33(3), 341–365. <a href="doi:10.1016/0304-4076(86)90002-3" class="uri">doi:10.1016/0304-4076(86)90002-3</a></p></li>
+<li><p>Lambert, D. (1992). Zero-inflated Poisson regression, with an
+application to defects in manufacturing. <em>Technometrics</em>, 34(1),
+1–14. <a href="doi:10.2307/1269547" class="uri">doi:10.2307/1269547</a></p></li>
+<li><p>Zeileis, A., Kleiber, C., and Jackman, S. (2008). Regression
+models for count data in R. <em>Journal of Statistical Software</em>,
+27(8), 1–25. <a href="doi:10.18637/jss.v027.i08" class="uri">doi:10.18637/jss.v027.i08</a></p></li>
+<li><p>Venables, W. N. and Ripley, B. D. (2002). <em>Modern Applied
+Statistics with S</em> (4th ed.). Springer.</p></li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

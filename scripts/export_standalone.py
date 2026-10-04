@@ -93,6 +93,13 @@ CHECK_PREFIXES = [
     "examples/",
 ]
 
+# 随包分发的第三方依赖快照：不是本 skill 的文档，其自带 NEWS/README 会误触相对路径检查。
+VENDORED_PREFIXES = [
+    "templates/_shared/stata-ado/",
+    "templates/_shared/r-lib/",
+    "templates/_shared/python-env/",
+]
+
 NOTE_TEMPLATE = (
     "> **拆分版路径约定**：本包由 `paper-master-4ss/scripts/export_standalone.py` 从 "
     "`paper-master-4ss/modules/{module}/` 自动导出，是可独立安装的运行版。包内相对路径"
@@ -340,6 +347,10 @@ def check_package(target: Path) -> list[str]:
         # master/ 协议与治理 references 是导出快照，保留总控包上下文，不做严格检查；
         # update 的 targets/ 是外部模块命名空间映射，按设计指向其他包
         if rel.parts[0] == "master" or item.name in GOVERNANCE_REFS or "targets/" in str(rel):
+            continue
+        # 随包分发的第三方依赖快照（Stata ado 库、R 包库、Python 锁文件）不是本 skill 的文档，
+        # 其自带的 NEWS/README 会命中本检查器的相对路径模式，属误报，整体跳过。
+        if VENDORED_PREFIXES and any(str(rel).startswith(p) for p in VENDORED_PREFIXES):
             continue
         text = read_text(item)
         for raw in re.findall(r"[A-Za-z0-9_*][A-Za-z0-9_./*-]*", text):

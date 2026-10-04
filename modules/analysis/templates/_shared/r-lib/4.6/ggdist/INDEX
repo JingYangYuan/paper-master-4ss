@@ -1,0 +1,96 @@
+Pr_                     Probability expressions in ggdist aesthetics
+align                   Break (bin) alignment methods
+auto_partial            Automatic partial function application in
+                        ggdist
+bandwidth               Bandwidth estimators
+bin_dots                Bin data values using a dotplot algorithm
+blur                    Blur functions for blurry dot plots
+bounder_cdf             Estimate bounds of a distribution using the CDF
+                        of its order statistics
+bounder_cooke           Estimate bounds of a distribution using Cooke's
+                        method
+bounder_range           Estimate bounds of a distribution using the
+                        range of the sample
+breaks                  Break (bin) selection algorithms for histograms
+curve_interval          Curvewise point and interval summaries for tidy
+                        data frames of draws from distributions
+cut_cdf_qi              Categorize values from a CDF into quantile
+                        intervals
+density_bounded         Bounded density estimator using the reflection
+                        method
+density_histogram       Histogram density estimator
+density_unbounded       Unbounded density estimator
+find_dotplot_binwidth   Dynamically select a good bin width for a
+                        dotplot
+geom_blur_dots          Blurry dot plot (geom)
+geom_dots               Dot plot (shortcut geom)
+geom_dotsinterval       Automatic dotplot + point + interval meta-geom
+geom_interval           Multiple-interval plot (shortcut geom)
+geom_lineribbon         Line + multiple-ribbon plots (ggplot geom)
+geom_pointinterval      Point + multiple-interval plot (shortcut geom)
+geom_slab               Slab (ridge) plot (shortcut geom)
+geom_slabinterval       Slab + point + interval meta-geom
+geom_spike              Spike plot (ggplot2 geom)
+geom_swarm              Beeswarm plot (shortcut geom)
+geom_weave              Dot-weave plot (shortcut geom)
+ggdist-deprecated       Deprecated functions and arguments in ggdist
+ggdist-package          Visualizations of Distributions and Uncertainty
+guide_rampbar           Continuous guide for colour ramp scales
+                        (ggplot2 guide)
+interval_widths         Nicely-spaced sets of interval widths
+lkjcorr_marginal        Marginal distribution of a single correlation
+                        from an LKJ distribution
+marginalize_lkjcorr     Turn spec for LKJ distribution into spec for
+                        marginal LKJ distribution
+parse_dist              Parse distribution specifications into columns
+                        of a data frame
+partial_colour_ramp     Partial colour ramp (datatype)
+point_interval          Point and interval summaries for tidy data
+                        frames of draws from distributions
+position_dodgejust      Dodge overlapping objects side-to-side,
+                        preserving justification
+ramp_colours            Apply partial colour ramps
+scale_colour_ramp       Secondary color scale that ramps from another
+                        color (ggplot2 scale)
+scale_side_mirrored     Side scale for mirrored slabs (ggplot2 scale)
+scale_thickness         Slab thickness scale (ggplot2 scale)
+smooth_density          Smooth dot positions in a dotplot using a
+                        kernel density estimator ("density dotplots")
+smooth_discrete         Smooth dot positions in a dotplot of discrete
+                        values ("bar dotplots")
+smooth_none             Apply no smooth to a dotplot
+stat_ccdfinterval       CCDF bar plot (shortcut stat)
+stat_cdfinterval        CDF bar plot (shortcut stat)
+stat_dots               Dot plot (shortcut stat)
+stat_dotsinterval       Dots + point + interval plot (shortcut stat)
+stat_eye                Eye (violin + interval) plot (shortcut stat)
+stat_gradientinterval   Gradient + interval plot (shortcut stat)
+stat_halfeye            Half-eye (density + interval) plot (shortcut
+                        stat)
+stat_histinterval       Histogram + interval plot (shortcut stat)
+stat_interval           Multiple-interval plot (shortcut stat)
+stat_lineribbon         Line + multiple-ribbon plot (shortcut stat)
+stat_mcse_dots          Blurry MCSE dot plot (stat)
+stat_pointinterval      Point + multiple-interval plot (shortcut stat)
+stat_ribbon             Multiple-ribbon plot (shortcut stat)
+stat_slab               Slab (ridge) plot (shortcut stat)
+stat_slabinterval       Slab + interval plots for sample data and
+                        analytical distributions (ggplot stat)
+stat_spike              Spike plot (ggplot2 stat)
+student_t               Scaled and shifted Student's t distribution
+sub-geometry-scales     Sub-geometry scales for geom_slabinterval
+                        (ggplot2 scales)
+subguide_axis           Axis sub-guide for thickness scales
+subguide_none           Empty sub-guide for thickness scales
+subscale_identity       Identity sub-scale for thickness aesthetic
+subscale_thickness      Sub-scale for thickness aesthetic
+theme_ggdist            Simple, light ggplot2 theme for ggdist and
+                        tidybayes
+thickness               Thickness (datatype)
+tidy-format-translators
+                        Translate between different tidy data frame
+                        formats for draws from distributions
+waiver                  A waived argument
+weighted_ecdf           Weighted empirical cumulative distribution
+                        function
+weighted_quantile       Weighted sample quantiles

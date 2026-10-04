@@ -126,6 +126,22 @@ spatial <- c("sf", "tmap", "leaflet", "ggspatial")
 interactive <- c("plotly", "htmlwidgets", "DT")
 ```
 
+### 随包分发的 R 包库快照（免安装路径）
+
+本 skill 在 `templates/_shared/r-lib/4.6/` 下附带了一份本地 `site-library` 的完整快照
+（179 包 / 21871 文件 / 495 MB，R 4.6.0 + macOS arm64），用于在**无法联网或不想逐个编译**的环境里
+让 `03-regression` 的 R 模板开箱即用：
+
+```r
+.libPaths(c("<skill 根目录>/modules/analysis/templates/_shared/r-lib/4.6", .libPaths()))
+```
+
+- 两种方式**二选一**：已用 `install.packages` 装好依赖时不要再加载本目录，避免版本混用。
+- 快照含编译产物（`.so`/`.dylib`），**只在 R 4.6.x + macOS arm64 可直接加载**；其它版本/平台请用上面的清单方式。
+- 不含 R 随附的 recommended/base 包（`MASS`、`nnet`、`survival`、`boot`、`Matrix` 等），它们随 R 本体安装。
+- 不含 `spdep`/`spatialreg`/`splm`（依赖链 `sf` → GDAL 不可得）；R 空间计量由 base R 实现承载。
+- 详见 `templates/_shared/r-lib/README.md`。
+
 版本锁定（论文复现）：
 
 ```r

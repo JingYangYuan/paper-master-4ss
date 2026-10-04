@@ -1,0 +1,108 @@
+{smcl}
+{* 27Oct2005}{...}
+{hline}
+help for {hi:plreg}{right:(SJ6-3: st0109)}
+{hline}
+
+{title:Linear partial regression }
+
+{p 8 17 2}{cmd:plreg} {it:depvar} {it:indepvars} {ifin}{cmd:,}
+{opth nlf(varname)}
+[{opth gen:erate(newvar)} {opt or:der(#)}
+	{cmd:wh}
+	{opt l:evel(#)}
+	{opt coll:inear}
+	{it:lowess_options}]
+
+
+{title:Description}
+
+{p 4 4 2}
+{cmd:plreg} estimates the following semiparametric regression model by the
+method of differencing:
+
+        Y = f(z) + x*b + e          (1)
+
+{p 4 4 2}
+where f(z) is a smooth function with bounded first derivatives,
+the function f is known to lie in a particular parametric family,
+x are control variables that enter (1) linearily, e is the zero-mean
+innovation error, and b is a vector of parameters. {p_end}
+
+{p 4 4 2}
+Standard errors of b are adjusted according to Yatchew (1998) method.{p_end}
+
+
+{title:Options}
+
+{p 4 8 2}
+{opth nlf(varname)} is required and specifies the argument of an unknown
+function.
+
+{p 4 8 2}
+{opth generate(newvar)} creates a new variable {it:newvar} containing the
+smoothed value of {it:f}. These values is estimated by the locally weighted
+regression using {cmd:lowess}. A corresponding graph of the estimated function {it:f} could also be output; see {helpb lowess}.
+
+{p 4 8 2}
+{cmd:order(}{it:#}{cmd:)} specifies the differencing order. Tenth-order
+differencing is the maximum allowed.  If {cmd:order(}{it:#}{cmd:)} is not
+specified, the model is fitted by first-order differencing.
+
+{p 4 8 2}
+{cmd:wh} specifies a form of the vector of differencing weights. By default,
+Yatchew (1998) weights are used. If {cmd:wh} is specified, Hall, Kay, and
+Titterington (1990) weights are used for differencing.
+
+{p 4 8 2}
+{cmd:level(}{it:#}{cmd:)} sets the confidence level; the default is
+{cmd:level(95)}.
+
+{p 4 8 2}
+{cmd:collinear} specifies that collinear variables be kept.
+
+{p 4 8 2}
+{it:{help lowess:lowess_options}} control the way {cmd:lowess} generates the
+smoothed values for the argument.
+
+
+{title:Examples}
+
+{p 4 8 2}
+{cmd:. plreg y1 x1 x2 x3, nlf(z) }
+
+{p 4 8 2}
+{cmd:. plreg y1 x1 x2 x3, nlf(z) wh gen(f_hat) order(7)}
+
+{p 4 8 2}
+{cmd:. plreg y1 x1 x2 x3, nlf(z) wh gen(f_hat) order(7) nodraw}
+
+
+{title:References}
+
+{p 4 8 2}
+Hall, P., J. Kay, and D. Titterington. 1990. Asymptotically optimal
+difference-based estimation of variance in non-parametric regression.
+{it:Biometrica} 77: 521-528.
+
+{p 4 8 2}
+Robinson, P. 1988. Root-n-consistent semi-parametric regression.
+{it:Econometrica} 56: 931-54.
+
+{p 4 8 2}
+Yatchew, A. 1998. Nonparametric regression techniques in economics.
+{it:Journal of Economic Literature} 36: 669-721.
+
+
+{title:Author}
+
+{pstd}
+ M. Lokshin, DECRG, The World Bank.{break}
+ If you observe any problems {browse "mailto:mlokshin@worldbank.org"}.
+
+
+{title:Also see}
+
+{p 4 13 2}
+Online:  {helpb regress}, {helpb lowess}
+{p_end}

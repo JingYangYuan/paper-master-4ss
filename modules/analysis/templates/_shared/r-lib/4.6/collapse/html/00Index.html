@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html>
+<head><title>R: Advanced and Fast Data Transformation</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<link rel="stylesheet" type="text/css" href="R.css">
+</head><body><div class="container">
+<h1> Advanced and Fast Data Transformation
+<img class="toplogo" src="../../../doc/html/Rlogo.svg" alt="[R logo]">
+</h1>
+<hr>
+<div style="text-align: center;">
+<a href="../../../doc/html/packages.html"><img class="arrow" src="../../../doc/html/left.jpg" alt="[Up]"></a>
+<a href="../../../doc/html/index.html"><img class="arrow" src="../../../doc/html/up.jpg" alt="[Top]"></a>
+</div><h2>Documentation for package &lsquo;collapse&rsquo; version 2.1.8</h2>
+
+<ul><li><a href="../DESCRIPTION" type="text/plain; charset=utf-8">DESCRIPTION file</a></li>
+<li><a href="../doc/index.html">User guides, package vignettes and other documentation</a></li>
+<li><a href="../NEWS.md">Package NEWS</a></li>
+</ul>
+
+<h2>Help Pages</h2>
+
+
+<p style="text-align: center;">
+<a href="# "> </a>
+<a href="#A">A</a>
+<a href="#B">B</a>
+<a href="#C">C</a>
+<a href="#D">D</a>
+<a href="#E">E</a>
+<a href="#F">F</a>
+<a href="#G">G</a>
+<a href="#H">H</a>
+<a href="#I">I</a>
+<a href="#J">J</a>
+<a href="#L">L</a>
+<a href="#M">M</a>
+<a href="#N">N</a>
+<a href="#P">P</a>
+<a href="#Q">Q</a>
+<a href="#R">R</a>
+<a href="#S">S</a>
+<a href="#T">T</a>
+<a href="#U">U</a>
+<a href="#V">V</a>
+<a href="#W">W</a>
+<a href="#misc">misc</a>
+</p>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="collapse-package.html">collapse-package</a></td>
+<td>Advanced and Fast Data Transformation</td></tr>
+</table>
+
+<h2><a id="A">-- A --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="collapse-documentation.html">A0-collapse-documentation</a></td>
+<td>Collapse Documentation &amp; Overview</td></tr>
+<tr><td style="width: 25%;"><a href="fast-statistical-functions.html">A1-fast-statistical-functions</a></td>
+<td>Fast (Grouped, Weighted) Statistical Functions for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fast-grouping-ordering.html">A2-fast-grouping-ordering</a></td>
+<td>Fast Grouping and Ordering</td></tr>
+<tr><td style="width: 25%;"><a href="fast-data-manipulation.html">A3-fast-data-manipulation</a></td>
+<td>Fast Data Manipulation</td></tr>
+<tr><td style="width: 25%;"><a href="quick-conversion.html">A4-quick-conversion</a></td>
+<td>Quick Data Conversion</td></tr>
+<tr><td style="width: 25%;"><a href="collap.html">A5-advanced-aggregation</a></td>
+<td>Advanced Data Aggregation</td></tr>
+<tr><td style="width: 25%;"><a href="data-transformations.html">A6-data-transformations</a></td>
+<td>Data Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="time-series-panel-series.html">A7-time-series-panel-series</a></td>
+<td>Time Series and Panel Series</td></tr>
+<tr><td style="width: 25%;"><a href="list-processing.html">A8-list-processing</a></td>
+<td>List Processing</td></tr>
+<tr><td style="width: 25%;"><a href="summary-statistics.html">A9-summary-statistics</a></td>
+<td>Summary Statistics</td></tr>
+<tr><td style="width: 25%;"><a href="recode-replace.html">AA1-recode-replace</a></td>
+<td>Recode and Replace Values in Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">AA2-efficient-programming</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="small-helpers.html">AA3-small-helpers</a></td>
+<td>Small (Helper) Functions</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-options.html">AA4-collapse-options</a></td>
+<td>_collapse_ Package Options</td></tr>
+<tr><td style="width: 25%;"><a href="across.html">across</a></td>
+<td>Apply Functions Across Multiple Columns</td></tr>
+<tr><td style="width: 25%;"><a href="small-helpers.html">add_stub</a></td>
+<td>Small (Helper) Functions</td></tr>
+<tr><td style="width: 25%;"><a href="select_replace_vars.html">add_vars</a></td>
+<td>Fast Select, Replace or Add Data Frame Columns</td></tr>
+<tr><td style="width: 25%;"><a href="select_replace_vars.html">add_vars&lt;-</a></td>
+<td>Fast Select, Replace or Add Data Frame Columns</td></tr>
+<tr><td style="width: 25%;"><a href="collap.html">advanced-aggregation</a></td>
+<td>Advanced Data Aggregation</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">allNA</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">alloc</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">allv</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="small-helpers.html">all_funs</a></td>
+<td>Small (Helper) Functions</td></tr>
+<tr><td style="width: 25%;"><a href="small-helpers.html">all_identical</a></td>
+<td>Small (Helper) Functions</td></tr>
+<tr><td style="width: 25%;"><a href="small-helpers.html">all_obj_equal</a></td>
+<td>Small (Helper) Functions</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">anyv</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="funique.html">any_duplicated</a></td>
+<td>Fast Unique Elements / Rows</td></tr>
+<tr><td style="width: 25%;"><a href="psmat.html">aperm.psmat</a></td>
+<td>Matrix / Array from Panel Series</td></tr>
+<tr><td style="width: 25%;"><a href="arithmetic.html">arithmetic</a></td>
+<td>Fast Row/Column Arithmetic for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="descr.html">as.data.frame.descr</a></td>
+<td>Detailed Statistical Description of Data Frame</td></tr>
+<tr><td style="width: 25%;"><a href="qsu.html">as.data.frame.qsu</a></td>
+<td>Fast (Grouped, Weighted) Summary Statistics for Cross-Sectional and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="quick-conversion.html">as_character_factor</a></td>
+<td>Quick Data Conversion</td></tr>
+<tr><td style="width: 25%;"><a href="GRP.html">as_factor_GRP</a></td>
+<td>Fast Grouping / _collapse_ Grouping Objects</td></tr>
+<tr><td style="width: 25%;"><a href="qF.html">as_factor_qG</a></td>
+<td>Fast Factor Generation, Interactions and Vector Grouping</td></tr>
+<tr><td style="width: 25%;"><a href="quick-conversion.html">as_integer_factor</a></td>
+<td>Quick Data Conversion</td></tr>
+<tr><td style="width: 25%;"><a href="quick-conversion.html">as_numeric_factor</a></td>
+<td>Quick Data Conversion</td></tr>
+<tr><td style="width: 25%;"><a href="extract_list.html">atomic_elem</a></td>
+<td>Find and Extract / Subset List Elements</td></tr>
+<tr><td style="width: 25%;"><a href="extract_list.html">atomic_elem&lt;-</a></td>
+<td>Find and Extract / Subset List Elements</td></tr>
+<tr><td style="width: 25%;"><a href="select_replace_vars.html">av</a></td>
+<td>Fast Select, Replace or Add Data Frame Columns</td></tr>
+<tr><td style="width: 25%;"><a href="select_replace_vars.html">av&lt;-</a></td>
+<td>Fast Select, Replace or Add Data Frame Columns</td></tr>
+</table>
+
+<h2><a id="B">-- B --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="fbetween_fwithin.html">B</a></td>
+<td>Fast Between (Averaging) and (Quasi-)Within (Centering) Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="fbetween_fwithin.html">B.data.frame</a></td>
+<td>Fast Between (Averaging) and (Quasi-)Within (Centering) Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="fbetween_fwithin.html">B.default</a></td>
+<td>Fast Between (Averaging) and (Quasi-)Within (Centering) Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="fbetween_fwithin.html">B.grouped_df</a></td>
+<td>Fast Between (Averaging) and (Quasi-)Within (Centering) Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="fbetween_fwithin.html">B.matrix</a></td>
+<td>Fast Between (Averaging) and (Quasi-)Within (Centering) Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="fbetween_fwithin.html">B.pdata.frame</a></td>
+<td>Fast Between (Averaging) and (Quasi-)Within (Centering) Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="fbetween_fwithin.html">B.pseries</a></td>
+<td>Fast Between (Averaging) and (Quasi-)Within (Centering) Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="BY.html">BY</a></td>
+<td>Split-Apply-Combine Computing</td></tr>
+<tr><td style="width: 25%;"><a href="BY.html">BY.data.frame</a></td>
+<td>Split-Apply-Combine Computing</td></tr>
+<tr><td style="width: 25%;"><a href="BY.html">BY.default</a></td>
+<td>Split-Apply-Combine Computing</td></tr>
+<tr><td style="width: 25%;"><a href="BY.html">BY.grouped_df</a></td>
+<td>Split-Apply-Combine Computing</td></tr>
+<tr><td style="width: 25%;"><a href="BY.html">BY.matrix</a></td>
+<td>Split-Apply-Combine Computing</td></tr>
+</table>
+
+<h2><a id="C">-- C --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="select_replace_vars.html">cat_vars</a></td>
+<td>Fast Select, Replace or Add Data Frame Columns</td></tr>
+<tr><td style="width: 25%;"><a href="select_replace_vars.html">cat_vars&lt;-</a></td>
+<td>Fast Select, Replace or Add Data Frame Columns</td></tr>
+<tr><td style="width: 25%;"><a href="select_replace_vars.html">char_vars</a></td>
+<td>Fast Select, Replace or Add Data Frame Columns</td></tr>
+<tr><td style="width: 25%;"><a href="select_replace_vars.html">char_vars&lt;-</a></td>
+<td>Fast Select, Replace or Add Data Frame Columns</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">cinv</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="fmatch.html">ckmatch</a></td>
+<td>Fast Matching</td></tr>
+<tr><td style="width: 25%;"><a href="collap.html">collap</a></td>
+<td>Advanced Data Aggregation</td></tr>
+<tr><td style="width: 25%;"><a href="collap.html">collapg</a></td>
+<td>Advanced Data Aggregation</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-package.html">collapse</a></td>
+<td>Advanced and Fast Data Transformation</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-documentation.html">collapse-documentation</a></td>
+<td>Collapse Documentation &amp; Overview</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-options.html">collapse-options</a></td>
+<td>_collapse_ Package Options</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-renamed.html">collapse-renamed</a></td>
+<td>Renamed Functions</td></tr>
+<tr><td style="width: 25%;"><a href="collap.html">collapv</a></td>
+<td>Advanced Data Aggregation</td></tr>
+<tr><td style="width: 25%;"><a href="colorder.html">colorder</a></td>
+<td>Fast Reordering of Data Frame Columns</td></tr>
+<tr><td style="width: 25%;"><a href="colorder.html">colorderv</a></td>
+<td>Fast Reordering of Data Frame Columns</td></tr>
+<tr><td style="width: 25%;"><a href="small-helpers.html">copyAttrib</a></td>
+<td>Small (Helper) Functions</td></tr>
+<tr><td style="width: 25%;"><a href="small-helpers.html">copyMostAttrib</a></td>
+<td>Small (Helper) Functions</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">copyv</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+</table>
+
+<h2><a id="D">-- D --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="fdiff.html">D</a></td>
+<td>Fast (Quasi-, Log-) Differences for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fdiff.html">D.data.frame</a></td>
+<td>Fast (Quasi-, Log-) Differences for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fdiff.html">D.default</a></td>
+<td>Fast (Quasi-, Log-) Differences for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fdiff.html">D.grouped_df</a></td>
+<td>Fast (Quasi-, Log-) Differences for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fdiff.html">D.list</a></td>
+<td>Fast (Quasi-, Log-) Differences for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fdiff.html">D.matrix</a></td>
+<td>Fast (Quasi-, Log-) Differences for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fdiff.html">D.pdata.frame</a></td>
+<td>Fast (Quasi-, Log-) Differences for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fdiff.html">D.pseries</a></td>
+<td>Fast (Quasi-, Log-) Differences for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="dapply.html">dapply</a></td>
+<td>Data Apply</td></tr>
+<tr><td style="width: 25%;"><a href="data-transformations.html">data-transformations</a></td>
+<td>Data Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="select_replace_vars.html">date_vars</a></td>
+<td>Fast Select, Replace or Add Data Frame Columns</td></tr>
+<tr><td style="width: 25%;"><a href="select_replace_vars.html">date_vars&lt;-</a></td>
+<td>Fast Select, Replace or Add Data Frame Columns</td></tr>
+<tr><td style="width: 25%;"><a href="descr.html">descr</a></td>
+<td>Detailed Statistical Description of Data Frame</td></tr>
+<tr><td style="width: 25%;"><a href="descr.html">descr.default</a></td>
+<td>Detailed Statistical Description of Data Frame</td></tr>
+<tr><td style="width: 25%;"><a href="descr.html">descr.grouped_df</a></td>
+<td>Detailed Statistical Description of Data Frame</td></tr>
+<tr><td style="width: 25%;"><a href="fdiff.html">Dlog</a></td>
+<td>Fast (Quasi-, Log-) Differences for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fdiff.html">Dlog.data.frame</a></td>
+<td>Fast (Quasi-, Log-) Differences for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fdiff.html">Dlog.default</a></td>
+<td>Fast (Quasi-, Log-) Differences for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fdiff.html">Dlog.grouped_df</a></td>
+<td>Fast (Quasi-, Log-) Differences for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fdiff.html">Dlog.list</a></td>
+<td>Fast (Quasi-, Log-) Differences for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fdiff.html">Dlog.matrix</a></td>
+<td>Fast (Quasi-, Log-) Differences for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fdiff.html">Dlog.pdata.frame</a></td>
+<td>Fast (Quasi-, Log-) Differences for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fdiff.html">Dlog.pseries</a></td>
+<td>Fast (Quasi-, Log-) Differences for Time Series and Panel Data</td></tr>
+</table>
+
+<h2><a id="E">-- E --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="efficient-programming.html">efficient-programming</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+</table>
+
+<h2><a id="F">-- F --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="flag.html">F</a></td>
+<td>Fast Lags and Leads for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="flag.html">F.data.frame</a></td>
+<td>Fast Lags and Leads for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="flag.html">F.default</a></td>
+<td>Fast Lags and Leads for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="flag.html">F.grouped_df</a></td>
+<td>Fast Lags and Leads for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="flag.html">F.matrix</a></td>
+<td>Fast Lags and Leads for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="flag.html">F.pdata.frame</a></td>
+<td>Fast Lags and Leads for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="flag.html">F.pseries</a></td>
+<td>Fast Lags and Leads for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="select_replace_vars.html">fact_vars</a></td>
+<td>Fast Select, Replace or Add Data Frame Columns</td></tr>
+<tr><td style="width: 25%;"><a href="select_replace_vars.html">fact_vars&lt;-</a></td>
+<td>Fast Select, Replace or Add Data Frame Columns</td></tr>
+<tr><td style="width: 25%;"><a href="fast-data-manipulation.html">fast-data-manipulation</a></td>
+<td>Fast Data Manipulation</td></tr>
+<tr><td style="width: 25%;"><a href="fast-grouping-ordering.html">fast-grouping-ordering</a></td>
+<td>Fast Grouping and Ordering</td></tr>
+<tr><td style="width: 25%;"><a href="fast-statistical-functions.html">fast-statistical-functions</a></td>
+<td>Fast (Grouped, Weighted) Statistical Functions for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fbetween_fwithin.html">fbetween</a></td>
+<td>Fast Between (Averaging) and (Quasi-)Within (Centering) Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="fbetween_fwithin.html">fbetween.data.frame</a></td>
+<td>Fast Between (Averaging) and (Quasi-)Within (Centering) Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="fbetween_fwithin.html">fbetween.default</a></td>
+<td>Fast Between (Averaging) and (Quasi-)Within (Centering) Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="fbetween_fwithin.html">fbetween.grouped_df</a></td>
+<td>Fast Between (Averaging) and (Quasi-)Within (Centering) Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="fbetween_fwithin.html">fbetween.matrix</a></td>
+<td>Fast Between (Averaging) and (Quasi-)Within (Centering) Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="fbetween_fwithin.html">fbetween.pdata.frame</a></td>
+<td>Fast Between (Averaging) and (Quasi-)Within (Centering) Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="fbetween_fwithin.html">fbetween.pseries</a></td>
+<td>Fast Between (Averaging) and (Quasi-)Within (Centering) Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="ftransform.html">fcompute</a></td>
+<td>Fast Transform and Compute Columns on a Data Frame</td></tr>
+<tr><td style="width: 25%;"><a href="ftransform.html">fcomputev</a></td>
+<td>Fast Transform and Compute Columns on a Data Frame</td></tr>
+<tr><td style="width: 25%;"><a href="fcount.html">fcount</a></td>
+<td>Efficiently Count Observations by Group</td></tr>
+<tr><td style="width: 25%;"><a href="fcount.html">fcountv</a></td>
+<td>Efficiently Count Observations by Group</td></tr>
+<tr><td style="width: 25%;"><a href="fcumsum.html">fcumsum</a></td>
+<td>Fast (Grouped, Ordered) Cumulative Sum for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fcumsum.html">fcumsum.data.frame</a></td>
+<td>Fast (Grouped, Ordered) Cumulative Sum for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fcumsum.html">fcumsum.default</a></td>
+<td>Fast (Grouped, Ordered) Cumulative Sum for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fcumsum.html">fcumsum.grouped_df</a></td>
+<td>Fast (Grouped, Ordered) Cumulative Sum for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fcumsum.html">fcumsum.matrix</a></td>
+<td>Fast (Grouped, Ordered) Cumulative Sum for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fcumsum.html">fcumsum.pdata.frame</a></td>
+<td>Fast (Grouped, Ordered) Cumulative Sum for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fcumsum.html">fcumsum.pseries</a></td>
+<td>Fast (Grouped, Ordered) Cumulative Sum for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fdiff.html">fdiff</a></td>
+<td>Fast (Quasi-, Log-) Differences for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fdiff.html">fdiff.data.frame</a></td>
+<td>Fast (Quasi-, Log-) Differences for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fdiff.html">fdiff.default</a></td>
+<td>Fast (Quasi-, Log-) Differences for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fdiff.html">fdiff.grouped_df</a></td>
+<td>Fast (Quasi-, Log-) Differences for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fdiff.html">fdiff.list</a></td>
+<td>Fast (Quasi-, Log-) Differences for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fdiff.html">fdiff.matrix</a></td>
+<td>Fast (Quasi-, Log-) Differences for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fdiff.html">fdiff.pdata.frame</a></td>
+<td>Fast (Quasi-, Log-) Differences for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fdiff.html">fdiff.pseries</a></td>
+<td>Fast (Quasi-, Log-) Differences for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">fdim</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="fdist.html">fdist</a></td>
+<td>Fast and Flexible Distance Computations</td></tr>
+<tr><td style="width: 25%;"><a href="fdroplevels.html">fdroplevels</a></td>
+<td>Fast Removal of Unused Factor Levels</td></tr>
+<tr><td style="width: 25%;"><a href="fdroplevels.html">fdroplevels.data.frame</a></td>
+<td>Fast Removal of Unused Factor Levels</td></tr>
+<tr><td style="width: 25%;"><a href="fdroplevels.html">fdroplevels.factor</a></td>
+<td>Fast Removal of Unused Factor Levels</td></tr>
+<tr><td style="width: 25%;"><a href="funique.html">fduplicated</a></td>
+<td>Fast Unique Elements / Rows</td></tr>
+<tr><td style="width: 25%;"><a href="ffirst_flast.html">ffirst</a></td>
+<td>Fast (Grouped) First and Last Value for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="ffirst_flast.html">ffirst.data.frame</a></td>
+<td>Fast (Grouped) First and Last Value for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="ffirst_flast.html">ffirst.default</a></td>
+<td>Fast (Grouped) First and Last Value for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="ffirst_flast.html">ffirst.grouped_df</a></td>
+<td>Fast (Grouped) First and Last Value for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="ffirst_flast.html">ffirst.matrix</a></td>
+<td>Fast (Grouped) First and Last Value for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fFtest.html">fFtest</a></td>
+<td>Fast (Weighted) F-test for Linear Models (with Factors)</td></tr>
+<tr><td style="width: 25%;"><a href="fFtest.html">fFtest.default</a></td>
+<td>Fast (Weighted) F-test for Linear Models (with Factors)</td></tr>
+<tr><td style="width: 25%;"><a href="fFtest.html">fFtest.formula</a></td>
+<td>Fast (Weighted) F-test for Linear Models (with Factors)</td></tr>
+<tr><td style="width: 25%;"><a href="GRP.html">fgroup_by</a></td>
+<td>Fast Grouping / _collapse_ Grouping Objects</td></tr>
+<tr><td style="width: 25%;"><a href="GRP.html">fgroup_vars</a></td>
+<td>Fast Grouping / _collapse_ Grouping Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fgrowth.html">fgrowth</a></td>
+<td>Fast Growth Rates for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fgrowth.html">fgrowth.data.frame</a></td>
+<td>Fast Growth Rates for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fgrowth.html">fgrowth.default</a></td>
+<td>Fast Growth Rates for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fgrowth.html">fgrowth.grouped_df</a></td>
+<td>Fast Growth Rates for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fgrowth.html">fgrowth.list</a></td>
+<td>Fast Growth Rates for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fgrowth.html">fgrowth.matrix</a></td>
+<td>Fast Growth Rates for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fgrowth.html">fgrowth.pdata.frame</a></td>
+<td>Fast Growth Rates for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fgrowth.html">fgrowth.pseries</a></td>
+<td>Fast Growth Rates for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-renamed.html">fHDbetween</a></td>
+<td>Renamed Functions</td></tr>
+<tr><td style="width: 25%;"><a href="fhdbetween_fhdwithin.html">fhdbetween</a></td>
+<td>Higher-Dimensional Centering and Linear Prediction</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-renamed.html">fHDbetween.data.frame</a></td>
+<td>Renamed Functions</td></tr>
+<tr><td style="width: 25%;"><a href="fhdbetween_fhdwithin.html">fhdbetween.data.frame</a></td>
+<td>Higher-Dimensional Centering and Linear Prediction</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-renamed.html">fHDbetween.default</a></td>
+<td>Renamed Functions</td></tr>
+<tr><td style="width: 25%;"><a href="fhdbetween_fhdwithin.html">fhdbetween.default</a></td>
+<td>Higher-Dimensional Centering and Linear Prediction</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-renamed.html">fHDbetween.grouped_df</a></td>
+<td>Renamed Functions</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-renamed.html">fHDbetween.matrix</a></td>
+<td>Renamed Functions</td></tr>
+<tr><td style="width: 25%;"><a href="fhdbetween_fhdwithin.html">fhdbetween.matrix</a></td>
+<td>Higher-Dimensional Centering and Linear Prediction</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-renamed.html">fHDbetween.pdata.frame</a></td>
+<td>Renamed Functions</td></tr>
+<tr><td style="width: 25%;"><a href="fhdbetween_fhdwithin.html">fhdbetween.pdata.frame</a></td>
+<td>Higher-Dimensional Centering and Linear Prediction</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-renamed.html">fHDbetween.pseries</a></td>
+<td>Renamed Functions</td></tr>
+<tr><td style="width: 25%;"><a href="fhdbetween_fhdwithin.html">fhdbetween.pseries</a></td>
+<td>Higher-Dimensional Centering and Linear Prediction</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-renamed.html">fHDwithin</a></td>
+<td>Renamed Functions</td></tr>
+<tr><td style="width: 25%;"><a href="fhdbetween_fhdwithin.html">fhdwithin</a></td>
+<td>Higher-Dimensional Centering and Linear Prediction</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-renamed.html">fHDwithin.data.frame</a></td>
+<td>Renamed Functions</td></tr>
+<tr><td style="width: 25%;"><a href="fhdbetween_fhdwithin.html">fhdwithin.data.frame</a></td>
+<td>Higher-Dimensional Centering and Linear Prediction</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-renamed.html">fHDwithin.default</a></td>
+<td>Renamed Functions</td></tr>
+<tr><td style="width: 25%;"><a href="fhdbetween_fhdwithin.html">fhdwithin.default</a></td>
+<td>Higher-Dimensional Centering and Linear Prediction</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-renamed.html">fHDwithin.grouped_df</a></td>
+<td>Renamed Functions</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-renamed.html">fHDwithin.matrix</a></td>
+<td>Renamed Functions</td></tr>
+<tr><td style="width: 25%;"><a href="fhdbetween_fhdwithin.html">fhdwithin.matrix</a></td>
+<td>Higher-Dimensional Centering and Linear Prediction</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-renamed.html">fHDwithin.pdata.frame</a></td>
+<td>Renamed Functions</td></tr>
+<tr><td style="width: 25%;"><a href="fhdbetween_fhdwithin.html">fhdwithin.pdata.frame</a></td>
+<td>Higher-Dimensional Centering and Linear Prediction</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-renamed.html">fHDwithin.pseries</a></td>
+<td>Renamed Functions</td></tr>
+<tr><td style="width: 25%;"><a href="fhdbetween_fhdwithin.html">fhdwithin.pseries</a></td>
+<td>Higher-Dimensional Centering and Linear Prediction</td></tr>
+<tr><td style="width: 25%;"><a href="indexing.html">findex</a></td>
+<td>Fast Indexed Time Series and Panels</td></tr>
+<tr><td style="width: 25%;"><a href="indexing.html">findex_by</a></td>
+<td>Fast Indexed Time Series and Panels</td></tr>
+<tr><td style="width: 25%;"><a href="qF.html">finteraction</a></td>
+<td>Fast Factor Generation, Interactions and Vector Grouping</td></tr>
+<tr><td style="width: 25%;"><a href="flag.html">flag</a></td>
+<td>Fast Lags and Leads for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="flag.html">flag.data.frame</a></td>
+<td>Fast Lags and Leads for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="flag.html">flag.default</a></td>
+<td>Fast Lags and Leads for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="flag.html">flag.grouped_df</a></td>
+<td>Fast Lags and Leads for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="flag.html">flag.matrix</a></td>
+<td>Fast Lags and Leads for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="flag.html">flag.pdata.frame</a></td>
+<td>Fast Lags and Leads for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="flag.html">flag.pseries</a></td>
+<td>Fast Lags and Leads for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="ffirst_flast.html">flast</a></td>
+<td>Fast (Grouped) First and Last Value for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="ffirst_flast.html">flast.data.frame</a></td>
+<td>Fast (Grouped) First and Last Value for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="ffirst_flast.html">flast.default</a></td>
+<td>Fast (Grouped) First and Last Value for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="ffirst_flast.html">flast.grouped_df</a></td>
+<td>Fast (Grouped) First and Last Value for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="ffirst_flast.html">flast.matrix</a></td>
+<td>Fast (Grouped) First and Last Value for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="flm.html">flm</a></td>
+<td>Fast (Weighted) Linear Model Fitting</td></tr>
+<tr><td style="width: 25%;"><a href="flm.html">flm.default</a></td>
+<td>Fast (Weighted) Linear Model Fitting</td></tr>
+<tr><td style="width: 25%;"><a href="flm.html">flm.formula</a></td>
+<td>Fast (Weighted) Linear Model Fitting</td></tr>
+<tr><td style="width: 25%;"><a href="fmatch.html">fmatch</a></td>
+<td>Fast Matching</td></tr>
+<tr><td style="width: 25%;"><a href="fmin_fmax.html">fmax</a></td>
+<td>Fast (Grouped) Maxima and Minima for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fmin_fmax.html">fmax.data.frame</a></td>
+<td>Fast (Grouped) Maxima and Minima for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fmin_fmax.html">fmax.default</a></td>
+<td>Fast (Grouped) Maxima and Minima for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fmin_fmax.html">fmax.grouped_df</a></td>
+<td>Fast (Grouped) Maxima and Minima for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fmin_fmax.html">fmax.matrix</a></td>
+<td>Fast (Grouped) Maxima and Minima for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fmean.html">fmean</a></td>
+<td>Fast (Grouped, Weighted) Mean for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fmean.html">fmean.data.frame</a></td>
+<td>Fast (Grouped, Weighted) Mean for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fmean.html">fmean.default</a></td>
+<td>Fast (Grouped, Weighted) Mean for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fmean.html">fmean.grouped_df</a></td>
+<td>Fast (Grouped, Weighted) Mean for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fmean.html">fmean.matrix</a></td>
+<td>Fast (Grouped, Weighted) Mean for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fnth_fmedian.html">fmedian</a></td>
+<td>Fast (Grouped, Weighted) N'th Element/Quantile for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fnth_fmedian.html">fmedian.data.frame</a></td>
+<td>Fast (Grouped, Weighted) N'th Element/Quantile for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fnth_fmedian.html">fmedian.default</a></td>
+<td>Fast (Grouped, Weighted) N'th Element/Quantile for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fnth_fmedian.html">fmedian.grouped_df</a></td>
+<td>Fast (Grouped, Weighted) N'th Element/Quantile for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fnth_fmedian.html">fmedian.matrix</a></td>
+<td>Fast (Grouped, Weighted) N'th Element/Quantile for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fmin_fmax.html">fmin</a></td>
+<td>Fast (Grouped) Maxima and Minima for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fmin_fmax.html">fmin.data.frame</a></td>
+<td>Fast (Grouped) Maxima and Minima for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fmin_fmax.html">fmin.default</a></td>
+<td>Fast (Grouped) Maxima and Minima for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fmin_fmax.html">fmin.grouped_df</a></td>
+<td>Fast (Grouped) Maxima and Minima for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fmin_fmax.html">fmin.matrix</a></td>
+<td>Fast (Grouped) Maxima and Minima for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fmode.html">fmode</a></td>
+<td>Fast (Grouped, Weighted) Statistical Mode for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fmode.html">fmode.data.frame</a></td>
+<td>Fast (Grouped, Weighted) Statistical Mode for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fmode.html">fmode.default</a></td>
+<td>Fast (Grouped, Weighted) Statistical Mode for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fmode.html">fmode.grouped_df</a></td>
+<td>Fast (Grouped, Weighted) Statistical Mode for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fmode.html">fmode.matrix</a></td>
+<td>Fast (Grouped, Weighted) Statistical Mode for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="ftransform.html">fmutate</a></td>
+<td>Fast Transform and Compute Columns on a Data Frame</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">fncol</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-renamed.html">fNdistinct</a></td>
+<td>Renamed Functions</td></tr>
+<tr><td style="width: 25%;"><a href="fndistinct.html">fndistinct</a></td>
+<td>Fast (Grouped) Distinct Value Count for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-renamed.html">fNdistinct.data.frame</a></td>
+<td>Renamed Functions</td></tr>
+<tr><td style="width: 25%;"><a href="fndistinct.html">fndistinct.data.frame</a></td>
+<td>Fast (Grouped) Distinct Value Count for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-renamed.html">fNdistinct.default</a></td>
+<td>Renamed Functions</td></tr>
+<tr><td style="width: 25%;"><a href="fndistinct.html">fndistinct.default</a></td>
+<td>Fast (Grouped) Distinct Value Count for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-renamed.html">fNdistinct.grouped_df</a></td>
+<td>Renamed Functions</td></tr>
+<tr><td style="width: 25%;"><a href="fndistinct.html">fndistinct.grouped_df</a></td>
+<td>Fast (Grouped) Distinct Value Count for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-renamed.html">fNdistinct.matrix</a></td>
+<td>Renamed Functions</td></tr>
+<tr><td style="width: 25%;"><a href="fndistinct.html">fndistinct.matrix</a></td>
+<td>Fast (Grouped) Distinct Value Count for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">fnlevels</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-renamed.html">fNobs</a></td>
+<td>Renamed Functions</td></tr>
+<tr><td style="width: 25%;"><a href="fnobs.html">fnobs</a></td>
+<td>Fast (Grouped) Observation Count for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-renamed.html">fNobs.data.frame</a></td>
+<td>Renamed Functions</td></tr>
+<tr><td style="width: 25%;"><a href="fnobs.html">fnobs.data.frame</a></td>
+<td>Fast (Grouped) Observation Count for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-renamed.html">fNobs.default</a></td>
+<td>Renamed Functions</td></tr>
+<tr><td style="width: 25%;"><a href="fnobs.html">fnobs.default</a></td>
+<td>Fast (Grouped) Observation Count for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-renamed.html">fNobs.grouped_df</a></td>
+<td>Renamed Functions</td></tr>
+<tr><td style="width: 25%;"><a href="fnobs.html">fnobs.grouped_df</a></td>
+<td>Fast (Grouped) Observation Count for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-renamed.html">fNobs.matrix</a></td>
+<td>Renamed Functions</td></tr>
+<tr><td style="width: 25%;"><a href="fnobs.html">fnobs.matrix</a></td>
+<td>Fast (Grouped) Observation Count for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">fnrow</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="fnth_fmedian.html">fnth</a></td>
+<td>Fast (Grouped, Weighted) N'th Element/Quantile for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fnth_fmedian.html">fnth.data.frame</a></td>
+<td>Fast (Grouped, Weighted) N'th Element/Quantile for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fnth_fmedian.html">fnth.default</a></td>
+<td>Fast (Grouped, Weighted) N'th Element/Quantile for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fnth_fmedian.html">fnth.grouped_df</a></td>
+<td>Fast (Grouped, Weighted) N'th Element/Quantile for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fnth_fmedian.html">fnth.matrix</a></td>
+<td>Fast (Grouped, Weighted) N'th Element/Quantile for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="funique.html">fnunique</a></td>
+<td>Fast Unique Elements / Rows</td></tr>
+<tr><td style="width: 25%;"><a href="fprod.html">fprod</a></td>
+<td>Fast (Grouped, Weighted) Product for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fprod.html">fprod.data.frame</a></td>
+<td>Fast (Grouped, Weighted) Product for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fprod.html">fprod.default</a></td>
+<td>Fast (Grouped, Weighted) Product for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fprod.html">fprod.grouped_df</a></td>
+<td>Fast (Grouped, Weighted) Product for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fprod.html">fprod.matrix</a></td>
+<td>Fast (Grouped, Weighted) Product for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fquantile.html">fquantile</a></td>
+<td>Fast (Weighted) Sample Quantiles and Range</td></tr>
+<tr><td style="width: 25%;"><a href="fquantile.html">frange</a></td>
+<td>Fast (Weighted) Sample Quantiles and Range</td></tr>
+<tr><td style="width: 25%;"><a href="frename.html">frename</a></td>
+<td>Fast Renaming and Relabelling Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fscale.html">fscale</a></td>
+<td>Fast (Grouped, Weighted) Scaling and Centering of Matrix-like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fscale.html">fscale.data.frame</a></td>
+<td>Fast (Grouped, Weighted) Scaling and Centering of Matrix-like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fscale.html">fscale.default</a></td>
+<td>Fast (Grouped, Weighted) Scaling and Centering of Matrix-like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fscale.html">fscale.grouped_df</a></td>
+<td>Fast (Grouped, Weighted) Scaling and Centering of Matrix-like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fscale.html">fscale.matrix</a></td>
+<td>Fast (Grouped, Weighted) Scaling and Centering of Matrix-like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fscale.html">fscale.pdata.frame</a></td>
+<td>Fast (Grouped, Weighted) Scaling and Centering of Matrix-like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fscale.html">fscale.pseries</a></td>
+<td>Fast (Grouped, Weighted) Scaling and Centering of Matrix-like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fvar_fsd.html">fsd</a></td>
+<td>Fast (Grouped, Weighted) Variance and Standard Deviation for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fvar_fsd.html">fsd.data.frame</a></td>
+<td>Fast (Grouped, Weighted) Variance and Standard Deviation for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fvar_fsd.html">fsd.default</a></td>
+<td>Fast (Grouped, Weighted) Variance and Standard Deviation for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fvar_fsd.html">fsd.grouped_df</a></td>
+<td>Fast (Grouped, Weighted) Variance and Standard Deviation for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fvar_fsd.html">fsd.matrix</a></td>
+<td>Fast (Grouped, Weighted) Variance and Standard Deviation for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="select_replace_vars.html">fselect</a></td>
+<td>Fast Select, Replace or Add Data Frame Columns</td></tr>
+<tr><td style="width: 25%;"><a href="select_replace_vars.html">fselect&lt;-</a></td>
+<td>Fast Select, Replace or Add Data Frame Columns</td></tr>
+<tr><td style="width: 25%;"><a href="fslice.html">fslice</a></td>
+<td>Fast Slicing of Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fslice.html">fslicev</a></td>
+<td>Fast Slicing of Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fsubset.html">fsubset</a></td>
+<td>Fast Subsetting Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fsubset.html">fsubset.data.frame</a></td>
+<td>Fast Subsetting Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fsubset.html">fsubset.default</a></td>
+<td>Fast Subsetting Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fsubset.html">fsubset.matrix</a></td>
+<td>Fast Subsetting Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fsubset.html">fsubset.pdata.frame</a></td>
+<td>Fast Subsetting Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fsubset.html">fsubset.pseries</a></td>
+<td>Fast Subsetting Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fsum.html">fsum</a></td>
+<td>Fast (Grouped, Weighted) Sum for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fsum.html">fsum.data.frame</a></td>
+<td>Fast (Grouped, Weighted) Sum for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fsum.html">fsum.default</a></td>
+<td>Fast (Grouped, Weighted) Sum for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fsum.html">fsum.grouped_df</a></td>
+<td>Fast (Grouped, Weighted) Sum for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fsum.html">fsum.matrix</a></td>
+<td>Fast (Grouped, Weighted) Sum for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fsummarise.html">fsummarise</a></td>
+<td>Fast Summarise</td></tr>
+<tr><td style="width: 25%;"><a href="fsummarise.html">fsummarize</a></td>
+<td>Fast Summarise</td></tr>
+<tr><td style="width: 25%;"><a href="ftransform.html">ftransform</a></td>
+<td>Fast Transform and Compute Columns on a Data Frame</td></tr>
+<tr><td style="width: 25%;"><a href="ftransform.html">ftransform&lt;-</a></td>
+<td>Fast Transform and Compute Columns on a Data Frame</td></tr>
+<tr><td style="width: 25%;"><a href="ftransform.html">ftransformv</a></td>
+<td>Fast Transform and Compute Columns on a Data Frame</td></tr>
+<tr><td style="width: 25%;"><a href="GRP.html">fungroup</a></td>
+<td>Fast Grouping / _collapse_ Grouping Objects</td></tr>
+<tr><td style="width: 25%;"><a href="funique.html">funique</a></td>
+<td>Fast Unique Elements / Rows</td></tr>
+<tr><td style="width: 25%;"><a href="funique.html">funique.data.frame</a></td>
+<td>Fast Unique Elements / Rows</td></tr>
+<tr><td style="width: 25%;"><a href="funique.html">funique.default</a></td>
+<td>Fast Unique Elements / Rows</td></tr>
+<tr><td style="width: 25%;"><a href="funique.html">funique.pdata.frame</a></td>
+<td>Fast Unique Elements / Rows</td></tr>
+<tr><td style="width: 25%;"><a href="funique.html">funique.pseries</a></td>
+<td>Fast Unique Elements / Rows</td></tr>
+<tr><td style="width: 25%;"><a href="funique.html">funique.sf</a></td>
+<td>Fast Unique Elements / Rows</td></tr>
+<tr><td style="width: 25%;"><a href="fvar_fsd.html">fvar</a></td>
+<td>Fast (Grouped, Weighted) Variance and Standard Deviation for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fvar_fsd.html">fvar.data.frame</a></td>
+<td>Fast (Grouped, Weighted) Variance and Standard Deviation for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fvar_fsd.html">fvar.default</a></td>
+<td>Fast (Grouped, Weighted) Variance and Standard Deviation for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fvar_fsd.html">fvar.grouped_df</a></td>
+<td>Fast (Grouped, Weighted) Variance and Standard Deviation for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fvar_fsd.html">fvar.matrix</a></td>
+<td>Fast (Grouped, Weighted) Variance and Standard Deviation for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fbetween_fwithin.html">fwithin</a></td>
+<td>Fast Between (Averaging) and (Quasi-)Within (Centering) Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="fbetween_fwithin.html">fwithin.data.frame</a></td>
+<td>Fast Between (Averaging) and (Quasi-)Within (Centering) Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="fbetween_fwithin.html">fwithin.default</a></td>
+<td>Fast Between (Averaging) and (Quasi-)Within (Centering) Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="fbetween_fwithin.html">fwithin.grouped_df</a></td>
+<td>Fast Between (Averaging) and (Quasi-)Within (Centering) Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="fbetween_fwithin.html">fwithin.matrix</a></td>
+<td>Fast Between (Averaging) and (Quasi-)Within (Centering) Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="fbetween_fwithin.html">fwithin.pdata.frame</a></td>
+<td>Fast Between (Averaging) and (Quasi-)Within (Centering) Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="fbetween_fwithin.html">fwithin.pseries</a></td>
+<td>Fast Between (Averaging) and (Quasi-)Within (Centering) Transformations</td></tr>
+</table>
+
+<h2><a id="G">-- G --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="fgrowth.html">G</a></td>
+<td>Fast Growth Rates for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fgrowth.html">G.data.frame</a></td>
+<td>Fast Growth Rates for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fgrowth.html">G.default</a></td>
+<td>Fast Growth Rates for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fgrowth.html">G.grouped_df</a></td>
+<td>Fast Growth Rates for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fgrowth.html">G.list</a></td>
+<td>Fast Growth Rates for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fgrowth.html">G.matrix</a></td>
+<td>Fast Growth Rates for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fgrowth.html">G.pdata.frame</a></td>
+<td>Fast Growth Rates for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="fgrowth.html">G.pseries</a></td>
+<td>Fast Growth Rates for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="GRP.html">gby</a></td>
+<td>Fast Grouping / _collapse_ Grouping Objects</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-options.html">get_collapse</a></td>
+<td>_collapse_ Package Options</td></tr>
+<tr><td style="width: 25%;"><a href="extract_list.html">get_elem</a></td>
+<td>Find and Extract / Subset List Elements</td></tr>
+<tr><td style="width: 25%;"><a href="select_replace_vars.html">get_vars</a></td>
+<td>Fast Select, Replace or Add Data Frame Columns</td></tr>
+<tr><td style="width: 25%;"><a href="select_replace_vars.html">get_vars&lt;-</a></td>
+<td>Fast Select, Replace or Add Data Frame Columns</td></tr>
+<tr><td style="width: 25%;"><a href="GGDC10S.html">GGDC10S</a></td>
+<td>Groningen Growth and Development Centre 10-Sector Database</td></tr>
+<tr><td style="width: 25%;"><a href="GRP.html">greorder</a></td>
+<td>Fast Grouping / _collapse_ Grouping Objects</td></tr>
+<tr><td style="width: 25%;"><a href="group.html">group</a></td>
+<td>Fast Hash-Based Grouping</td></tr>
+<tr><td style="width: 25%;"><a href="groupid.html">groupid</a></td>
+<td>Generate Run-Length Type Group-Id</td></tr>
+<tr><td style="width: 25%;"><a href="group.html">groupv</a></td>
+<td>Fast Hash-Based Grouping</td></tr>
+<tr><td style="width: 25%;"><a href="GRP.html">group_by_vars</a></td>
+<td>Fast Grouping / _collapse_ Grouping Objects</td></tr>
+<tr><td style="width: 25%;"><a href="GRP.html">GRP</a></td>
+<td>Fast Grouping / _collapse_ Grouping Objects</td></tr>
+<tr><td style="width: 25%;"><a href="GRP.html">GRP.default</a></td>
+<td>Fast Grouping / _collapse_ Grouping Objects</td></tr>
+<tr><td style="width: 25%;"><a href="GRP.html">GRP.factor</a></td>
+<td>Fast Grouping / _collapse_ Grouping Objects</td></tr>
+<tr><td style="width: 25%;"><a href="GRP.html">GRP.grouped_df</a></td>
+<td>Fast Grouping / _collapse_ Grouping Objects</td></tr>
+<tr><td style="width: 25%;"><a href="GRP.html">GRP.GRP</a></td>
+<td>Fast Grouping / _collapse_ Grouping Objects</td></tr>
+<tr><td style="width: 25%;"><a href="GRP.html">GRP.pdata.frame</a></td>
+<td>Fast Grouping / _collapse_ Grouping Objects</td></tr>
+<tr><td style="width: 25%;"><a href="GRP.html">GRP.pseries</a></td>
+<td>Fast Grouping / _collapse_ Grouping Objects</td></tr>
+<tr><td style="width: 25%;"><a href="GRP.html">GRP.qG</a></td>
+<td>Fast Grouping / _collapse_ Grouping Objects</td></tr>
+<tr><td style="width: 25%;"><a href="GRP.html">GRPid</a></td>
+<td>Fast Grouping / _collapse_ Grouping Objects</td></tr>
+<tr><td style="width: 25%;"><a href="GRP.html">GRPN</a></td>
+<td>Fast Grouping / _collapse_ Grouping Objects</td></tr>
+<tr><td style="width: 25%;"><a href="GRP.html">GRPnames</a></td>
+<td>Fast Grouping / _collapse_ Grouping Objects</td></tr>
+<tr><td style="width: 25%;"><a href="GRP.html">gsplit</a></td>
+<td>Fast Grouping / _collapse_ Grouping Objects</td></tr>
+<tr><td style="width: 25%;"><a href="select_replace_vars.html">gv</a></td>
+<td>Fast Select, Replace or Add Data Frame Columns</td></tr>
+<tr><td style="width: 25%;"><a href="select_replace_vars.html">gv&lt;-</a></td>
+<td>Fast Select, Replace or Add Data Frame Columns</td></tr>
+<tr><td style="width: 25%;"><a href="select_replace_vars.html">gvr</a></td>
+<td>Fast Select, Replace or Add Data Frame Columns</td></tr>
+<tr><td style="width: 25%;"><a href="select_replace_vars.html">gvr&lt;-</a></td>
+<td>Fast Select, Replace or Add Data Frame Columns</td></tr>
+</table>
+
+<h2><a id="H">-- H --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="extract_list.html">has_elem</a></td>
+<td>Find and Extract / Subset List Elements</td></tr>
+<tr><td style="width: 25%;"><a href="fhdbetween_fhdwithin.html">HDB</a></td>
+<td>Higher-Dimensional Centering and Linear Prediction</td></tr>
+<tr><td style="width: 25%;"><a href="fhdbetween_fhdwithin.html">HDB.data.frame</a></td>
+<td>Higher-Dimensional Centering and Linear Prediction</td></tr>
+<tr><td style="width: 25%;"><a href="fhdbetween_fhdwithin.html">HDB.default</a></td>
+<td>Higher-Dimensional Centering and Linear Prediction</td></tr>
+<tr><td style="width: 25%;"><a href="fhdbetween_fhdwithin.html">HDB.matrix</a></td>
+<td>Higher-Dimensional Centering and Linear Prediction</td></tr>
+<tr><td style="width: 25%;"><a href="fhdbetween_fhdwithin.html">HDB.pdata.frame</a></td>
+<td>Higher-Dimensional Centering and Linear Prediction</td></tr>
+<tr><td style="width: 25%;"><a href="fhdbetween_fhdwithin.html">HDB.pseries</a></td>
+<td>Higher-Dimensional Centering and Linear Prediction</td></tr>
+<tr><td style="width: 25%;"><a href="fhdbetween_fhdwithin.html">HDW</a></td>
+<td>Higher-Dimensional Centering and Linear Prediction</td></tr>
+<tr><td style="width: 25%;"><a href="fhdbetween_fhdwithin.html">HDW.data.frame</a></td>
+<td>Higher-Dimensional Centering and Linear Prediction</td></tr>
+<tr><td style="width: 25%;"><a href="fhdbetween_fhdwithin.html">HDW.default</a></td>
+<td>Higher-Dimensional Centering and Linear Prediction</td></tr>
+<tr><td style="width: 25%;"><a href="fhdbetween_fhdwithin.html">HDW.matrix</a></td>
+<td>Higher-Dimensional Centering and Linear Prediction</td></tr>
+<tr><td style="width: 25%;"><a href="fhdbetween_fhdwithin.html">HDW.pdata.frame</a></td>
+<td>Higher-Dimensional Centering and Linear Prediction</td></tr>
+<tr><td style="width: 25%;"><a href="fhdbetween_fhdwithin.html">HDW.pseries</a></td>
+<td>Higher-Dimensional Centering and Linear Prediction</td></tr>
+</table>
+
+<h2><a id="I">-- I --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="indexing.html">iby</a></td>
+<td>Fast Indexed Time Series and Panels</td></tr>
+<tr><td style="width: 25%;"><a href="indexing.html">indexing</a></td>
+<td>Fast Indexed Time Series and Panels</td></tr>
+<tr><td style="width: 25%;"><a href="extract_list.html">irreg_elem</a></td>
+<td>Find and Extract / Subset List Elements</td></tr>
+<tr><td style="width: 25%;"><a href="small-helpers.html">is_categorical</a></td>
+<td>Small (Helper) Functions</td></tr>
+<tr><td style="width: 25%;"><a href="small-helpers.html">is_date</a></td>
+<td>Small (Helper) Functions</td></tr>
+<tr><td style="width: 25%;"><a href="GRP.html">is_GRP</a></td>
+<td>Fast Grouping / _collapse_ Grouping Objects</td></tr>
+<tr><td style="width: 25%;"><a href="indexing.html">is_irregular</a></td>
+<td>Fast Indexed Time Series and Panels</td></tr>
+<tr><td style="width: 25%;"><a href="qF.html">is_qG</a></td>
+<td>Fast Factor Generation, Interactions and Vector Grouping</td></tr>
+<tr><td style="width: 25%;"><a href="is_unlistable.html">is_unlistable</a></td>
+<td>Unlistable Lists</td></tr>
+<tr><td style="width: 25%;"><a href="qF.html">itn</a></td>
+<td>Fast Factor Generation, Interactions and Vector Grouping</td></tr>
+<tr><td style="width: 25%;"><a href="indexing.html">ix</a></td>
+<td>Fast Indexed Time Series and Panels</td></tr>
+</table>
+
+<h2><a id="J">-- J --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="join.html">join</a></td>
+<td>Fast and Verbose Table Joins</td></tr>
+</table>
+
+<h2><a id="L">-- L --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="flag.html">L</a></td>
+<td>Fast Lags and Leads for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="flag.html">L.data.frame</a></td>
+<td>Fast Lags and Leads for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="flag.html">L.default</a></td>
+<td>Fast Lags and Leads for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="flag.html">L.grouped_df</a></td>
+<td>Fast Lags and Leads for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="flag.html">L.matrix</a></td>
+<td>Fast Lags and Leads for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="flag.html">L.pdata.frame</a></td>
+<td>Fast Lags and Leads for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="flag.html">L.pseries</a></td>
+<td>Fast Lags and Leads for Time Series and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="ldepth.html">ldepth</a></td>
+<td>Determine the Depth / Level of Nesting of a List</td></tr>
+<tr><td style="width: 25%;"><a href="GRP.html">length.GRP</a></td>
+<td>Fast Grouping / _collapse_ Grouping Objects</td></tr>
+<tr><td style="width: 25%;"><a href="list-processing.html">list-processing</a></td>
+<td>List Processing</td></tr>
+<tr><td style="width: 25%;"><a href="extract_list.html">list_elem</a></td>
+<td>Find and Extract / Subset List Elements</td></tr>
+<tr><td style="width: 25%;"><a href="extract_list.html">list_elem&lt;-</a></td>
+<td>Find and Extract / Subset List Elements</td></tr>
+<tr><td style="width: 25%;"><a href="select_replace_vars.html">logi_vars</a></td>
+<td>Fast Select, Replace or Add Data Frame Columns</td></tr>
+<tr><td style="width: 25%;"><a href="select_replace_vars.html">logi_vars&lt;-</a></td>
+<td>Fast Select, Replace or Add Data Frame Columns</td></tr>
+</table>
+
+<h2><a id="M">-- M --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="small-helpers.html">massign</a></td>
+<td>Small (Helper) Functions</td></tr>
+<tr><td style="width: 25%;"><a href="quick-conversion.html">mctl</a></td>
+<td>Quick Data Conversion</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">missing_cases</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="quick-conversion.html">mrtl</a></td>
+<td>Quick Data Conversion</td></tr>
+<tr><td style="width: 25%;"><a href="ftransform.html">mtt</a></td>
+<td>Fast Transform and Compute Columns on a Data Frame</td></tr>
+</table>
+
+<h2><a id="N">-- N --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="small-helpers.html">namlab</a></td>
+<td>Small (Helper) Functions</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">na_focb</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">na_insert</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">na_locf</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">na_omit</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">na_rm</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="select_replace_vars.html">num_vars</a></td>
+<td>Fast Select, Replace or Add Data Frame Columns</td></tr>
+<tr><td style="width: 25%;"><a href="select_replace_vars.html">num_vars&lt;-</a></td>
+<td>Fast Select, Replace or Add Data Frame Columns</td></tr>
+<tr><td style="width: 25%;"><a href="select_replace_vars.html">nv</a></td>
+<td>Fast Select, Replace or Add Data Frame Columns</td></tr>
+<tr><td style="width: 25%;"><a href="select_replace_vars.html">nv&lt;-</a></td>
+<td>Fast Select, Replace or Add Data Frame Columns</td></tr>
+</table>
+
+<h2><a id="P">-- P --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="pad.html">pad</a></td>
+<td>Pad Matrix-Like Objects with a Value</td></tr>
+<tr><td style="width: 25%;"><a href="pivot.html">pivot</a></td>
+<td>Fast and Easy Data Reshaping</td></tr>
+<tr><td style="width: 25%;"><a href="GRP.html">plot.GRP</a></td>
+<td>Fast Grouping / _collapse_ Grouping Objects</td></tr>
+<tr><td style="width: 25%;"><a href="psmat.html">plot.psmat</a></td>
+<td>Matrix / Array from Panel Series</td></tr>
+<tr><td style="width: 25%;"><a href="descr.html">print.descr</a></td>
+<td>Detailed Statistical Description of Data Frame</td></tr>
+<tr><td style="width: 25%;"><a href="GRP.html">print.GRP</a></td>
+<td>Fast Grouping / _collapse_ Grouping Objects</td></tr>
+<tr><td style="width: 25%;"><a href="indexing.html">print.index_df</a></td>
+<td>Fast Indexed Time Series and Panels</td></tr>
+<tr><td style="width: 25%;"><a href="pwcor_pwcov_pwnobs.html">print.pwcor</a></td>
+<td>(Pairwise, Weighted) Correlations, Covariances and Observation Counts</td></tr>
+<tr><td style="width: 25%;"><a href="pwcor_pwcov_pwnobs.html">print.pwcov</a></td>
+<td>(Pairwise, Weighted) Correlations, Covariances and Observation Counts</td></tr>
+<tr><td style="width: 25%;"><a href="qsu.html">print.qsu</a></td>
+<td>Fast (Grouped, Weighted) Summary Statistics for Cross-Sectional and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="psacf.html">psacf</a></td>
+<td>Auto- and Cross- Covariance and Correlation Function Estimation for Panel Series</td></tr>
+<tr><td style="width: 25%;"><a href="psacf.html">psacf.data.frame</a></td>
+<td>Auto- and Cross- Covariance and Correlation Function Estimation for Panel Series</td></tr>
+<tr><td style="width: 25%;"><a href="psacf.html">psacf.default</a></td>
+<td>Auto- and Cross- Covariance and Correlation Function Estimation for Panel Series</td></tr>
+<tr><td style="width: 25%;"><a href="psacf.html">psacf.pdata.frame</a></td>
+<td>Auto- and Cross- Covariance and Correlation Function Estimation for Panel Series</td></tr>
+<tr><td style="width: 25%;"><a href="psacf.html">psacf.pseries</a></td>
+<td>Auto- and Cross- Covariance and Correlation Function Estimation for Panel Series</td></tr>
+<tr><td style="width: 25%;"><a href="psacf.html">psccf</a></td>
+<td>Auto- and Cross- Covariance and Correlation Function Estimation for Panel Series</td></tr>
+<tr><td style="width: 25%;"><a href="psacf.html">psccf.default</a></td>
+<td>Auto- and Cross- Covariance and Correlation Function Estimation for Panel Series</td></tr>
+<tr><td style="width: 25%;"><a href="psacf.html">psccf.pseries</a></td>
+<td>Auto- and Cross- Covariance and Correlation Function Estimation for Panel Series</td></tr>
+<tr><td style="width: 25%;"><a href="psmat.html">psmat</a></td>
+<td>Matrix / Array from Panel Series</td></tr>
+<tr><td style="width: 25%;"><a href="psmat.html">psmat.data.frame</a></td>
+<td>Matrix / Array from Panel Series</td></tr>
+<tr><td style="width: 25%;"><a href="psmat.html">psmat.default</a></td>
+<td>Matrix / Array from Panel Series</td></tr>
+<tr><td style="width: 25%;"><a href="psmat.html">psmat.pdata.frame</a></td>
+<td>Matrix / Array from Panel Series</td></tr>
+<tr><td style="width: 25%;"><a href="psmat.html">psmat.pseries</a></td>
+<td>Matrix / Array from Panel Series</td></tr>
+<tr><td style="width: 25%;"><a href="psacf.html">pspacf</a></td>
+<td>Auto- and Cross- Covariance and Correlation Function Estimation for Panel Series</td></tr>
+<tr><td style="width: 25%;"><a href="psacf.html">pspacf.data.frame</a></td>
+<td>Auto- and Cross- Covariance and Correlation Function Estimation for Panel Series</td></tr>
+<tr><td style="width: 25%;"><a href="psacf.html">pspacf.default</a></td>
+<td>Auto- and Cross- Covariance and Correlation Function Estimation for Panel Series</td></tr>
+<tr><td style="width: 25%;"><a href="psacf.html">pspacf.pdata.frame</a></td>
+<td>Auto- and Cross- Covariance and Correlation Function Estimation for Panel Series</td></tr>
+<tr><td style="width: 25%;"><a href="psacf.html">pspacf.pseries</a></td>
+<td>Auto- and Cross- Covariance and Correlation Function Estimation for Panel Series</td></tr>
+<tr><td style="width: 25%;"><a href="pwcor_pwcov_pwnobs.html">pwcor</a></td>
+<td>(Pairwise, Weighted) Correlations, Covariances and Observation Counts</td></tr>
+<tr><td style="width: 25%;"><a href="pwcor_pwcov_pwnobs.html">pwcov</a></td>
+<td>(Pairwise, Weighted) Correlations, Covariances and Observation Counts</td></tr>
+<tr><td style="width: 25%;"><a href="pwcor_pwcov_pwnobs.html">pwnobs</a></td>
+<td>(Pairwise, Weighted) Correlations, Covariances and Observation Counts</td></tr>
+</table>
+
+<h2><a id="Q">-- Q --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="quick-conversion.html">qDF</a></td>
+<td>Quick Data Conversion</td></tr>
+<tr><td style="width: 25%;"><a href="quick-conversion.html">qDT</a></td>
+<td>Quick Data Conversion</td></tr>
+<tr><td style="width: 25%;"><a href="qF.html">qF</a></td>
+<td>Fast Factor Generation, Interactions and Vector Grouping</td></tr>
+<tr><td style="width: 25%;"><a href="qF.html">qG</a></td>
+<td>Fast Factor Generation, Interactions and Vector Grouping</td></tr>
+<tr><td style="width: 25%;"><a href="quick-conversion.html">qM</a></td>
+<td>Quick Data Conversion</td></tr>
+<tr><td style="width: 25%;"><a href="qsu.html">qsu</a></td>
+<td>Fast (Grouped, Weighted) Summary Statistics for Cross-Sectional and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="qsu.html">qsu.data.frame</a></td>
+<td>Fast (Grouped, Weighted) Summary Statistics for Cross-Sectional and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="qsu.html">qsu.default</a></td>
+<td>Fast (Grouped, Weighted) Summary Statistics for Cross-Sectional and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="qsu.html">qsu.grouped_df</a></td>
+<td>Fast (Grouped, Weighted) Summary Statistics for Cross-Sectional and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="qsu.html">qsu.matrix</a></td>
+<td>Fast (Grouped, Weighted) Summary Statistics for Cross-Sectional and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="qsu.html">qsu.pdata.frame</a></td>
+<td>Fast (Grouped, Weighted) Summary Statistics for Cross-Sectional and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="qsu.html">qsu.pseries</a></td>
+<td>Fast (Grouped, Weighted) Summary Statistics for Cross-Sectional and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="qsu.html">qsu.sf</a></td>
+<td>Fast (Grouped, Weighted) Summary Statistics for Cross-Sectional and Panel Data</td></tr>
+<tr><td style="width: 25%;"><a href="qtab.html">qtab</a></td>
+<td>Fast (Weighted) Cross Tabulation</td></tr>
+<tr><td style="width: 25%;"><a href="qtab.html">qtable</a></td>
+<td>Fast (Weighted) Cross Tabulation</td></tr>
+<tr><td style="width: 25%;"><a href="quick-conversion.html">qTBL</a></td>
+<td>Quick Data Conversion</td></tr>
+<tr><td style="width: 25%;"><a href="quick-conversion.html">quick-conversion</a></td>
+<td>Quick Data Conversion</td></tr>
+</table>
+
+<h2><a id="R">-- R --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="radixorder.html">radixorder</a></td>
+<td>Fast Radix-Based Ordering</td></tr>
+<tr><td style="width: 25%;"><a href="radixorder.html">radixorderv</a></td>
+<td>Fast Radix-Based Ordering</td></tr>
+<tr><td style="width: 25%;"><a href="rapply2d.html">rapply2d</a></td>
+<td>Recursively Apply a Function to a List of Data Objects</td></tr>
+<tr><td style="width: 25%;"><a href="recode-replace.html">recode-replace</a></td>
+<td>Recode and Replace Values in Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="recode-replace.html">recode_char</a></td>
+<td>Recode and Replace Values in Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="recode-replace.html">recode_num</a></td>
+<td>Recode and Replace Values in Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="extract_list.html">reg_elem</a></td>
+<td>Find and Extract / Subset List Elements</td></tr>
+<tr><td style="width: 25%;"><a href="indexing.html">reindex</a></td>
+<td>Fast Indexed Time Series and Panels</td></tr>
+<tr><td style="width: 25%;"><a href="frename.html">relabel</a></td>
+<td>Fast Renaming and Relabelling Objects</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-renamed.html">replace_Inf</a></td>
+<td>Renamed Functions</td></tr>
+<tr><td style="width: 25%;"><a href="recode-replace.html">replace_inf</a></td>
+<td>Recode and Replace Values in Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-renamed.html">replace_NA</a></td>
+<td>Renamed Functions</td></tr>
+<tr><td style="width: 25%;"><a href="recode-replace.html">replace_na</a></td>
+<td>Recode and Replace Values in Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="recode-replace.html">replace_outliers</a></td>
+<td>Recode and Replace Values in Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="small-helpers.html">rm_stub</a></td>
+<td>Small (Helper) Functions</td></tr>
+<tr><td style="width: 25%;"><a href="frename.html">rnm</a></td>
+<td>Fast Renaming and Relabelling Objects</td></tr>
+<tr><td style="width: 25%;"><a href="rowbind.html">rowbind</a></td>
+<td>Row-Bind Lists / Data Frame-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="roworder.html">roworder</a></td>
+<td>Fast Reordering of Data Frame Rows</td></tr>
+<tr><td style="width: 25%;"><a href="roworder.html">roworderv</a></td>
+<td>Fast Reordering of Data Frame Rows</td></tr>
+<tr><td style="width: 25%;"><a href="rsplit.html">rsplit</a></td>
+<td>Fast (Recursive) Splitting</td></tr>
+<tr><td style="width: 25%;"><a href="rsplit.html">rsplit.data.frame</a></td>
+<td>Fast (Recursive) Splitting</td></tr>
+<tr><td style="width: 25%;"><a href="rsplit.html">rsplit.default</a></td>
+<td>Fast (Recursive) Splitting</td></tr>
+<tr><td style="width: 25%;"><a href="rsplit.html">rsplit.matrix</a></td>
+<td>Fast (Recursive) Splitting</td></tr>
+</table>
+
+<h2><a id="S">-- S --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="fsubset.html">sbt</a></td>
+<td>Fast Subsetting Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="seqid.html">seqid</a></td>
+<td>Generate Group-Id from Integer Sequences</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">seq_col</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">seq_row</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="small-helpers.html">setAttrib</a></td>
+<td>Small (Helper) Functions</td></tr>
+<tr><td style="width: 25%;"><a href="small-helpers.html">setattrib</a></td>
+<td>Small (Helper) Functions</td></tr>
+<tr><td style="width: 25%;"><a href="small-helpers.html">setColnames</a></td>
+<td>Small (Helper) Functions</td></tr>
+<tr><td style="width: 25%;"><a href="small-helpers.html">setDimnames</a></td>
+<td>Small (Helper) Functions</td></tr>
+<tr><td style="width: 25%;"><a href="small-helpers.html">setLabels</a></td>
+<td>Small (Helper) Functions</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">setop</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="frename.html">setrelabel</a></td>
+<td>Fast Renaming and Relabelling Objects</td></tr>
+<tr><td style="width: 25%;"><a href="frename.html">setrename</a></td>
+<td>Fast Renaming and Relabelling Objects</td></tr>
+<tr><td style="width: 25%;"><a href="small-helpers.html">setRownames</a></td>
+<td>Small (Helper) Functions</td></tr>
+<tr><td style="width: 25%;"><a href="ftransform.html">settfm</a></td>
+<td>Fast Transform and Compute Columns on a Data Frame</td></tr>
+<tr><td style="width: 25%;"><a href="ftransform.html">settfmv</a></td>
+<td>Fast Transform and Compute Columns on a Data Frame</td></tr>
+<tr><td style="width: 25%;"><a href="TRA.html">setTRA</a></td>
+<td>Transform Data by (Grouped) Replacing or Sweeping out Statistics</td></tr>
+<tr><td style="width: 25%;"><a href="ftransform.html">settransform</a></td>
+<td>Fast Transform and Compute Columns on a Data Frame</td></tr>
+<tr><td style="width: 25%;"><a href="ftransform.html">settransformv</a></td>
+<td>Fast Transform and Compute Columns on a Data Frame</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">setv</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-options.html">set_collapse</a></td>
+<td>_collapse_ Package Options</td></tr>
+<tr><td style="width: 25%;"><a href="select_replace_vars.html">slt</a></td>
+<td>Fast Select, Replace or Add Data Frame Columns</td></tr>
+<tr><td style="width: 25%;"><a href="select_replace_vars.html">slt&lt;-</a></td>
+<td>Fast Select, Replace or Add Data Frame Columns</td></tr>
+<tr><td style="width: 25%;"><a href="small-helpers.html">small-helpers</a></td>
+<td>Small (Helper) Functions</td></tr>
+<tr><td style="width: 25%;"><a href="fsummarise.html">smr</a></td>
+<td>Fast Summarise</td></tr>
+<tr><td style="width: 25%;"><a href="fsubset.html">ss</a></td>
+<td>Fast Subsetting Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fscale.html">STD</a></td>
+<td>Fast (Grouped, Weighted) Scaling and Centering of Matrix-like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fscale.html">STD.data.frame</a></td>
+<td>Fast (Grouped, Weighted) Scaling and Centering of Matrix-like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fscale.html">STD.default</a></td>
+<td>Fast (Grouped, Weighted) Scaling and Centering of Matrix-like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fscale.html">STD.grouped_df</a></td>
+<td>Fast (Grouped, Weighted) Scaling and Centering of Matrix-like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fscale.html">STD.matrix</a></td>
+<td>Fast (Grouped, Weighted) Scaling and Centering of Matrix-like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fscale.html">STD.pdata.frame</a></td>
+<td>Fast (Grouped, Weighted) Scaling and Centering of Matrix-like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fscale.html">STD.pseries</a></td>
+<td>Fast (Grouped, Weighted) Scaling and Centering of Matrix-like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="summary-statistics.html">summary-statistics</a></td>
+<td>Summary Statistics</td></tr>
+</table>
+
+<h2><a id="T">-- T --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="ftransform.html">tfm</a></td>
+<td>Fast Transform and Compute Columns on a Data Frame</td></tr>
+<tr><td style="width: 25%;"><a href="ftransform.html">tfm&lt;-</a></td>
+<td>Fast Transform and Compute Columns on a Data Frame</td></tr>
+<tr><td style="width: 25%;"><a href="ftransform.html">tfmv</a></td>
+<td>Fast Transform and Compute Columns on a Data Frame</td></tr>
+<tr><td style="width: 25%;"><a href="time-series-panel-series.html">time-series-panel-series</a></td>
+<td>Time Series and Panel Series</td></tr>
+<tr><td style="width: 25%;"><a href="timeid.html">timeid</a></td>
+<td>Generate Integer-Id From Time/Date Sequences</td></tr>
+<tr><td style="width: 25%;"><a href="indexing.html">to_plm</a></td>
+<td>Fast Indexed Time Series and Panels</td></tr>
+<tr><td style="width: 25%;"><a href="TRA.html">TRA</a></td>
+<td>Transform Data by (Grouped) Replacing or Sweeping out Statistics</td></tr>
+<tr><td style="width: 25%;"><a href="TRA.html">TRA.data.frame</a></td>
+<td>Transform Data by (Grouped) Replacing or Sweeping out Statistics</td></tr>
+<tr><td style="width: 25%;"><a href="TRA.html">TRA.default</a></td>
+<td>Transform Data by (Grouped) Replacing or Sweeping out Statistics</td></tr>
+<tr><td style="width: 25%;"><a href="TRA.html">TRA.grouped_df</a></td>
+<td>Transform Data by (Grouped) Replacing or Sweeping out Statistics</td></tr>
+<tr><td style="width: 25%;"><a href="TRA.html">TRA.matrix</a></td>
+<td>Transform Data by (Grouped) Replacing or Sweeping out Statistics</td></tr>
+<tr><td style="width: 25%;"><a href="t_list.html">t_list</a></td>
+<td>Efficient List Transpose</td></tr>
+</table>
+
+<h2><a id="U">-- U --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="small-helpers.html">unattrib</a></td>
+<td>Small (Helper) Functions</td></tr>
+<tr><td style="width: 25%;"><a href="indexing.html">unindex</a></td>
+<td>Fast Indexed Time Series and Panels</td></tr>
+<tr><td style="width: 25%;"><a href="unlist2d.html">unlist2d</a></td>
+<td>Recursive Row-Binding / Unlisting in 2D - to Data Frame</td></tr>
+</table>
+
+<h2><a id="V">-- V --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="varying.html">varying</a></td>
+<td>Fast Check of Variation in Data</td></tr>
+<tr><td style="width: 25%;"><a href="varying.html">varying.data.frame</a></td>
+<td>Fast Check of Variation in Data</td></tr>
+<tr><td style="width: 25%;"><a href="varying.html">varying.default</a></td>
+<td>Fast Check of Variation in Data</td></tr>
+<tr><td style="width: 25%;"><a href="varying.html">varying.grouped_df</a></td>
+<td>Fast Check of Variation in Data</td></tr>
+<tr><td style="width: 25%;"><a href="varying.html">varying.matrix</a></td>
+<td>Fast Check of Variation in Data</td></tr>
+<tr><td style="width: 25%;"><a href="varying.html">varying.pdata.frame</a></td>
+<td>Fast Check of Variation in Data</td></tr>
+<tr><td style="width: 25%;"><a href="varying.html">varying.pseries</a></td>
+<td>Fast Check of Variation in Data</td></tr>
+<tr><td style="width: 25%;"><a href="varying.html">varying.sf</a></td>
+<td>Fast Check of Variation in Data</td></tr>
+<tr><td style="width: 25%;"><a href="small-helpers.html">vclasses</a></td>
+<td>Small (Helper) Functions</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">vec</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">vgcd</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="small-helpers.html">vlabels</a></td>
+<td>Small (Helper) Functions</td></tr>
+<tr><td style="width: 25%;"><a href="small-helpers.html">vlabels&lt;-</a></td>
+<td>Small (Helper) Functions</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">vlengths</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">vtypes</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+</table>
+
+<h2><a id="W">-- W --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="fbetween_fwithin.html">W</a></td>
+<td>Fast Between (Averaging) and (Quasi-)Within (Centering) Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="fbetween_fwithin.html">W.data.frame</a></td>
+<td>Fast Between (Averaging) and (Quasi-)Within (Centering) Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="fbetween_fwithin.html">W.default</a></td>
+<td>Fast Between (Averaging) and (Quasi-)Within (Centering) Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="fbetween_fwithin.html">W.grouped_df</a></td>
+<td>Fast Between (Averaging) and (Quasi-)Within (Centering) Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="fbetween_fwithin.html">W.matrix</a></td>
+<td>Fast Between (Averaging) and (Quasi-)Within (Centering) Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="fbetween_fwithin.html">W.pdata.frame</a></td>
+<td>Fast Between (Averaging) and (Quasi-)Within (Centering) Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="fbetween_fwithin.html">W.pseries</a></td>
+<td>Fast Between (Averaging) and (Quasi-)Within (Centering) Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">whichNA</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">whichv</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="wlddev.html">wlddev</a></td>
+<td>World Development Dataset</td></tr>
+</table>
+
+<h2><a id="misc">-- misc --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="indexing.html">$.indexed_frame</a></td>
+<td>Fast Indexed Time Series and Panels</td></tr>
+<tr><td style="width: 25%;"><a href="indexing.html">$&lt;-.indexed_frame</a></td>
+<td>Fast Indexed Time Series and Panels</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">%!=%</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="fmatch.html">%!iin%</a></td>
+<td>Fast Matching</td></tr>
+<tr><td style="width: 25%;"><a href="fmatch.html">%!in%</a></td>
+<td>Fast Matching</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">%*=%</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">%+=%</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">%-=%</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">%/=%</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="small-helpers.html">%=%</a></td>
+<td>Small (Helper) Functions</td></tr>
+<tr><td style="width: 25%;"><a href="efficient-programming.html">%==%</a></td>
+<td>Small Functions to Make R Programming More Efficient</td></tr>
+<tr><td style="width: 25%;"><a href="arithmetic.html">%c*%</a></td>
+<td>Fast Row/Column Arithmetic for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="arithmetic.html">%c+%</a></td>
+<td>Fast Row/Column Arithmetic for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="arithmetic.html">%c-%</a></td>
+<td>Fast Row/Column Arithmetic for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="arithmetic.html">%c/%</a></td>
+<td>Fast Row/Column Arithmetic for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="arithmetic.html">%cr%</a></td>
+<td>Fast Row/Column Arithmetic for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fmatch.html">%iin%</a></td>
+<td>Fast Matching</td></tr>
+<tr><td style="width: 25%;"><a href="arithmetic.html">%r*%</a></td>
+<td>Fast Row/Column Arithmetic for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="arithmetic.html">%r+%</a></td>
+<td>Fast Row/Column Arithmetic for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="arithmetic.html">%r-%</a></td>
+<td>Fast Row/Column Arithmetic for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="arithmetic.html">%r/%</a></td>
+<td>Fast Row/Column Arithmetic for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="arithmetic.html">%rr%</a></td>
+<td>Fast Row/Column Arithmetic for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="small-helpers.html">.c</a></td>
+<td>Small (Helper) Functions</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-documentation.html">.COLLAPSE_ALL</a></td>
+<td>Collapse Documentation &amp; Overview</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-documentation.html">.COLLAPSE_DATA</a></td>
+<td>Collapse Documentation &amp; Overview</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-documentation.html">.COLLAPSE_GENERIC</a></td>
+<td>Collapse Documentation &amp; Overview</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-renamed.html">.COLLAPSE_OLD</a></td>
+<td>Renamed Functions</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-documentation.html">.COLLAPSE_TOPICS</a></td>
+<td>Collapse Documentation &amp; Overview</td></tr>
+<tr><td style="width: 25%;"><a href="fast-statistical-functions.html">.FAST_FUN</a></td>
+<td>Fast (Grouped, Weighted) Statistical Functions for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="fast-statistical-functions.html">.FAST_STAT_FUN</a></td>
+<td>Fast (Grouped, Weighted) Statistical Functions for Matrix-Like Objects</td></tr>
+<tr><td style="width: 25%;"><a href="collapse-options.html">.op</a></td>
+<td>_collapse_ Package Options</td></tr>
+<tr><td style="width: 25%;"><a href="data-transformations.html">.OPERATOR_FUN</a></td>
+<td>Data Transformations</td></tr>
+<tr><td style="width: 25%;"><a href="fquantile.html">.quantile</a></td>
+<td>Fast (Weighted) Sample Quantiles and Range</td></tr>
+<tr><td style="width: 25%;"><a href="fquantile.html">.range</a></td>
+<td>Fast (Weighted) Sample Quantiles and Range</td></tr>
+<tr><td style="width: 25%;"><a href="descr.html">[.descr</a></td>
+<td>Detailed Statistical Description of Data Frame</td></tr>
+<tr><td style="width: 25%;"><a href="indexing.html">[.indexed_frame</a></td>
+<td>Fast Indexed Time Series and Panels</td></tr>
+<tr><td style="width: 25%;"><a href="indexing.html">[.indexed_series</a></td>
+<td>Fast Indexed Time Series and Panels</td></tr>
+<tr><td style="width: 25%;"><a href="indexing.html">[.index_df</a></td>
+<td>Fast Indexed Time Series and Panels</td></tr>
+<tr><td style="width: 25%;"><a href="psmat.html">[.psmat</a></td>
+<td>Matrix / Array from Panel Series</td></tr>
+<tr><td style="width: 25%;"><a href="indexing.html">[&lt;-.indexed_frame</a></td>
+<td>Fast Indexed Time Series and Panels</td></tr>
+<tr><td style="width: 25%;"><a href="indexing.html">[[.indexed_frame</a></td>
+<td>Fast Indexed Time Series and Panels</td></tr>
+<tr><td style="width: 25%;"><a href="indexing.html">[[&lt;-.indexed_frame</a></td>
+<td>Fast Indexed Time Series and Panels</td></tr>
+</table>
+</div></body></html>

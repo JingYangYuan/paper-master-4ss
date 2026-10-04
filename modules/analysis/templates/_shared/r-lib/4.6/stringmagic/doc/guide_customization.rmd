@@ -1,0 +1,351 @@
+---
+title: "Tailor-made functions and operations"
+author: "Laurent R. Bergé"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: journal
+    highlight: haddock
+    number_sections: yes
+    toc: yes
+    toc_depth: 3
+    toc_float:
+      collapsed: no
+      smooth_scroll: no
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{guide_customization}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  collapse = TRUE, 
+  comment = "#>"
+)
+
+library(stringmagic)
+```
+
+This vignette presents how to customize `stringmagic` to (better) suit your needs. It covers:
+
+- how to [create custom functions with alias generators](#sec_alias)
+- how to [create new string operations](#sec_creation) available within 
+[`string_magic`](https://lrberge.github.io/stringmagic/articles/guide_string_magic.html)
+- how to [use `stringmagic` in a package when employing custom operations](#sec_package) (this is advanced)
+
+# Creating new functions with alias generators {#sec_alias}
+
+Several `stringmagic` functions dispose of alias generators, which end with the suffix
+`_alias`. They generate a copy of the function with different default values (and also take
+care of setting up the environment correctly). Some functions have many arguments,
+by changing the default arguments you can create completely new functions. 
+
+This section will guide you through alias generation, and how they can be useful, using examples.
+
+### Creating a formula builder
+
+This is a common R problem: *how to turn a character string into a formula, in a handy way*? 
+You can use a few arguments of `string_magic` to make it work:
+
+- `.default`: to apply a default sequence of operations to interpolations
+- `.post`: to appy a custom function right before returning the object
+
+The objective here is to inject variable names into a character vector and turn it into a formula.
+Since variables in a formula are separated with a `"+"`, we need to collapse several variables
+with `"+"`. This will be achieved with the `.default` argument. Then we turn it into a formula
+by passing `as.formula` in the `.post` argument.
+
+```{r}
+y = "Petal.Length"
+x = c("Sepal.Length", "Petal.Width", "Species")
+string_magic("{y} ~ {x}", .default = "' + 'collapse", .post = as.formula)
+```
+
+Now that we see that our builder works with `string_magic`, we create a dedicated function with an alias.
+
+```{r}
+fml_builder = string_magic_alias(.default = "' + 'collapse", .post = as.formula)
+```
+
+The function `fml_builder` works as `string_magic` but with different default values. 
+Now we can apply it directly.
+
+```{r}
+fml_builder("{y} ~ {x}")
+```
+
+Since this function is just a call to `string_magic`, you can apply anything you want. Let's
+scale the variables on the right-hand-side by using nesting:
+
+```{r}
+x = c("Sepal.Length", "Petal.Width")
+fml_builder("{y} ~ {'+'collapse ! scale({x})}")
+```
+
+### Changing `str_clean`
+
+The function [`str_clean`](https://lrberge.github.io/stringmagic/articles/guide_string_tools.html#sec_clean) specialses in cleaning character vectors. To do so it uses a specific syntax
+to transform various regular expressions at once. For example `"pat1, pat2 => replacement"` will turn the 
+regular expression `pat1` and `pat2` into the `replacement`. The syntax is: i) a comma separated
+list of regular expressions, 2) a pipe (`" => "`), 3) the replacement. 
+If you are not happy with the fact that regexes are separated with commas, or of the look of the pipe, no problem!
+
+Let's change the default values, let's: i) use a semi-colon separation, ii) use `">>"` instead of the regular pipe.
+```{r}
+my_clean = string_clean_alias(split = "; ", pipe = " >> ")
+
+x = "My name is Bond, James Bond"
+# old way
+string_clean(x, "e, o => a")
+
+# new way
+my_clean(x, "e; o >> a")
+```
+
+### Creating small numeric matrices
+
+The function [`string_vec`](https://lrberge.github.io/stringmagic/articles/guide_string_tools.html#sec_vec) facilitates the creation of small character vectors.
+With its arguments `.nmat`, you can turn the vector into a numeric matrix. Hence, let us write
+a function to create small numeric matrices.
+
+We will use:
+
+- `.nmat = TRUE` to ask to transform the result into a numeric matrix. The number of 
+rows will be deduced from the number of newlines.
+-  `.last = "'[\n ,]+'split"` (`.last` means *last* operation) to split the resulting character vector with respect to
+newlines, commas and space, so that numbers can be separated by any succession of these
+
+```{r}
+num_mat = string_vec_alias(.nmat = TRUE, .last = "'[\n ,]+'split")
+num_mat("1, 2, 3
+         7, 5, 0
+         0, 0, 1")
+```
+
+# Creating your own string operations {#sec_creation}
+
+You can add any arbitraty operation to `string_magic`. There are two main ways:
+
+- registering a custom sequence of regular `string_magic` operations (`string_magic_register_ops`) 
+- registering a custom function (`string_magic_register_fun`)
+
+### New operations as a sequence of existing operations {#sec_reg_ops}
+
+Create new sequence of operations with `string_magic_register_ops`. It takes two arguments:
+
+1. the sequence of `string_magic` operations, 
+2. the name of the new operation.
+
+For example, let's create a new operation `h1` which formats a string into a header. 
+It adds an hypen before the text and adds hyphens after the text up to the 40th column.
+
+Ex.1: creating a header operation.
+```{r}
+# 1) we register the sequence of regular string_magic operations
+string_magic_register_ops("'- | 'paste, '40|-'fill", "h1")
+# 2) we use it
+string_magic("h1 ! That's my header", .nest = TRUE)
+```
+
+### New operations using a custom function
+
+To implement new operations using functions, you have two steps: 
+1. create the custom function,
+2. register the function an provide an alias to the operation.
+
+First you need to create a function that will be applied to a character vector. 
+
+That function **must** have at least the arguments `x` and `...`. 
+
+Additionnaly, it can have the optional arguments: `argument`, `options`, `group`, `group_flag`.
+This function must return a vector. Optionnally, and only if relevant (see the last example),
+you can add an attribute `"group"` to the returned object which will be used in grouped operations.
+
+Second, you need to register the function with `string_magic_register_fun` and assign an alias to it. 
+Optionnally, you can provide a list of valid options. 
+
+Let's create an example in which we add markdown emphasis to words.
+
+Ex.1: a new operation adding markdown emphasis.
+```{r}
+library(stringmagic)
+# A) define the function
+fun_emph = function(x, ...) paste0("*", x, "*")
+ 
+# B) register it
+string_magic_register_fun(fun_emph, "emph")
+
+# C) use it
+x = string_vec("right, now")
+string_magic("Take heed, {emph, collapse ? x}.")
+```
+
+More generally, the function taken by `string_magic_register_fun` is called internally 
+by `string_magic` in the form `fun(x, argument, options, group, group_flag)`.
+Here is the meaning of the arguments:
+
+- `x`: the value to which the operation applies. 
+- `argument`: the quoted `string_magic` argument (always character). 
+- `options`: a character vector of `string_magic` options. 
+- `group`: an index of the group to which belongs each observation (integer). 
+- `group_flag`: value between 0 and 2; 0: no grouping operation requested; 
+1: keep track of groups; 2: apply grouping.
+
+The two last arguments, `group` and `group_flag`, are of use
+only in group-wise operations only if `fun` changes the length or the order of vectors. 
+
+Let's add an argument and an option to the `"emph"` operation that we defined in Ex.1.
+
+Ex.2: new operation with argument and option.
+```{r}
+fun_emph = function(x, argument, options, ...){
+  arg = argument
+  if(nchar(arg) == 0) arg = "*"
+  
+  if("strong" %in% options){
+    arg = paste0(rep(arg, 3), collapse = "")
+  }
+  
+  paste0(arg, x, arg)
+}
+
+string_magic_register_fun(fun_emph, "emph", "strong")
+
+x = string_vec("right, now")
+string_magic("Take heed, {'_'emph.s, c? x}.")
+
+# In string_magic_register_fun, the valid_option argument is used to validate them.
+try(string_magic("Take heed, {'_'emph.aaa, c? x}."))
+```
+
+Finally let's illustrate an example with group-wise awareness. This is somewhat advanced and should
+be of concern only when you regularly use [group-wise operations](https://lrberge.github.io/stringmagic/articles/ref_string_magic_special_operations.html#sec_group_wise).
+
+Ex.3: we create a function that only keeps variable names (ex: x5, is_num, etc).
+```{r}
+
+keep_varnames = function(x, group, group_flag, ...){
+  is_ok = grepl("^[[:alpha:].][[:alnum:]._]*$", x)
+  
+  if(group_flag != 0){
+    group = group[is_ok]
+    # recreating the index
+    group = unclass(as.factor(group))
+  } 
+  
+  res = x[is_ok]
+  # we add the group in an attribute (this is the way)
+  attr(res, "group") = group
+  
+  return(res)
+}
+
+string_magic_register_fun(keep_varnames, "keepvar")
+
+expr = c("x1 + 52", "73 %% 5 == x", "y[y > .z_5]")
+string_magic("All vars: {'[^[:alnum:]_.]+'split, keepvar, unik, enum.bq ? expr}.")
+
+# thanks to the group flag, we can apply group-wise operations
+# we apply cat after the function (using .post) to have a nice display of the newlines 
+string_magic("Vars in each expr:\n",
+             "{'\n'c ! - {1:3}) {'[^[:alnum:]_.]+'split, ",
+                                 "keepvar, ~(unik, enum.bq) ? expr}}", .post = cat)
+```
+
+
+# Using `stringmagic` with custom operations as a dependency {#sec_package}
+
+This is section is only relevant if: 
+
+1. you use `stringmagic` as a dependency in your package, and 
+2. you use custom `stringmagic` operations. 
+
+If you answer "no" to any of these 
+two points, do not read this section, it's only about details. *Otherwise it's a must read.*
+
+To use custom `stringmagic` operations within a package, you need to explicitly register
+the operations in a specific namespace, and, when using the `stringmagic` functions, 
+you need to add the argument `.namespace` telling where the new operations are located.
+
+## Why do I need a namespace?
+
+There are two reasons: i) to ensure compatibility with future versions of the `stringmagic` package,
+and ii) to avoid conflicts with user-created operations. 
+Let's take an example. You create a package an use `stringmagic` with the custom operation
+`h1`, detailed [here](#sec_reg_ops), to create headers. Now let's say a future version of 
+`stringmagic` also introduces a `h1` function, that works differently from yours. This means
+that your package will work with the old `stringmagic` version but will lead to a bug with 
+the new version. Not great!
+
+Same story if the user defines her own `h1` operation: we end up with two operations with the 
+same name, hence a conflict. 
+
+We need a mechanism to ensure that the `h1` operation in
+your package always work, irrespecive of the doings of the user and of the version of `stringmagic`.
+We now detail how to do it.
+
+## Using custom operations in a package
+
+To use custom operations in a package:
+
+1. add the argument `.namespace = "my_package_name"` to the calls to `string_magic_register_ops` 
+and `string_magic_register_fun`
+2. add the argument `.namespace = "my_package_name"` to any call to `stringmagic`'s functions using 
+custom operation. Achive this simply by creating aliases to `stringmagic` function.
+
+### Example
+
+You develop the package `superpack` which uses `stringmagic` to display messages to the user 
+and you want to register the `header` operation (behaving [similarly to `h1`](#sec_reg_ops)).
+```{r}
+string_magic_register_ops("'- | 'paste, '70|-'fill", 
+                          alias = "header", 
+                          namespace = "superpack")
+```
+
+You can now summon your new operation to write a message to the user. Just remenber that 
+you need the `.namespace` argument:
+
+```{r}
+time = 0.7
+cat_magic("{header!Important message to you, user}",
+          "The algorithm converged in {time}s.", 
+          .sep = "\n", .namespace = "superpack")
+```
+
+Without the namespace argument, this leads to an error:
+```{r, error = TRUE}
+time = 0.7
+cat_magic("{header!Important message to you, user}",
+          "The algorithm converged in {time}s.", 
+          .sep = "\n")
+```
+
+Using the `.namsepace` argument is cumbersome. That is why `stringmagic` offers alias generators to
+easily create aliases of the `stringmagic` functions using custom operations.
+
+### Using aliases
+
+To avoid providing the argument `.namespace` at each call (which makes the function completely useless),
+use the alias genetaors, as described in [the first section](#sec_alias). Let's continue on the
+previous example but this time we avoid the argument `.namespace` by creating an alias.
+
+To create the alias, we use `cat_magic_alias` which creates a copy of `cat_magic` for which
+the default values have been modified. Here we override the function name (of course you can use 
+any other name, like `cmagic`, `magcat`, whatever!):
+```{r}
+cat_magic = stringmagic::cat_magic_alias(.namespace = "superpack")
+```
+
+An now we are able to access our previously defined function without error:
+```{r, error = TRUE}
+time = 0.7
+cat_magic("{header!Important message to you, user}",
+          "The algorithm converged in {time}s.", 
+          .sep = "\n")
+```

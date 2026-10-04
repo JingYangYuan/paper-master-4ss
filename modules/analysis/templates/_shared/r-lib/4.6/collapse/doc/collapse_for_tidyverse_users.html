@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Sebastian Krantz" />
+
+<meta name="date" content="2026-08-29" />
+
+<title>collapse for tidyverse Users</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">collapse for tidyverse Users</h1>
+<h4 class="author">Sebastian Krantz</h4>
+<h4 class="date">2026-08-29</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#namespace-and-global-options" id="toc-namespace-and-global-options">Namespace and Global
+Options</a></li>
+<li><a href="#using-the-fast-statistical-functions" id="toc-using-the-fast-statistical-functions">Using the <em>Fast
+Statistical Functions</em></a></li>
+<li><a href="#writing-efficient-code" id="toc-writing-efficient-code">Writing Efficient Code</a>
+<ul>
+<li><a href="#using-internal-grouping" id="toc-using-internal-grouping">Using Internal Grouping</a></li>
+</ul></li>
+<li><a href="#conclusion" id="toc-conclusion">Conclusion</a></li>
+</ul>
+</div>
+
+<style type="text/css">
+pre {
+max-height: 500px;
+overflow-y: auto;
+}
+pre[class] {
+max-height: 500px;
+}
+</style>
+<p><em>collapse</em> is a C/C++ based package for data transformation
+and statistical computing in R that aims to enable greater performance
+and statistical complexity in data manipulation tasks and offers a
+stable, class-agnostic, and lightweight API. It is part of the core <a href="https://fastverse.org/fastverse/"><em>fastverse</em></a>, a suite
+of lightweight packages with similar objectives.</p>
+<p>The <a href="https://tidyverse.org/"><em>tidyverse</em></a> set of
+packages provides a rich, expressive, and consistent syntax for data
+manipulation in R centering on the <em>tibble</em> object and tidy data
+principles (each observation is a row, each variable is a column).</p>
+<p><em>collapse</em> fully supports the <em>tibble</em> object and
+provides many <em>tidyverse</em>-like functions for data manipulation.
+It can thus be used to write <em>tidyverse</em>-like data manipulation
+code that, thanks to low-level vectorization of many statistical
+operations and optimized R code, typically runs much faster than native
+<em>tidyverse</em> code, in addition to being much more lightweight in
+dependencies.</p>
+<p>Its aim is not to create a faster <em>tidyverse</em>, i.e., it does
+not implements all aspects of the rich <em>tidyverse</em> grammar or
+changes to it<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>, and also takes inspiration from other
+leading data manipulation libraries to serve broad aims of performance,
+parsimony, complexity, and robustness in data manipulation for R.</p>
+<div id="namespace-and-global-options" class="section level2">
+<h2>Namespace and Global Options</h2>
+<p><em>collapse</em> data manipulation functions familiar to
+<em>tidyverse</em> users include <code>fselect</code>,
+<code>fgroup_by</code>, <code>fsummarise</code>, <code>fmutate</code>,
+<code>across</code>, <code>frename</code>, <code>fslice</code>, and
+<code>fcount</code>. Other functions like <code>fsubset</code>,
+<code>ftransform</code>, and <code>get_vars</code> are inspired by base
+R, while again other functions like <code>join</code>,
+<code>pivot</code>, <code>roworder</code>, <code>colorder</code>,
+<code>rowbind</code>, etc. are inspired by other data manipulation
+libraries such as <em>data.table</em> and <em>polars</em>.</p>
+<p>By virtue of the f- prefixes, the <em>collapse</em> namespace has no
+conflicts with the <em>tidyverse</em>, and these functions can easily be
+substituted in a <em>tidyverse</em> workflow.</p>
+<p>R users willing to replace the <em>tidyverse</em> have the additional
+option to mask functions and eliminate the prefixes with
+<code>set_collapse</code>. For example</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(collapse)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">set_collapse</span>(<span class="at">mask =</span> <span class="st">&quot;manip&quot;</span>) <span class="co"># version &gt;= 2.0.0 </span></span></code></pre></div>
+<p>makes available functions <code>select</code>, <code>group_by</code>,
+<code>summarise</code>, <code>mutate</code>, <code>rename</code>,
+<code>count</code>, <code>subset</code>, <code>slice</code>, and
+<code>transform</code> in the <em>collapse</em> namespace and detaches
+and re-attaches the package, such that the following code is executed by
+<em>collapse</em>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>mtcars <span class="sc">|&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>  <span class="fu">subset</span>(mpg <span class="sc">&gt;</span> <span class="dv">11</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>  <span class="fu">group_by</span>(cyl, vs, am) <span class="sc">|&gt;</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">c</span>(mpg, carb, hp), mean), </span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>            <span class="at">qsec_wt =</span> <span class="fu">weighted.mean</span>(qsec, wt))</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#   cyl vs am      mpg     carb        hp  qsec_wt</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co"># 1   4  0  1 26.00000 2.000000  91.00000 16.70000</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co"># 2   4  1  0 22.90000 1.666667  84.66667 21.04028</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co"># 3   4  1  1 28.37143 1.428571  80.57143 18.75509</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co"># 4   6  0  1 20.56667 4.666667 131.66667 16.33306</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co"># 5   6  1  0 19.12500 2.500000 115.25000 19.21275</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="co"># 6   8  0  0 15.98000 2.900000 191.00000 17.01239</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co"># 7   8  0  1 15.40000 6.000000 299.50000 14.55297</span></span></code></pre></div>
+<p><em>Note</em> that the correct documentation still needs to be called
+with prefixes, i.e., <code>?fsubset</code>. See
+<code>?set_collapse</code> for further options to the package, which
+also includes optimization options such as <code>nthreads</code>,
+<code>na.rm</code>, <code>sort</code>, and <code>stable.algo</code>.
+<em>Note</em> also that if you use <em>collapse</em>’s namespace
+masking, you can use <code>fastverse::fastverse_conflicts()</code> to
+check for namespace conflicts with other packages.</p>
+</div>
+<div id="using-the-fast-statistical-functions" class="section level2">
+<h2>Using the <em>Fast Statistical Functions</em></h2>
+<p>A key feature of <em>collapse</em> is that it not only provides
+functions for data manipulation, but also a full set of statistical
+functions and algorithms to speed up statistical calculations and
+perform more complex statistical operations (e.g. involving weights or
+time series data).</p>
+<p>Notably among these, the <a href="https://fastverse.org/collapse/reference/fast-statistical-functions.html"><em>Fast
+Statistical Functions</em></a> is a consistent set of S3-generic
+statistical functions providing fully vectorized statistical operations
+in R.</p>
+<p>Specifically, operations such as calculating the mean via the S3
+generic <code>fmean()</code> function are vectorized across columns and
+groups and may also involve weights or transformations of the original
+data:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">fmean</span>(mtcars<span class="sc">$</span>mpg)     <span class="co"># Vector</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co"># [1] 20.09063</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="fu">fmean</span>(EuStockMarkets) <span class="co"># Matrix</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#      DAX      SMI      CAC     FTSE </span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co"># 2530.657 3376.224 2227.828 3565.643</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="fu">fmean</span>(mtcars)         <span class="co"># Data Frame</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#        mpg        cyl       disp         hp       drat         wt       qsec         vs         am </span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#  20.090625   6.187500 230.721875 146.687500   3.596563   3.217250  17.848750   0.437500   0.406250 </span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#       gear       carb </span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#   3.687500   2.812500</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="fu">fmean</span>(mtcars<span class="sc">$</span>mpg, <span class="at">w =</span> mtcars<span class="sc">$</span>wt)  <span class="co"># Weighted mean</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co"># [1] 18.54993</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="fu">fmean</span>(mtcars<span class="sc">$</span>mpg, <span class="at">g =</span> mtcars<span class="sc">$</span>cyl) <span class="co"># Grouped mean</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#        4        6        8 </span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co"># 26.66364 19.74286 15.10000</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="fu">fmean</span>(mtcars<span class="sc">$</span>mpg, <span class="at">g =</span> mtcars<span class="sc">$</span>cyl, <span class="at">w =</span> mtcars<span class="sc">$</span>wt)   <span class="co"># Weighted group mean</span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#        4        6        8 </span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co"># 25.93504 19.64578 14.80643</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="fu">fmean</span>(mtcars[<span class="dv">5</span><span class="sc">:</span><span class="dv">10</span>], <span class="at">g =</span> mtcars<span class="sc">$</span>cyl, <span class="at">w =</span> mtcars<span class="sc">$</span>wt) <span class="co"># Of data frame</span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#       drat       wt     qsec        vs        am     gear</span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co"># 4 4.031264 2.414750 19.38044 0.9148868 0.6498031 4.047250</span></span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="co"># 6 3.569170 3.152060 18.12198 0.6212191 0.3787809 3.821036</span></span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="co"># 8 3.205658 4.133116 16.88529 0.0000000 0.1203808 3.240762</span></span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="fu">fmean</span>(mtcars<span class="sc">$</span>mpg, <span class="at">g =</span> mtcars<span class="sc">$</span>cyl, <span class="at">w =</span> mtcars<span class="sc">$</span>wt, <span class="at">TRA =</span> <span class="st">&quot;fill&quot;</span>) <span class="co"># Replace data by weighted group mean</span></span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="co">#  [1] 19.64578 19.64578 25.93504 19.64578 14.80643 19.64578 14.80643 25.93504 25.93504 19.64578</span></span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a><span class="co"># [11] 19.64578 14.80643 14.80643 14.80643 14.80643 14.80643 14.80643 25.93504 25.93504 25.93504</span></span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a><span class="co"># [21] 25.93504 14.80643 14.80643 14.80643 14.80643 25.93504 25.93504 25.93504 14.80643 19.64578</span></span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a><span class="co"># [31] 14.80643 25.93504</span></span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a><span class="co"># etc...</span></span></code></pre></div>
+<p>The data manipulation functions of <em>collapse</em> are integrated
+with these <em>Fast Statistical Functions</em> to enable vectorized
+statistical operations. For example, the following code</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>mtcars <span class="sc">|&gt;</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="fu">subset</span>(mpg <span class="sc">&gt;</span> <span class="dv">11</span>) <span class="sc">|&gt;</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="fu">group_by</span>(cyl, vs, am) <span class="sc">|&gt;</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">c</span>(mpg, carb, hp), fmean), </span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>            <span class="at">qsec_wt =</span> <span class="fu">fmean</span>(qsec, wt))</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#   cyl vs am      mpg     carb        hp  qsec_wt</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co"># 1   4  0  1 26.00000 2.000000  91.00000 16.70000</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co"># 2   4  1  0 22.90000 1.666667  84.66667 21.04028</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co"># 3   4  1  1 28.37143 1.428571  80.57143 18.75509</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co"># 4   6  0  1 20.56667 4.666667 131.66667 16.33306</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co"># 5   6  1  0 19.12500 2.500000 115.25000 19.21275</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co"># 6   8  0  0 15.98000 2.900000 191.00000 17.01239</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co"># 7   8  0  1 15.40000 6.000000 299.50000 14.55297</span></span></code></pre></div>
+<p>gives exactly the same result as above, but the execution is much
+faster (especially on larger data), because with <em>Fast Statistical
+Functions</em>, the data does not need to be split by groups, and there
+is no need to call <code>lapply()</code> inside the
+<code>across()</code> statement: <code>fmean.data.frame()</code> is
+simply applied to a subset of the data containing columns
+<code>mpg</code>, <code>carb</code> and <code>hp</code>.</p>
+<p>The <em>Fast Statistical Functions</em> also have a method for
+grouped data, so if we did not want to calculate the weighted mean of
+<code>qsec</code>, the code would simplify as follows:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>mtcars <span class="sc">|&gt;</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="fu">subset</span>(mpg <span class="sc">&gt;</span> <span class="dv">11</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="fu">group_by</span>(cyl, vs, am) <span class="sc">|&gt;</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="fu">select</span>(mpg, carb, hp) <span class="sc">|&gt;</span> </span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  <span class="fu">fmean</span>()</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#   cyl vs am      mpg     carb        hp</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co"># 1   4  0  1 26.00000 2.000000  91.00000</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co"># 2   4  1  0 22.90000 1.666667  84.66667</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co"># 3   4  1  1 28.37143 1.428571  80.57143</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co"># 4   6  0  1 20.56667 4.666667 131.66667</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co"># 5   6  1  0 19.12500 2.500000 115.25000</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co"># 6   8  0  0 15.98000 2.900000 191.00000</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co"># 7   8  0  1 15.40000 6.000000 299.50000</span></span></code></pre></div>
+<p>Note that all functions in <em>collapse</em>, including the <em>Fast
+Statistical Functions</em>, have the default <code>na.rm = TRUE</code>,
+i.e., missing values are skipped in calculations. This can be changed
+using <code>set_collapse(na.rm = FALSE)</code> to give behavior more
+consistent with base R.</p>
+<p>Another thing to be aware of when using <em>Fast Statistical
+Functions</em> inside data manipulation functions is that they toggle
+vectorized execution wherever they are used. E.g.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>mtcars <span class="sc">|&gt;</span> <span class="fu">group_by</span>(cyl) <span class="sc">|&gt;</span> <span class="fu">summarise</span>(<span class="at">mpg =</span> <span class="fu">fmean</span>(mpg) <span class="sc">+</span> <span class="fu">min</span>(qsec)) <span class="co"># Vectorized</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co">#   cyl      mpg</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co"># 1   4 41.16364</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co"># 2   6 34.24286</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co"># 3   8 29.60000</span></span></code></pre></div>
+<p>calculates a grouped mean of <code>mpg</code> but adds the overall
+minimum of <code>qsec</code> to the result, i.e., it is equivalent to
+<code>fmean(mpg, g = cyl) + min(qsec)</code>. On the other hand</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>mtcars <span class="sc">|&gt;</span> <span class="fu">group_by</span>(cyl) <span class="sc">|&gt;</span> <span class="fu">summarise</span>(<span class="at">mpg =</span> <span class="fu">fmean</span>(mpg) <span class="sc">+</span> <span class="fu">fmin</span>(qsec)) <span class="co"># Vectorized</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="co">#   cyl      mpg</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co"># 1   4 43.36364</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co"># 2   6 35.24286</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co"># 3   8 29.60000</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>mtcars <span class="sc">|&gt;</span> <span class="fu">group_by</span>(cyl) <span class="sc">|&gt;</span> <span class="fu">summarise</span>(<span class="at">mpg =</span> <span class="fu">mean</span>(mpg) <span class="sc">+</span> <span class="fu">min</span>(qsec))   <span class="co"># Not vectorized</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#   cyl      mpg</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co"># 1   4 43.36364</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co"># 2   6 35.24286</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co"># 3   8 29.60000</span></span></code></pre></div>
+<p>both give the mean + the minimum within each group, but calculated in
+different ways: the former is equivalent to
+<code>fmean(mpg, g = cyl) + fmin(qsec, g = cyl)</code>, whereas the
+latter is equal to
+<code>sapply(gsplit(mpg, cyl), function(x) mean(x) + min(x))</code>.</p>
+<p>See <code>?fsummarise</code> and <code>?fmutate</code> for more
+detailed examples. This <em>eager vectorization</em> approach is
+intentional as it allows users to vectorize complex expressions and fall
+back to base R if this is not desired. <a href="https://andrewghazi.github.io/posts/collapse_is_sick/sick.html">This
+blog post</a> by Andrew Ghazi provides an excellent example of computing
+a p-value test statistic by groups. <em>Note</em> that only expressions
+typed out can be vectorized; expressions inside functions such as
+<code>mean_plus_min &lt;- function(x) fmean(x) + fmin(x)</code> are not
+vectorized.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> To take full advantage of
+<em>collapse</em>, it is thus highly recommended to use the <em>Fast
+Statistical Functions</em> as much as possible.</p>
+<!-- To take full advantage of *collapse*, it is highly recommended to use the *Fast Statistical Functions* as much as possible. You can also set `set_collapse(mask = "all")` to replace statistical functions in base R like `sum` and `mean` with the collapse versions (toggling vectorized execution in all cases), but this may affect other parts of your code^[When doing this, make sure to refer to base R functions explicitly using `::` e.g. `base::mean`.]. -->
+</div>
+<div id="writing-efficient-code" class="section level2">
+<h2>Writing Efficient Code</h2>
+<p>It is also performance-critical to correctly sequence operations and
+limit excess computations. <em>tidyverse</em> code is often inefficient
+simply because the <em>tidyverse</em> allows you to do everything. For
+example,
+<code>mtcars |&gt; group_by(cyl) |&gt; filter(mpg &gt; 13) |&gt; arrange(mpg)</code>
+is permissible but inefficient code as it filters and reorders grouped
+data, requiring modifications to both the data frame and the attached
+grouping object. <em>collapse</em> does not allow calls to
+<code>fsubset()</code> on grouped data, and messages about it in
+<code>roworder()</code>, encouraging you to write more efficient
+code.</p>
+<p>The above example can also be optimized because we are subsetting the
+whole frame and then doing computations on a subset of columns. It would
+be more efficient to select all required columns during the subset
+operation:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>mtcars <span class="sc">|&gt;</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>  <span class="fu">subset</span>(mpg <span class="sc">&gt;</span> <span class="dv">11</span>, cyl, vs, am, mpg, carb, hp, qsec, wt) <span class="sc">|&gt;</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="fu">group_by</span>(cyl, vs, am) <span class="sc">|&gt;</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">c</span>(mpg, carb, hp), fmean), </span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>            <span class="at">qsec_wt =</span> <span class="fu">fmean</span>(qsec, wt))</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#   cyl vs am      mpg     carb        hp  qsec_wt</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co"># 1   4  0  1 26.00000 2.000000  91.00000 16.70000</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co"># 2   4  1  0 22.90000 1.666667  84.66667 21.04028</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co"># 3   4  1  1 28.37143 1.428571  80.57143 18.75509</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co"># 4   6  0  1 20.56667 4.666667 131.66667 16.33306</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co"># 5   6  1  0 19.12500 2.500000 115.25000 19.21275</span></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co"># 6   8  0  0 15.98000 2.900000 191.00000 17.01239</span></span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co"># 7   8  0  1 15.40000 6.000000 299.50000 14.55297</span></span></code></pre></div>
+<p>Without the weighted mean of <code>qsec</code>, this would simplify
+to</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>mtcars <span class="sc">|&gt;</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>  <span class="fu">subset</span>(mpg <span class="sc">&gt;</span> <span class="dv">11</span>, cyl, vs, am, mpg, carb, hp) <span class="sc">|&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  <span class="fu">group_by</span>(cyl, vs, am) <span class="sc">|&gt;</span> </span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="fu">fmean</span>()</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co">#   cyl vs am      mpg     carb        hp</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co"># 1   4  0  1 26.00000 2.000000  91.00000</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co"># 2   4  1  0 22.90000 1.666667  84.66667</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co"># 3   4  1  1 28.37143 1.428571  80.57143</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co"># 4   6  0  1 20.56667 4.666667 131.66667</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co"># 5   6  1  0 19.12500 2.500000 115.25000</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co"># 6   8  0  0 15.98000 2.900000 191.00000</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co"># 7   8  0  1 15.40000 6.000000 299.50000</span></span></code></pre></div>
+<p>Finally, we could set the following options to toggle unsorted
+grouping, no missing value skipping, and multithreading across the three
+columns for more efficient execution.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>mtcars <span class="sc">|&gt;</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>  <span class="fu">subset</span>(mpg <span class="sc">&gt;</span> <span class="dv">11</span>, cyl, vs, am, mpg, carb, hp) <span class="sc">|&gt;</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  <span class="fu">group_by</span>(cyl, vs, am, <span class="at">sort =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>  <span class="fu">fmean</span>(<span class="at">nthreads =</span> <span class="dv">3</span>, <span class="at">na.rm =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="co">#   cyl vs am      mpg     carb        hp</span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co"># 1   6  0  1 20.56667 4.666667 131.66667</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="co"># 2   4  1  1 28.37143 1.428571  80.57143</span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="co"># 3   6  1  0 19.12500 2.500000 115.25000</span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co"># 4   8  0  0 15.98000 2.900000 191.00000</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co"># 5   4  1  0 22.90000 1.666667  84.66667</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co"># 6   4  0  1 26.00000 2.000000  91.00000</span></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="co"># 7   8  0  1 15.40000 6.000000 299.50000</span></span></code></pre></div>
+<p>Setting these options globally using
+<code>set_collapse(sort = FALSE, nthreads = 3, na.rm = FALSE)</code>
+avoids the need to set them repeatedly.</p>
+<div id="using-internal-grouping" class="section level3">
+<h3>Using Internal Grouping</h3>
+<p>Another key to writing efficient code with <em>collapse</em> is to
+avoid <code>fgroup_by()</code> where possible, especially for mutate
+operations. <em>collapse</em> does not implement <code>.by</code>
+arguments to manipulation functions like <em>dplyr</em>, but instead
+allows ad-hoc grouped transformations through its statistical functions.
+For example, the easiest and fastest way to computed the median of
+<code>mpg</code> by <code>cyl</code>, <code>vs</code>, and
+<code>am</code> is</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>mtcars <span class="sc">|&gt;</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">mpg_median =</span> <span class="fu">fmedian</span>(mpg, <span class="fu">list</span>(cyl, vs, am), <span class="at">TRA =</span> <span class="st">&quot;fill&quot;</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">3</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co">#                mpg cyl disp  hp drat    wt  qsec vs am gear carb mpg_median</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co"># Mazda RX4     21.0   6  160 110 3.90 2.620 16.46  0  1    4    4       21.0</span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="co"># Mazda RX4 Wag 21.0   6  160 110 3.90 2.875 17.02  0  1    4    4       21.0</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co"># Datsun 710    22.8   4  108  93 3.85 2.320 18.61  1  1    4    1       30.4</span></span></code></pre></div>
+<p>For the common case of averaging and centering data,
+<em>collapse</em> also provides functions <code>fbetween()</code> for
+averaging and <code>fwithin()</code> for centering, i.e.,
+<code>fbetween(mpg, list(cyl, vs, am))</code> is the same as
+<code>fmean(mpg, list(cyl, vs, am), TRA = &quot;fill&quot;)</code>. There is also
+<code>fscale()</code> for (grouped) scaling and centering.</p>
+<p>This also applies to multiple columns, where we can use
+<code>fmutate(across(...))</code> or <code>ftransformv()</code>,
+i.e. </p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>mtcars <span class="sc">|&gt;</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(mpg, disp, qsec), fmedian, <span class="fu">list</span>(cyl, vs, am), <span class="at">TRA =</span> <span class="st">&quot;fill&quot;</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">2</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="co">#               mpg cyl disp  hp drat    wt  qsec vs am gear carb</span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="co"># Mazda RX4      21   6  160 110  3.9 2.620 16.46  0  1    4    4</span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="co"># Mazda RX4 Wag  21   6  160 110  3.9 2.875 16.46  0  1    4    4</span></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="co"># Or </span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a>mtcars <span class="sc">|&gt;</span></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a>  <span class="fu">transformv</span>(<span class="fu">c</span>(mpg, disp, qsec), fmedian, <span class="fu">list</span>(cyl, vs, am), <span class="at">TRA =</span> <span class="st">&quot;fill&quot;</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">2</span>)</span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a><span class="co">#               mpg cyl disp  hp drat    wt  qsec vs am gear carb</span></span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a><span class="co"># Mazda RX4      21   6  160 110  3.9 2.620 16.46  0  1    4    4</span></span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a><span class="co"># Mazda RX4 Wag  21   6  160 110  3.9 2.875 16.46  0  1    4    4</span></span></code></pre></div>
+<p>Of course, if we want to apply different functions using the same
+grouping, <code>fgroup_by()</code> is sensible, but for mutate
+operations it also has the argument <code>return.groups = FALSE</code>,
+which avoids materializing the unique grouping columns, saving some
+memory.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>mtcars <span class="sc">|&gt;</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>  <span class="fu">group_by</span>(cyl, vs, am, <span class="at">return.groups =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">mpg_median =</span> <span class="fu">fmedian</span>(mpg), </span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>         <span class="at">mpg_mean =</span> <span class="fu">fmean</span>(mpg), <span class="co"># Or fbetween(mpg)</span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>         <span class="at">mpg_demean =</span> <span class="fu">fwithin</span>(mpg), <span class="co"># Or fmean(mpg, TRA = &quot;-&quot;)</span></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>         <span class="at">mpg_scale =</span> <span class="fu">fscale</span>(mpg), </span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>         <span class="at">.keep =</span> <span class="st">&quot;used&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">3</span>)</span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="co">#                mpg cyl vs am mpg_median mpg_mean mpg_demean  mpg_scale</span></span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a><span class="co"># Mazda RX4     21.0   6  0  1       21.0 20.56667  0.4333333  0.5773503</span></span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a><span class="co"># Mazda RX4 Wag 21.0   6  0  1       21.0 20.56667  0.4333333  0.5773503</span></span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a><span class="co"># Datsun 710    22.8   4  1  1       30.4 28.37143 -5.5714286 -1.1710339</span></span></code></pre></div>
+<p>The <code>TRA</code> argument supports a whole array of operations,
+see <code>?TRA</code>. For example <code>fsum(mtcars, TRA = &quot;/&quot;)</code>
+turns the column vectors into proportions. As an application of this,
+consider a generated dataset of sector-level exports.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="co"># c = country, s = sector, y = year, v = value</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>exports <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">c =</span> <span class="fu">paste0</span>(<span class="st">&quot;c&quot;</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>), <span class="at">s =</span> <span class="fu">paste0</span>(<span class="st">&quot;s&quot;</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>), <span class="at">y =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">15</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>           <span class="fu">mutate</span>(<span class="at">v =</span> <span class="fu">round</span>(<span class="fu">abs</span>(<span class="fu">rnorm</span>(<span class="fu">length</span>(c), <span class="at">mean =</span> <span class="dv">5</span>)), <span class="dv">2</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>           <span class="fu">subset</span>(<span class="sc">-</span><span class="fu">sample.int</span>(<span class="fu">length</span>(v), <span class="dv">360</span>)) <span class="co"># Making it unbalanced and irregular</span></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="fu">head</span>(exports)</span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a><span class="co">#    c  s y    v</span></span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="co"># 1 c2 s1 1 5.55</span></span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="co"># 2 c3 s1 1 4.33</span></span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a><span class="co"># 3 c4 s1 1 5.21</span></span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="co"># 4 c5 s1 1 5.31</span></span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a><span class="co"># 5 c6 s1 1 6.17</span></span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a><span class="co"># 6 c7 s1 1 5.62</span></span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a><span class="fu">nrow</span>(exports)</span>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a><span class="co"># [1] 600</span></span></code></pre></div>
+<p>It is very easy then to compute Balassa’s (1965) Revealed Comparative
+Advantage (RCA) index, which is the share of a sector in country exports
+divided by the share of the sector in world exports. An index above 1
+indicates that a RCA of country c in sector s.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="co"># Computing Balassa&#39;s (1965) RCA index: fast and memory efficient</span></span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="co"># settfm() modifies exports and assigns it back to the global environment</span></span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a><span class="fu">settfm</span>(exports, <span class="at">RCA =</span> <span class="fu">fsum</span>(v, <span class="fu">list</span>(c, y), <span class="at">TRA =</span> <span class="st">&quot;/&quot;</span>) <span class="sc">%/=%</span> <span class="fu">fsum</span>(<span class="fu">fsum</span>(v, y, <span class="at">TRA =</span> <span class="st">&quot;/&quot;</span>), <span class="fu">list</span>(s, y), <span class="at">TRA =</span> <span class="st">&quot;fill&quot;</span>, <span class="at">set =</span> <span class="cn">TRUE</span>))</span></code></pre></div>
+<p>Note that this involved a single expression with two different
+grouped operations, which is only possible by incorporating grouping
+into statistical functions themselves. Let’s summarise this dataset
+using <code>pivot()</code> to aggregate the RCA index across years. Here
+<code>&quot;mean&quot;</code> calls a highly efficient internal mean function.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="fu">pivot</span>(exports, <span class="at">ids =</span> <span class="st">&quot;c&quot;</span>, <span class="at">values =</span> <span class="st">&quot;RCA&quot;</span>, <span class="at">names =</span> <span class="st">&quot;s&quot;</span>, </span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>      <span class="at">how =</span> <span class="st">&quot;wider&quot;</span>, <span class="at">FUN =</span> <span class="st">&quot;mean&quot;</span>, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a><span class="co">#    c       s1       s2       s3       s4       s5       s6       s7       s8</span></span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="co"># 1 c1 1.456983 1.674245 2.106907 1.715610 1.517669 2.058640 1.731403 1.533286</span></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a><span class="co"># 2 c2 2.196345 1.741839 1.925417 1.940657 1.422963 1.523795 1.385106 1.455789</span></span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a><span class="co"># 3 c3 1.261560 1.552989 1.710201 1.420272 1.470105 1.531912 1.562338 1.307914</span></span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a><span class="co"># 4 c4 1.455803 1.480939 1.558595 1.424664 1.213920 1.283873 1.631415 1.249383</span></span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a><span class="co"># 5 c5 1.420965 1.616355 1.732715 1.465465 1.579685 1.252126 1.385581 1.359236</span></span>
+<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a><span class="co"># 6 c6 1.445393 1.452775 1.872439 1.529396 1.464301 1.732497 1.331926 1.264625</span></span>
+<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a><span class="co"># 7 c7 1.730497 1.627966 1.678039 1.710256 1.572039 1.798925 2.119763 1.451539</span></span>
+<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a><span class="co"># 8 c8 1.763551 1.773720 1.730399 1.553112 1.419381 1.609315 1.715916 1.568516</span></span></code></pre></div>
+<p>We may also wish to investigate the growth rate of RCA. This can be
+done using <code>fgrowth()</code>. Since the panel is irregular, i.e.,
+not every sector is observed in every year, it is critical to also
+supply the time variable.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>exports <span class="sc">|&gt;</span> </span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">RCA_growth =</span> <span class="fu">fgrowth</span>(RCA, <span class="at">g =</span> <span class="fu">list</span>(c, s), <span class="at">t =</span> y)) <span class="sc">|&gt;</span> </span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a>  <span class="fu">pivot</span>(<span class="at">ids =</span> <span class="st">&quot;c&quot;</span>, <span class="at">values =</span> <span class="st">&quot;RCA_growth&quot;</span>, <span class="at">names =</span> <span class="st">&quot;s&quot;</span>, </span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a>        <span class="at">how =</span> <span class="st">&quot;wider&quot;</span>, <span class="at">FUN =</span> fmedian, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a><span class="co">#    c         s1         s2          s3          s4         s5          s6         s7         s8</span></span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a><span class="co"># 1 c1         NA -31.320346  33.2382015 -17.7150170 -19.521910   7.7699227 -11.166836   9.014163</span></span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a><span class="co"># 2 c2   1.837294  60.313915   7.6639286 -36.3451812   7.657809   0.5202565 -17.252738  16.234799</span></span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a><span class="co"># 3 c3 -17.644211  10.140848  39.3044351  -0.5140010 -27.571156 -15.3070853 -20.052042  -9.645808</span></span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a><span class="co"># 4 c4  -3.619271  13.614077 -11.5213936 -29.1795219  12.698973  -2.8301315   9.579979   4.351506</span></span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a><span class="co"># 5 c5 -11.267960   1.563708  49.2593990   0.6372803  12.894361 -10.7062506 -16.359597   1.331514</span></span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a><span class="co"># 6 c6  -8.854774 -24.375237  -0.7098001  -0.6061250 -21.095221  17.3704638 -23.141631  -5.861039</span></span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1"></a><span class="co"># 7 c7   7.168700   9.169368 -51.7958299 -27.7699562  10.830523  23.9014624 -27.645297 -15.541500</span></span>
+<span id="cb17-13"><a href="#cb17-13" tabindex="-1"></a><span class="co"># 8 c8  42.166200  -6.204723 114.3084929 -18.3894910 -17.674001  -3.4403949   1.342354 -38.826719</span></span></code></pre></div>
+<p>Lastly, since the panel is unbalanced, we may wish to create an RCA
+index for only the last year, but balance the dataset a bit more by
+taking the last available trade within the last three years. This can be
+done using a single subset call</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="co"># Taking the latest observation within the last 3 years</span></span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>exports_latest <span class="ot">&lt;-</span> <span class="fu">subset</span>(exports, y <span class="sc">&gt;</span> <span class="dv">12</span> <span class="sc">&amp;</span> y <span class="sc">==</span> <span class="fu">fmax</span>(y, <span class="fu">list</span>(c, s), <span class="st">&quot;fill&quot;</span>), <span class="sc">-</span>y)</span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a><span class="co"># How many sectors do we observe for each country in the last 3 years?</span></span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a><span class="fu">with</span>(exports_latest, <span class="fu">fndistinct</span>(s, c))</span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a><span class="co"># c1 c2 c3 c4 c5 c6 c7 c8 </span></span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a><span class="co">#  8  8  7  7  8  8  6  8</span></span></code></pre></div>
+<p>We can then compute the RCA index on this data</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>exports_latest <span class="sc">|&gt;</span></span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">RCA =</span> <span class="fu">fsum</span>(v, c, <span class="at">TRA =</span> <span class="st">&quot;/&quot;</span>) <span class="sc">%/=%</span> <span class="fu">fsum</span>(<span class="fu">proportions</span>(v), s, <span class="at">TRA =</span> <span class="st">&quot;fill&quot;</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>    <span class="fu">pivot</span>(<span class="st">&quot;c&quot;</span>, <span class="st">&quot;RCA&quot;</span>, <span class="st">&quot;s&quot;</span>, <span class="at">how =</span> <span class="st">&quot;wider&quot;</span>, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a><span class="co">#    c        s1        s2        s3        s4        s5        s6        s7        s8</span></span>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a><span class="co"># 1 c1 0.9957444 1.0039325 1.2424563 0.9257392 0.8152179 1.3325429 0.7410637 1.0259104</span></span>
+<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a><span class="co"># 2 c2 1.1416748 0.8007287 1.1660717 1.0364984 0.7154912 1.0625854 1.2649881 0.8687216</span></span>
+<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a><span class="co"># 3 c3 1.1104473 0.9500677 1.3770016        NA 1.1941963 1.1301935 0.9773947 1.0015135</span></span>
+<span id="cb19-8"><a href="#cb19-8" tabindex="-1"></a><span class="co"># 4 c4 0.8381306 1.2543034 1.1274679 1.3990983 1.3918678        NA 0.7364405 1.1539036</span></span>
+<span id="cb19-9"><a href="#cb19-9" tabindex="-1"></a><span class="co"># 5 c5 0.8536024 0.8182961 0.9638389 1.6273503 1.0172714 0.8268992 1.0423516 1.0273071</span></span>
+<span id="cb19-10"><a href="#cb19-10" tabindex="-1"></a><span class="co"># 6 c6 0.8465415 0.8878380 1.2123911 1.7417480 0.8812675 1.1393711 0.9840424 0.6626898</span></span>
+<span id="cb19-11"><a href="#cb19-11" tabindex="-1"></a><span class="co"># 7 c7 1.0284817 1.2207153        NA        NA 1.2871187 1.4475702 1.2210074 1.3880608</span></span>
+<span id="cb19-12"><a href="#cb19-12" tabindex="-1"></a><span class="co"># 8 c8 1.2217063 1.1452869 0.7166041 0.9448634 0.8388402 0.9760660 1.1123412 0.9686146</span></span></code></pre></div>
+<p>To summarise, <em>collapse</em> provides many options for ad-hoc or
+limited grouping, which are faster than a full <code>fgroup_by()</code>,
+and also syntactically efficient. Further efficiency gains are possible
+using operations by reference, e.g., <code>%/=%</code> instead of
+<code>/</code> to avoid an intermediate copy. It is also possible to
+transform by reference using fast statistical functions by passing the
+<code>set = TRUE</code> argument, e.g.,
+<code>with(mtcars, fmean(mpg, cyl, TRA = &quot;fill&quot;, set = TRUE))</code>
+replaces <code>mpg</code> by its group-averaged version (the transformed
+vector is returned invisibly).</p>
+</div>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p><em>collapse</em> enhances R both statistically and computationally
+and is a good option for <em>tidyverse</em> users searching for more
+efficient and lightweight solutions to data manipulation and statistical
+computing problems in R. For more information, I recommend starting with
+the short vignette on <a href="https://fastverse.org/collapse/articles/collapse_documentation.html"><em>Documentation
+Resources</em></a>.</p>
+<p>R users willing to write efficient/lightweight code and completely
+replace the <em>tidyverse</em> in their workflow are also encouraged to
+closely examine the <a href="https://fastverse.org/fastverse/"><em>fastverse</em></a> suite of
+packages. <em>collapse</em> alone may not always suffice, but 99% of
+<em>tidyverse</em> code can be replaced with an efficient and
+lightweight <em>fastverse</em> solution.</p>
+</div>
+<div class="footnotes footnotes-end-of-document">
+<hr />
+<ol>
+<li id="fn1"><p>Notably, tidyselect, lambda expressions, and many of the
+smaller helper functions are left out.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p><em>collapse</em> can only read what you type,
+e.g. <code>exp &lt;- substitute(fmean(mpg) + min(mpg))</code>, then
+<code>all_funs(exp)</code> gives <code>c(&quot;+&quot;, &quot;fmean&quot;, &quot;min&quot;)</code>,
+and <code>any(all_funs(exp) %in% .FAST_STAT_FUN)</code> returns
+<code>TRUE</code>, signifying to <code>fsummarise()</code> that the
+expression should be executed only once with the grouping object passed
+to the <code>g</code> argument of <code>fmean()</code>, instead of it
+being executed once for every group.<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

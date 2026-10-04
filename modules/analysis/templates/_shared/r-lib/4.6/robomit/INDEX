@@ -1,0 +1,16 @@
+o_beta                  beta*
+o_beta_boot             Bootstrapped beta*s
+o_beta_boot_inf         Bootstrapped mean beta* and confidence
+                        intervals
+o_beta_boot_viz         Visualization of bootstrapped beta*s
+o_beta_rsq              beta*s over a range of maximum R-squares
+o_beta_rsq_viz          Visualization of beta*s over a range of maximum
+                        R-squares
+o_delta                 delta*
+o_delta_boot            Bootstrapped delta*s
+o_delta_boot_inf        Bootstrapped mean delta* and confidence
+                        intervals
+o_delta_boot_viz        Visualization of bootstrapped delta*s
+o_delta_rsq             delta*s over a range of maximum R-squares
+o_delta_rsq_viz         Visualization of delta*s over a range of
+                        maximum R-squares

@@ -1,0 +1,19 @@
+basque                  Panel Data from Spanish Regions to demonstrate
+                        the use of the Synthetic Control Method
+collect.optimx          Collect results from optimx optimization
+                        methods
+dataprep                Constructs a list of matrices from panel
+                        dataset to be loaded into synth()
+fn.V                    Loss Function for nested optimization of W and
+                        V weights
+gaps.plot               Plots Gap in Outcome Trajectories between the
+                        Treated its Synthetic Control Unit
+path.plot               Plots Outcome Trajectories for Treated Unit and
+                        its Synthetic Control Unit
+spec.pred.func          Special Predictor Function for Dataprep
+synth                   Constructs synthetic control units for
+                        comparative case studies
+synth.data              Panel Data to demonstrate the use of the
+                        Synthetic Control Method
+synth.tab               Creates Tables that Summarize Results of
+                        Synthetic Control Group Method

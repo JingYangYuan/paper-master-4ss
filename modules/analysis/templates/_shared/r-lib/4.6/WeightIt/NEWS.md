@@ -1,0 +1,769 @@
+WeightIt News and Updates
+======
+
+# `WeightIt` 2.1.0
+
+* With `method = "bart"`, `use.offset` can now be set to `TRUE` to use the linear predictor of a GLM as an offset in the BART model.
+
+* With `method = "gbm"`, balance is now assessed on multiple trees in parallel when a [*future*](https://CRAN.R-project.org/package=future) plan with more than one worker is set. This requires [*future.apply*](https://CRAN.R-project.org/package=future.apply) to be installed.
+
+* Model formulas supplied to `weightitMSM()` can now have random effects included. Note this is intended to be used in the case of clustering, not for modeling longitudinal treatments in a single model.
+
+* Fixed a bug in `summary.weightitMSM()` where mean weights would be printed twice, one for each group.
+
+* In `weightitMSM()`, `stabilize` can now be supplied the same arguments as `num.formula`, making `num.formula` essentially redundant.
+
+* Stabilization formulas can now include random effects in both `weightit()` and `weightitMSM()`.
+
+* The `stabilize` component of `weightit` objects has been renamed to `stabilization` to match `weightitMSM` objects; this contains the stabilization formula, if any. This also means the mean weights will be displayed in the `summary.weightit()` output.
+
+* In `weightit()`, setting `stabilize = TRUE` with a continuous treatment is accepted rather than being ignored with a warning. It requests a marginal density model in the numerator, which for a point treatment is the density the weights already divide by, so the weights are unchanged; such an object is not reported as stabilized and has no `stabilization` component. Supplying a formula with terms in it, as in `stabilize = ~ x1`, does change the weights. The same applies to any numerator that comes to exactly 1, in `weightit()` and `weightitMSM()` alike.
+
+* Fixed a bug in which the name of a multi-category (i.e., `factor` or `character`) treatment was lost when the treatment was processed. In `weightitMSM()`, this meant a multi-category time point would either be left unnamed or fail with an error about a replacement having length zero.
+
+* Fixed a bug in `print.weightitMSM()` in which the stabilization factors would be run together with the line that follows them.
+
+* Added a documentation page at `?method_ps` describing how weights are computed from propensity scores supplied to the `ps` argument of `weightit()`, including the `subclass` and density arguments that page accepts.
+
+* Fixed a bug in `get_w_from_ps()` (and `weightit()`) with `estimand = "ATOS"` in which only part of the candidate values of `alpha` were searched, so the resulting subset depended on which treatment level was coded as treated.
+
+* Fixed a bug in `summary.weightit()` in which the maximum of the weight range ignored the sampling weights while the minimum did not.
+
+* Fixed a bug in `summary.weightitMSM()` in which `weight.range = FALSE` was ignored.
+
+* `summary()` on a `weightitMSM` object that models censoring now includes an entry for each censoring model, placed among the treatment entries in the order the models were fit and named for its censoring indicator. Each covers the units still under observation when that model was fit, since the censored units have a weight of exactly 0 and are not part of the weighted sample. `plot()` can select one by name as well as by position, e.g. `plot(summary(W), time = "C_2")`.
+
+* `summary()` on a `weightitMSM` object gains a `which.time` argument, which restricts the summary to the given models, given as a vector of positions in `formula.list` or of treatment or censoring variable names; omit it for all of them. Selecting a subset does not renumber anything, so a model keeps the position it has in the whole sequence.
+
+* The headings in the printed summary of a `weightitMSM` object now name the model, as in `1. Treatment: A_1` and `2. Censoring: C_2`, where the number is the model's position in `formula.list`. Previously they were numbered by treatment time point and did not say which variable they were about.
+
+* In `plot()` on a `summary.weightitMSM` object, the `time` argument has been renamed `which.time` for consistency with `summary()`. `time` continues to work.
+
+* For a censoring model, the effective sample size reported by `summary()` is now measured against the units that model was fit on, i.e., those still under observation entering it, rather than against all units. With censoring at more than one time point, the latter counted units that had already dropped out and were never eligible.
+
+* Fixed a bug in `plot()` on a `summary.weightit` object in which the weights of units with no treatment value, i.e., those censored at an earlier time point, were displayed in a facet of their own, and in which a censoring model's weights were displayed as though the censoring indicator were a treatment.
+
+* Fixed a bug in `plot.summary.weightit()` in which the `bins` argument was ignored.
+
+* Fixed a bug in `method = "ebal"` with a vector-valued `tols`, which errored for binary and multi-category treatments.
+
+* Fixed a bug in `method = "ebal"` with continuous treatments in which supplying `d.moments` greater than any entry of a per-covariate `moments` vector (e.g., `moments = c(x1 = 2, x2 = 3)` with `d.moments = 3`) would hold only the *means* of the covariates to their unweighted values, rather than the requested number of moments; i.e., raising `d.moments` reduced the number of moments held instead of increasing it.
+
+* With `method = "bart"`, `samplerOnly` is now ignored as documented rather than passed on to `dbarts::bart2()`, where it would cause an error.
+
+* `method = "gbm"` no longer accepts `estimand = "ATOS"`, which was listed as available but too slow to be practical.
+
+* After `trim()` or `calibrate()`, the components used for M-estimation are now removed, so `glm_weightit()` no longer computes standard errors from the untrimmed or uncalibrated weights. Such objects now use `vcov = "HC0"` by default; use `vcov = "BS"` or `"FWB"` to account for trimming.
+
+* `.cens()` is now *cobalt*'s `.cens()`, re-exported. *cobalt* 5.0.0 gained its own copy so that `cobalt::bal.tab()` could recognize a censoring model, and two identically named exports meant one masked the other on `library(WeightIt)`. There is now one function: `.cens()` behaves exactly as before, and an indicator tagged with either package attached is the same object and accepted by both. *cobalt* 5.0.0 or later is required.
+
+* Fixed a bug in which only a bare `.cens()` marker was recognized as one, so a censoring model written as `WeightIt::.cens(C) ~ x1 + x2` was named after the whole call rather than after the indicator: the model was named `WeightIt::.cens(C)` rather than `C`, which in `weightitMSM()` is also how the time point is identified in `summary()` and in `cobalt::bal.tab()`. The weights were correct either way. What marks a censoring model is now the indicator `.cens()` returns rather than the syntax that produced it, so any way of naming the same function works, including `cobalt::.cens()` and a local alias, as does supplying a variable that was tagged ahead of time.
+
+# `WeightIt` 2.0.0
+
+Several new features have been added, described in more detail below. In particular, these are censoring weights estimation and random effects in propensity score models.
+
+### Censoring weights (IPCW)
+
+* Added support for estimating inverse probability of censoring weights (IPCW). Censoring is now its own treatment type, distinct from binary, multi-category, and continuous treatments. Wrapping a censoring indicator in `.cens()` on the left side of a model formula requests it, as in `weightit(.cens(C) ~ x1 + x2, data = d, method = "glm")`. The convention is that the indicator is 1 for units that are censored and 0 for those still under observation; censored units receive a weight of exactly 0, and the rest receive $1/P(C = 0 | X)$. `.cens()` is documented at `?.cens`.
+
+* `.cens()` can also be called outside a formula to tag a variable as a censoring indicator, which routes the lower-level interfaces to the censoring path: `weightit.fit(covs, treat = .cens(C), method = "glm")` and `get_w_from_ps(ps, treat = .cens(C))` estimate and compute censoring weights, the latter returning `(1 - C)/(1 - ps)`, where `ps` is the probability of *being censored*. Arguments that do not apply (`estimand`, `focal`, `treated`, `subclass`, `stabilize`) are ignored with a warning.
+
+* Each weighting method has a dedicated implementation for censoring weights, rather than reusing the binary-treatment machinery. Because inverse probability of censoring weights are only ever needed for the units still under observation, these estimate weights for that group alone, targeting the covariate distribution of the full at-risk sample. This avoids the wasted (and sometimes infeasible) problem of solving for weights among the censored units, which matters most when few units are censored. Censoring weights are available for `method` values `"glm"`, `"bart"`, `"cbps"`, `"ebal"`, `"energy"`, `"gbm"`, `"ipt"`, `"optweight"`, `"super"`, and `"cfd"`, as well as `method = NULL` (which yields complete-case weights) and a supplied `ps`. They are not available for `method = "npcbps"`. M-estimation-based standard errors are available for the same methods that support them for binary treatments.
+
+* `weightitMSM()` supports censoring models interleaved with the treatment models in `formula.list` in temporal order, as in `list(A_1 ~ X_0, A_2 ~ X_1 + A_1, .cens(C_2) ~ X_1 + A_1, A_3 ~ X_2 + A_2)`. Each model is fit only among the units still under observation at that time point, missing values are permitted in later treatments for units already censored, and the censoring weights are folded into the product of weights across time points. Censoring is treated as a treatment type rather than as a separate kind of model: the censoring indicators sit among the treatments in `treat.list`, and their covariates in `covs.list`, in the order the models were fit, and the `print()` and `summary()` methods list them there too, identifying each entry by its position in `formula.list` and the variable modeled. The new `at.risk` component of the output records which units were under observation when each model was fit and is documented in the "Value" section of `?weightitMSM`.
+
+* In `weightitMSM()`, censoring time points are stabilized exactly as treatment time points are. With `stabilize = TRUE`, the numerator of a censoring weight is a model for that censoring indicator saturated in the preceding treatments (an intercept when no treatment precedes it), and `num.formula` adds stabilization factors to it as it does for a treatment. When `num.formula` is supplied as a list, it must therefore have one entry per entry of `formula.list`, censoring entries included.
+
+* The numerator of a stabilized censoring weight is fit as a censoring model, using the same method as the denominator, in both `weightit()` and `weightitMSM()`. The stabilized weight is $P(C = 0 | V)/P(C = 0 | X)$ for the units still under observation, where $V$ are the stabilizing variables (usually just prior treatments, if any), and exactly 0 for those censored.
+
+* A censoring formula may have an empty right hand side, as in `.cens(C) ~ 1`, requesting a marginal censoring model in which censoring does not depend on the covariates. The weights are then $1/P(C = 0)$ for the units still under observation and 0 for those censored. This works in both `weightit()` and `weightitMSM()`, with any `method` (see the note on empty formulas under *Other new features*), and leaves the rest of the censoring machinery intact, including the risk sets, the missing values permitted after censoring, `by`, `stabilize`, and M-estimation.
+
+* Censoring weights are also available with `method = "cbps"` and `is.MSM.method = TRUE` in `weightitMSM()`, i.e., estimating one set of weights that satisfies the balance conditions at all time points simultaneously. Each condition is evaluated among the units still under observation at that time point, so the covariates and treatments that are missing for already-censored units never enter the estimating equations. The treatment conditions use the cumulative weights, which include the censoring factors, so they account for censoring; each censoring condition uses its own factor.
+
+* `glm_weightit()`, `lm_weightit()`, `multinom_weightit()`, `ordinal_weightit()`, and `coxph_weightit()` now tolerate missing values in the model variables for units with a weight of 0, which contribute neither to the fit nor to its variance. This makes it possible to fit an outcome model after censoring, where the outcome is unobserved for censored units. Missing values in units with a nonzero weight continue to produce an error. Relatedly, `coxph_weightit()` now allows weights of 0, which `survival::coxph()` rejects; such units are omitted from the model fit.
+
+### Random effects in PS models
+
+* `method = "glm"` now supports multilevel (mixed-effects) propensity score models. When the model `formula` supplied to `weightit()` contains `lme4`-style random effects terms (e.g., `treat ~ x1 + x2 + (1 | school)`), a multilevel model is fit to estimate the propensity scores: `lme4::glmer()` for binary treatments, `lme4::lmer()` for continuous treatments, and `mclogit::mblogit()` for multi-category treatments. The estimated propensity scores are cluster-specific (they include the estimated random effects).
+
+* `method = "bart"` also supports multilevel propensity score models. When the model `formula` supplied to `weightit()` contains `lme4`-style random effects terms (e.g., `treat ~ x1 + x2 + (1 | school)`), a multilevel BART model is fit using `stan4bart::stan4bart()`, which combines a BART sum-of-trees for the covariates with a Stan-estimated random-effects component. The full flexibility of `lme4::glmer()` random effects is available, including multiple grouping factors and random slopes. `bart2()`-style control arguments are translated to their `stan4bart()` equivalents. The estimated propensity scores are cluster-specific.
+
+* Added an `re_ok` field to the entries of `.weightit_methods` indicating whether each method supports random effects terms in the model `formula`.
+
+### Other new features
+
+* `multinom_weightit()` and `ordinal_weightit()` gain a `br` argument, which, when set to `TRUE`, performs mean bias reduction by solving the bias-reducing adjusted score equations of Firth (1993) instead of the usual maximum likelihood score equations. This yields estimates with smaller asymptotic bias that are always finite, even when the maximum likelihood estimates are not (e.g., under separation or when an end category of an ordinal outcome is unobserved). This mirrors `br` in `glm_weightit()` but uses in-house implementations rather than *brglm2*, so it requires no additional dependencies and composes with M-estimation, cluster-robust standard errors, and bootstrapping.
+
+  * For `multinom_weightit()`, the adjustment is that of Kosmidis and Firth (2011); because the model uses the canonical link, the adjusted score is the gradient of the log-likelihood penalized by the Jeffreys invariant prior, and estimates align with `brglm2::brmultinom()`.
+  * For `ordinal_weightit()`, the adjustment is the one derived for cumulative link models by Kosmidis (2014) and works for all supported links; the adjusted score equations are solved by quasi-Fisher scoring, controlled by the new `br.maxit` and `br.tol` components of `control`. Note this differs from `brglm2::bracl()`, which fits an adjacent category logit model rather than a cumulative link model (including with `parallel = TRUE`, which constrains the adjacent category logits rather than the cumulative ones to be parallel).
+
+* With `method = "glm"` and a multi-category treatment, bias-reduced propensity score models are now fit by *WeightIt* itself rather than by *brglm2*. A `br.` prefix on `link` requests mean bias reduction, as before, but it is now handled by `multinom_weightit()`'s and `ordinal_weightit()`'s machinery: `multi.method = "weightit"` accepts `"br.logit"` for unordered treatments and any of `"br.logit"`, `"br.probit"`, `"br.loglog"`, `"br.cloglog"`, and `"br.cauchit"` for ordered ones. Because `MASS::polr()` cannot fit bias-reduced models, supplying a `br.` link with `multi.method = "polr"` uses the *WeightIt* implementation as well. The practical gain is that M-estimation-based standard errors are now available for bias-reduced propensity score models, which they were not when *brglm2* did the fitting; *brglm2* is also no longer needed for this.
+
+* M-estimation-based standard errors are now available when `by` is supplied to `weightit()` and `weightitMSM()`. Previously, specifying `by` omitted the M-estimation components entirely; now the per-stratum components are combined so that `glm_weightit()` and friends produce standard errors asymptotically equivalent to those from estimating the weights from a single model in which the `by` variable is fully interacted with all the covariates (at all time points for `weightitMSM()`). This works for methods that support M-estimation and composes with `stabilize`.
+
+* `link = "softplus"` can be used with `method = "cbps"` and `method = "ipt"` to use the softplus link.
+
+* `weightit.fit()` gains a `subset` argument, restricting which units are used to fit the model.
+
+* The formulas in `formula.list` supplied to `weightitMSM()` can now have an empty right hand side (e.g., `A_1 ~ 1`), which requests a marginal model at that time point. Previously this produced an error, even though `weightit()` has always allowed it.
+
+* An empty model formula now works with every `method`. With no covariates there is nothing for any method to model or balance, and every method's target is met by the same weights, but most methods could not run at all on a covariate-free model, failing with errors from the packages they call that said nothing about the cause. Those weights are now computed by fitting an intercept-only GLM whatever `method` is supplied, ignoring any method-specific arguments. This is an implementation shortcut only: `method` is reported as supplied, and the package for the requested method need not be installed. `weightit()`, `weightitMSM()`, and `weightit.fit()` all behave this way. `method = NULL`, a user-defined `method` function, a supplied `ps`, and a formula whose only terms are `lme4`-style random effects (e.g., `A ~ (1 | school)`) are unaffected. Relatedly, `method = "cbps"` with `is.MSM.method = TRUE` now accepts a time point with no covariates, which contributes only its intercept balance condition.
+
+### Changes in behavior
+
+* With continuous treatments, estimation of the weights works a bit differently for `method = "glm"`, `"bart"`, `"gbm"`, and `"super"`. Previously, the numerator of the weights (corresponding to the marginal distribution of treatment) was estimated using the argument to `density` (by default, a normal distribution). Now, `density` only controls the *conditional* distribution used to estimate the denominator, and the numerator is estimated by marginalizing over the conditional distribution. This yields a marginal distribution that is compatible with the conditional distribution. In most cases, this will improve balance, but estimation will be a bit slower. Note this makes results of these methods no longer backward compatible. Also note that `method = "cbps"` is not affected by this change, even though it too estimates generalized propensity score weights.
+
+* The `plot` argument can no longer be used to visualize the densities for continuous treatments.
+
+* With `method = "gbm"`, `method = "surr"` is no longer allowed, as it did nothing different from `"ind"`. It is now set to `"ind"` with a warning.
+
+* The `link` argument in `ordinal_weightit()` no longer accepts `"log"` and `"clog"` as valid links.
+
+* An argument passed to the `subset` argument of `weightit.fit()` was previously silently ignored; it is now honored.
+
+* `nobs()` on a `coxph_weightit` object now returns the number of units contributing to the fit (i.e., those with a nonzero weight), consistent with the other `*_weightit()` methods. Previously the method was defined but never registered, so dispatch fell through to `survival:::nobs.coxph()`, which returns the number of *events*. `AIC()` and `BIC()` are unaffected, as they read the `"nobs"` attribute that `logLik()` carries, but the residual degrees of freedom reported by `anova()` change accordingly.
+
+* Passing `family = "multinomial"` to `glm_weightit()` now results in an error. Previously it would route the input to `multinom_weightit()`.
+
+* `multi.method = "brmultinom"` and `multi.method = "bracl"` in `weightit()` with `method = "glm"` are deprecated. They are accepted with a warning and now use the equivalent in-house bias-reduced fitters. Note the estimated propensity scores change for the former `"bracl"`: `brglm2::bracl()` fits an adjacent category logit model, whereas `ordinal_weightit()` fits a cumulative link (proportional odds) model.
+
+* For ordered multi-category treatments with `method = "glm"` and `multi.method = "weightit"`, the `link` argument no longer accepts `"identity"`, `"log"`, or `"clog"`.
+
+### Bug fixes
+
+* `method = "cbps"` now warns when the just-identified CBPS (`over = FALSE`) fails to solve its balance conditions. Previously this was silent: `optim()`'s convergence flag only reports whether the iteration limit or a line search failed, and the code never checked whether the balance objective had actually been driven to zero, so a fit that settled at a point where the conditions were still unmet returned weights that did not balance the covariates with no indication anything was wrong. This is most likely with a continuous treatment and many covariates, and depends on the sample rather than the specification alone. See the new *Unsolvable Balance Conditions* section of `?method_cbps`.
+
+* Fixed a bug in `tidy()` for `glm_weightit()`, `multinom_weightit()`, `ordinal_weightit()`, and `coxph_weightit()` objects that mislabeled columns. With `conf.int = TRUE` the two confidence limits were returned unnamed rather than as `conf.low` and `conf.high`, and with `exponentiate = TRUE` every name was shifted by one — the test statistic was labeled `std.error` — because transforming drops the standard-error column. The names are now taken from the columns actually returned.
+
+* `plot()` on a `summary.weightit` object for a continuous treatment no longer triggers a *ggplot2* deprecation warning about the `size` aesthetic for lines.
+
+* Fixed a bug in `method = "glm"` with a multi-category treatment and `multi.method = "glm"` that made every M-estimation-based standard error `NA`. That option fits one one-vs-rest binomial model per treatment level, and the M-estimation parts passed the treatment factor to each of those scores instead of the level's 0/1 indicator, so the score matrix (and hence the whole variance matrix) came out `NA`. Note this failed silently: `glm_weightit()` and friends returned a fit whose standard errors were all `NA` rather than erroring.
+
+* Fixed a bug in `method = "glm"` with a continuous treatment that made every M-estimation-based standard error an error. The residual standard deviation was omitted from the M-estimation parameter vector, leaving it one element short of the model matrix, so `vcov()` on a `glm_weightit()` fit using such weights failed with "non-conformable arguments". `vcov = "HC0"` and the other non-M-estimation variance types were unaffected. The standard deviation used is now the sampling-weighted root mean square of the residuals, which is the value the M-estimation score for that parameter solves for.
+
+* `multinom_weightit()` and `ordinal_weightit()` now warn when the optimization fails, which previously passed silently. Two cases are detected: `optim()` reporting non-convergence (e.g., from exhausting `maxit`), and `optim()` reporting success at a point that does not solve the estimating equations. The latter happens when the optimization is started far from the solution, which can occur when `start` is supplied from a diverging maximum likelihood fit; the coefficients returned in that case were not a solution of anything, and the score contributions did not sum to 0, so the standard errors were invalid too. The internal starting values are unaffected: `multinom_weightit()` starts from 0, and `ordinal_weightit()` with `br = TRUE` retries from a neutral point.
+
+* Fixed a bug in `ordinal_weightit()` with `link = "loglog"` that made the gradient and every robust variance matrix `NaN`. The `"loglog"` `mu.eta()` function evaluated to `NaN` rather than 0 at a linear predictor of `-Inf`, which is where the lowest threshold sits.
+
+* When `br = TRUE` in `glm_weightit()` and a `weightit` object supplying M-estimation components is used, the derivative of the outcome score with respect to the weighting model's coefficients is now computed by numeric differentiation. It previously used a shortcut that assumes the outcome score is linear in the weights, which the bias-reducing adjustment is not. Standard errors change slightly.
+
+* Fixed a bug in `method = "ebal"` with `tols` greater than 0 that could cause the FISTA solver to stop before the requested balance tolerance was reliably achieved. Thanks to Ivan Geshev for pointing it out.
+
+* Fixed a bug in `method = "ebal"` and `method = "energy"` with `tols` greater than 0, a continuous treatment, and sampling weights that could allow the treatment-covariate correlation to slightly exceed the requested tolerance.
+
+* Fixed a bug in `method = "energy"` with `estimand = "ATC"` and `moments` greater than 0.
+
+* Fixed a bug in `method = "energy"` and `method = "cfd"` with `min.w` set to `-Inf`.
+
+* Fixed a bug in which `method = "gbm"` with `criterion` set to a cross-validation specification (e.g., `"cv5"`) would fail with an error.
+
+* Fixed a bug in `method = "cbps"` with `is.MSM.method = TRUE` in which the balance conditions for a multi-category treatment used the treatment levels of the *last* time point rather than their own. This produced an error when the last time point was binary and silently used the wrong level set when two multi-category time points had the same number of levels.
+
+* Fixed a bug in `method = "cbps"` with `is.MSM.method = TRUE` in which a time point at which every unit was treated would compute the weights for all units as though none were treated.
+
+* Fixed a bug in `coxph_weightit()` in which a rank-deficient model (one with collinear predictors, so that some coefficients are not estimable) would fail with "non-conformable arguments". The score contributions used for the variance had one column per model matrix column, while the model matrix itself had been reduced to its estimable columns. Such fits now succeed, reporting the estimable coefficients and their standard errors and `NA` for the rest, as `glm_weightit()` does.
+
+* Fixed a bug in `weightitMSM()` in which supplying a single formula to `num.formula` would fail to correctly incorporate its terms into the stabilization model at all but the first time point.
+
+* Fixed a bug in which `predict()` on an `ordinal_weightit` object with `type = "link"` or `type = "stdlv"` and no `newdata` supplied could return incorrect values due to a scaling error.
+
+* Fixed a bug in `coxph_weightit()` in which `vcov = "const"` would always fail with the error "attempt to set an attribute on NULL". The model-based variance is now returned, matching that of an unweighted `survival::coxph()` fit.
+
+* Fixed a bug in `ordinal_weightit()` and `multinom_weightit()` in which `vcov = "const"` would always fail with the error "no applicable method for 'vcov' applied to an object of class \"list\"". The model-based variance is now returned, matching that of `MASS::polr()` and `mlogit::mlogit()`, respectively.
+
+* Fixed a bug in `coxph_weightit()` in which a model with no covariates (e.g., `Surv(time, event) ~ 1`) would fail with the error "'score' residuals are not defined for a null model". Such a model now returns an object with no coefficients and an empty variance matrix, which also makes `anova()` against a null model work.
+
+* Fixed a bug in `glm_weightit()` and `lm_weightit()` in which a model with collinear covariates would fail, with the error "length of 'dimnames' [1] not equal to array extent" when `vcov = "const"` and "the Hessian for the outcome model could not be inverted" when `vcov = "HC0"` or `vcov = "asympt"`. As with `stats::glm()`, the redundant coefficients are now `NA`, and the variance matrix covers the estimable coefficients.
+
+* Fixed a bug in `summary()` for `glm_weightit`, `lm_weightit`, `multinom_weightit`, and `ordinal_weightit` objects in which all standard errors (and the test statistics and p-values derived from them) would be `NA` when any coefficient was aliased due to collinear covariates.
+
+* Fixed a bug in `coxph_weightit()` in which a model fit to data with no observed events would fail with the error "object 'jacob' not found" (or "replacement has length zero" for a model with no covariates). As with `survival::coxph()`, the coefficients are now `NA`, along with the variance matrix, and a warning is thrown.
+
+* `weights` is now correctly ignored with a warning in `glm_weightit()` and friends.
+
+### Other
+
+* Added unit tests for all weighting methods.
+
+# `WeightIt` 1.7.0
+
+* `coxph_weightit()` can now estimate standard errors that account for estimation of the weights using M-estimation as described by [Shu et al. (2021)](https://doi.org/10.1111/biom.13332).
+
+* `weightit()` with `method = "ebal"` now accepts an optional `tols` argument, which can be used to set a balance threshold for inexact balance. This uses a new algorithm for optimizing with L1 regularization.
+
+* Fixed bugs in entropy balancing that made the M-estimation covariance slightly too small. Thanks to Chad Hazlett for pointing them out.
+
+* When using the `tols` argument with `method = "energy"` with a continuous treatment, the imbalance tolerances now yield correlations no larger than the imbalance tolerance as computed with `cobalt::col_w_corr()`. Previously, they were allowed to be slightly too large.
+
+* `glm_weightit()`, `multinom_weightit()`, `ordinal_weightit()`, and `coxph_weightit()` are now each documented on their own page.
+
+* The Estimating Effects vignettes (`vignette("estimating-effects")`) now describes how to use the [*adrftools*](https://ngreifer.github.io/adrftools/) package to estimate the effect of a continuous treatment.
+
+* [*arg*](https://ngreifer.github.io/arg/) is a new dependency for producing error messages and checking arguments.
+
+* Minor changes to `plot.summary.weightit()`, in particular to remove a deprecation warning from *ggplot2*.
+
+* In the `summary.weightit()` output, units with the highest weights are now named according to their rownames in `data`. `summary.weightit.sbps()` has been updated to be more in line with `summary.weightit()`.
+
+# `WeightIt` 1.6.0
+
+* Added `method = "cfd"` for characteristic function distance balancing as described by [Santra, Chen, and Park (2026)](https://arxiv.org/abs/2601.15449). Energy balancing is a special case of this method.
+
+* Added support for the new version of *osqp*, which changes some optional argument names and defaults for `method = "energy"`. These should not impact results.
+
+* *chk* and *crayon* have been removed as dependencies in favor of *cli*.
+
+# `WeightIt` 1.5.1
+
+* `calibrate()` with `method = "isoreg"` can now be used with sampling weights.
+
+* With `predict.ordinal_weightit()` and `predict.multinom_weightit()` with `type = "response"`, an optional `level` argument can be supplied to request predictions solely for the given outcome level.
+
+* When `vcov` is `"BS"` or `"FWB"` in `glm_weightit()`, etc., any call to `trim()` or `calibrate()` will be applied within each bootstrap replication.
+
+* Fixed a bug when using bootstrapping on `glm_weightit()`, etc., when the original call to `weightit()` was called as `WeightIt::weightit()`. (#85)
+
+* Fixed a bug when using `weightit()` with only categorical covariates. Thanks to @harshanperera85-commits and Pengfei Guo for pointing it out. (#86)
+
+* When a variable is manually excluded from a formula, e.g., `treat ~ . - re78`, that variable no longer is included in the covariate output.
+
+# `WeightIt` 1.5.0
+
+* For `predict.ordinal_weightit()`, `type` can now be `"stdlv"` to request predictions on the scale of the standardized latent variable underlying the ordinal responses.
+
+* `moments` can now be supplied as a named vector with a different integer value for each covariate, e.g., `moments = c(x1 = 2, x2 = 3)` to balance just the first two moments of `x1` and the first three of `x2`.
+
+* With `method = "energy"`, a new `tols` argument can be set to request inexact balance on covariate moments.
+
+* Some arguments and documentation for them has changed, in particular `moments`, `int`, and `subclass`, which used to be named arguments of `weightit()` and are now to be supplied through `...`. They are documented only on the help pages of the specific methods that allow them.
+
+* The `covs` component of the `weightit()` output object now only includes the raw covariates, not any transformations. This will affect `cobalt::bal.tab()` output.
+
+* In `summary.weightit()`, a new argument, `weight.range` can be supplied to specify whether the range of weights in each group should be displayed.
+
+* Fixed a bug in which the output of `bread()` was off by a factor of -1. This doesn't affect its use in `sandwich::sandwich()`.
+
+* Fixed a bug in which `bag.fraction` for `method = "gbm"` with binary and multi-category treatments had a default of .5 instead of the stated 1.
+
+* Fixed bugs relating to `method = "optweight"`; sampling weights and the fractional weighted bootstrap can now be used with it.
+
+* Fixed bugs related to `coxph_weightit()` with aliased coefficients and multi-state models. Thanks to Mads Jeppe Tarp-Johansen.
+
+* Fixed a bug in which messages about assuming which treatment level was "treated" were printed many times, including when bootstrapping.
+
+* Fixed a bug in which CBPS for continuous treatments would not yield correct balance in the presence of some extreme density estimates.
+
+* Typo fixes in vignettes and documentation.
+
+# `WeightIt` 1.4.0
+
+* Entropy balancing works slightly differently when sampling weights are supplied. The negative entropy between the estimated weights and the product of the sampling weights and base weights (if any) is now the quantity minimized in the optimization. Previously, the negative entropy between the product of the sampling weights and estimated weights and the base weights was minimized. The new behavior ensures entropy balancing is consistent with mathematically equivalent methods when it ought to be (i.e., CBPS and IPT for the ATT) and prevents counter-intuitive results, like that the ESS after weighting could be larger than that before weighting. Note this will cause results to differ between this and previous versions of `WeightIt`.
+
+* With `method = "cbps"`, `estimand` can now be set to `"ATO"` for binary and multi-category treatments. For binary treatments with the default link, this will yield identical weights to using `method = "glm"` with `estimand = "ATO"`.
+
+* Two new links can be supplied with `method = "glm"`, `"cbps"`, and `"ipt"`: `"loglog"` for the log-log link and `"clog"` for the complementary log link. The `link` argument can also now be supplied as a `link-glm` object (e.g., the output of a call to `make.link()`). This allows for more flexibility in the link function used to estimate the propensity score.
+
+* A new `solver` argument can be supplied to `weightit()` with `method = "ebal"` and with `method = "cbps"` with `over = FALSE` (the default); this argument controls whether to use `rootSolve::multiroot()` or `stats::optim()` solve the optimization problem for the weights. `multiroot()` is used by default when `rootSolve` is installed as it is quicker and more accurate.
+
+* For some methods, analytic formulas for the derivatives used in M-estimation are now used instead of relying on numeric differentiation. This increases speed and accuracy in computing standard errors that adjust for estimation of the weights. The formulas are benchmarked against numeric differentiation results.
+
+* Added new `method` argument to `calibrate()` to support isotonic regression calibration as described by [van der Laan el al. (2024)](https://arxiv.org/abs/2411.06342).
+
+* Added clearer error and warning messages to several functions, most notably `glm_weightit()` and friends, when missing values are present in the model variables.
+
+* The `update()` method for `glm_weightit` objects and friends is now a bit more sophisticated. When `data` or `s.weights` are supplied, the `weightit` object (if any) is refit before refitting the `glm_weightit` model. This makes it easy to performing bootstrapping by simply calling `update()` on a fitted object with a new dataset or bootstrap weights.
+
+* The `estfun()` and `bread()` methods for `glm_weightit` objects and friends now correctly extract the estimating function and bread matrices to be used when computing the sandwich covariance matrix using `sandwich::sandwich()`. `estfun()` (and thereby `sandwich()`) have an optional `asympt` argument, which, controls whether the asymptotic covariance matrix accounting for estimation of the weights is used.
+
+* Improved estimation and convergence for `method = "cbps"`. In particular, for the over-identified CBPS, the generalized inverse is now used only when the GMM weight matrix is singular. Previously, it was always used.
+
+* Improved processing of `estimand` and `focal` for binary treatments. `weightit()` is now better at guessing which level of the treatment is considered "treated", and `focal` can be used to identify the focal group when requesting the ATT or ATC. (#77)
+
+* Improved estimation of asymptotic and HC0 covariance matrices after `glm_weightit()` and friends.
+
+* When using `method = "super"` with `SL.method = "method.balance"`, a new algorithm is used to compute the optimal combination of predictions, which should yield better performance. This may cause results to differ from past versions.
+
+* Fixed a bug when using the fractional weighted bootstrap with `glm_weightit()` and friends after entropy balancing. This bug is still present with optimization-based weighting (i.e., `method = "optweight"`), so the fractional weighted bootstrap is no longer allowed with this method.
+
+* Sampling weights can no longer be used with `method = "optweight"` until a bug is sorted out.
+
+* Performance enhancements.
+
+* Added new tests for CBPS, IPT, and entropy balancing.
+
+* Updated the documentation for `msmdata`. Thanks to @larsentom. (#79)
+
+# `WeightIt` 1.3.2
+
+* Fixes to tests for CRAN.
+
+* Improvements to weight calculation for continuous treatments with small densities.
+
+# `WeightIt` 1.3.1
+
+* `vcov()`, `summary()`, `anova()`, and `confint()` for `glm_weightit` objects (and their relatives) now have a `vcov` argument that can be used to specify how the variance matrix is computed. This makes it possible to compute a variance matrix different from the one specified in the model fitting call without having to refit the model. `anova()` now displays which variance matrix was used.
+
+* Added `update()` methods for `glm_weightit`, `multinom_weightit`, `ordinal_weightit`, and `coxph_weightit` objects to update the model formula, dataset, or variance matrix. Updating the dataset also refits the `weightit` object included, if any.
+
+* `anova()` for `glm_weightit` objects gets its own help page at `help("anova.glm_weightit()")`.
+
+* Changed defaults with `missing = "saem"` for binary and multi-category treatments to bypass a bug in `misaem` code. (#71)
+
+* Preemptively fixed some bugs related to the use of `missing`, including when `missing` is used with `by`.
+
+* The missingness method (if any) is now included in the output of `weightit()`, `weightitMSM()`, and `weightit.fit()` and is printed when using the `print()` method for these objects.
+
+* When `missing = "saem"`, using `vcov = "FWB"` in `glm_weightit()`, etc., now appropriately results in an error. (#71)
+
+* `model.matrix.ordinal_weightit()` now excludes the `(Intercept)` column.
+
+* Fixed a bug with `predict.multinom_weightit()` and `predict.ordinal_weightit()` when the outcome was not included in `newdata`.
+
+* Typo fixes in documentation.
+
+# `WeightIt` 1.3.0
+
+* Added `anova()` methods for `glm_weightit`, `multinom_weightit`, `ordinal_weightit`, and `coxph_weightit` objects to perform Wald tests for comparing nested models. The models do not have to be symbolically nested.
+
+* Added the new user-facing object `.weightit_methods`, which contains information on each method and the options allowed with it. This is used within `WeightIt` for checking arguments but can also be used by other package developers who call functions in `WeightIt`. See `help(".weightit_methods")` for details.
+
+* `plot.weightit()` can be used with `method = "optweight"` to display the dual variables.
+
+* `missing` no longer allows partial matching.
+
+* `moments` can now be set to 0 when `quantile` is supplied to ensure balance on the quantiles without the moments for the methods that accepts `quantiles`. Thanks to @BERENZ for the suggestion.
+
+* For `ordinal_weightit` objects, `summary()` now has the option to omit thresholds from the output.
+
+* Fixed a bug in `ordinal_weightit()` where the Hessian (and therefore the HC0 robust variance) were calculated incorrectly when come coefficients were aliased (i.e., due to linearly dependent predictors).
+
+* Fixed a bug in `print.summary.glm_weightit()` when confidence intervals were requested. A new printing function is used that produces slightly nicer tables.
+
+* Fixes to vignettes and tests to satisfy CRAN checks.
+
+* Minor bug, performance, and readability fixes.
+
+# `WeightIt` 1.2.0
+
+* Added two new functions, `multinom_weightit()` and `ordinal_weightit()` for multinomial logistic regression and ordinal regression with capabilities to estimate a covariance matrix that accounts for estimation of the weights using M-estimation. Previously, multinomial logistic regression could be requested using `glm_weightit()` with `family = "multinomial"`; this has been deprecated.
+
+* M-estimation can now be used for weighting with ordinal regression for weights with multi-category ordered treatments with `method = "glm"`.
+
+* M-estimation can now be used with bias-reduced regression as implemented in `brglm2` for the propensity score (`method = "glm"` with `link = "br.{.}"`) and for the outcome model (`glm_weightit()` with `br = TRUE`). Thanks to Ioannis Kosmidis for supplying some starter code to implement this.
+
+* For any weighting methods with continuous treatments that support a `density` argument to specify the numerator and denominator densities of the weights, `density` can now be specified as `"kernel"` to request kernel density estimation. Previously, this was requested by setting `use.kernel = TRUE`, which is now deprecated.
+
+* Standard errors are now correctly computed when an offset is included in `glm_weightit()`. Thanks to @zeynepbaskurt. (#63)
+
+* Improved robustness of `get_w_from_ps()` to propensity scores of 0 and 1.
+
+* Updates to `weightit()` with `method = "gbm"`:
+
+    * `use.offset` is now tunable.
+    * The same random seed is used across specifications as requested by @mitchellcameron123. (#64)
+    * For binary and multi-category treatments with cross-validation used as the criterion, `class.stratify.cv` is now set to `TRUE` by default to stratify on treatment.
+    * For continuous treatments, the default density now corresponds to the distribution requested.
+    * `plot()` can be used on the output of `weightit()` to display the results of the tuning process; see `help("plot.weightit")` for details.
+    * Fixed a bug where `distribution` was not included in the output when tuned.
+    * Fixed a bug when propensity scores were estimated to be 0 or 1. Thanks to @mitchellcameron123. Propensity scores are now shifted slightly away from 0 or 1. (#64)
+
+* When using `weightit()` with `method = "super"` for binary and multi-category treatments, cross-validation now stratifies on treatment, as recommended by [Phillips et al. (2023)](https://doi.org/10.1093/ije/dyad023).
+
+* Fixed a bug and clarified some error messages when using ordered treatments with `method = "glm"`. Thanks to Steve Worthington for pointing them out.
+
+* Updated the help page of `get_w_from_ps()` to include formulas for the weights.
+
+# `WeightIt` 1.1.0
+
+* Added a new function, `coxph_weightit()`, for fitting Cox proportional hazards models in the weighted sample, with the option of accounting for estimation of the weights in computing standard errors via bootstrapping. This function uses the `summary()` and `print()` methods for `glm_weightit` objects, which are different from those for `coxph` objects.
+
+* `glm_weightit()` gets a new `print()` method that omits some invalid statistics displayed by the `print()` method for `glm` objects and displays the type of standard error estimated.
+
+* `summary.glm_weightit()` (which is also used for `coxph_weightit` objects) gets a new argument, `transform`, which can be used to transform the displayed coefficients and confidence interval bounds (if requested), e.g., by exponentiating them.
+
+* M-estimation is now supported for `method = "glm"` with continuous treatments.
+
+* A new estimator is now used for `method = "cbps"` with longitudinal treatments (i.e., using `weightitMSM()`). Previously, the weights from CBPS applied to each time point were multiplied together. Now, balance at all time points is optimized using a single set of weights. This implementation is close to that described by [Huffman and van Gameren (2018)](https://doi.org/10.1515/jci-2017-0002), not that of [Imai and Ratkovic (2015)](https://doi.org/10.1080/01621459.2014.956872).
+
+* A new estimator is now used for `method = "cbps"` with continuous treatments. The unconditional mean and variance are now included as parameters to be estimated. For the just-identified CBPS, this will typically improve balance, but results will depart from those found using `CBPS::CBPS()`.
+
+* For point treatments (i.e., using `weightit()`), the `stabilize` argument has some new behavior. It can now be be specified as a formula, and the stabilization factor is estimated separately and included in the M-estimation if allowed. It can now only be used when `estimand = "ATE"` (weights for other estimands should not be stabilized).
+
+* For binary treatments with `method = "glm"`, `link` can now be specified as `"flic"` or `"flac"` to use Firth corrected logistic regression as implemented in the `logistf` package.
+
+* With `method = "gbm"`, an error is now thrown if `criterion` (formerly known as `stop.method`) is supplied as anything other than a string.
+
+* For binary and continuous treatments with `method = "gbm"`, a new argument, `use.offset`, can be supplied, which, if `TRUE`, uses the linear predictor from a generalized linear model as an offset in the boosting model, which can improve performance.
+
+* Added a section on conducting moderation analysis to the estimating effect vignette (`vignette("estimating-effects")`).
+
+* Fixed a bug when using M-estimation for sequential treatments with `weightitMSM()` and `stabilize = TRUE`. Standard errors incorrectly accounted for estimation of the stabilization factor; they are now correct.
+
+* Fixed a bug when using `method = "ipt"` for the ATE.
+
+* Fixed a bug when some coefficients were aliased for `glm_weightit()`. Thanks to @kkwi5241.
+
+* Updated kernel balancing example in `method_user`.
+
+* Improved warnings and errors for bad models throughout the package.
+
+# `WeightIt` 1.0.0
+
+* Added a new function, `glm_weightit()` (along with wrapper `lm_weightit()`) and associated methods for fitting generalized linear models in the weighted sample, with the option of accounting for estimation of the weights in computing standard errors via M-estimation or two forms of bootstrapping. `glm_weightit()` also supports multinomial logistic regression in addition to all models supported by `glm()`. Cluster-robust standard errors are supported, and output is compatible with any functions that accept `glm()` objects. Not all weighting methods support M-estimation, but for those that do, a new component is added to the `weightit` output object. Currently, GLM propensity scores, entropy balancing, just-identified CBPS, and inverse probability tilting (described below) support M-estimation-based standard errors with `glm_weightit()`.
+
+* Added inverse probability tilting (IPT) as described by Graham, Pinto, and Egel (2012), which can be requested by setting `method = "ipt"`. This is similar to entropy balancing and CBPS in that it enforces exact balance and yields a propensity score, but has some theoretical advantages to both methods. IPT does not rely on any other packages and runs very quickly.
+
+* Estimating covariate balancing propensity score weights (i.e., `method = "cbps"`) no longer depends on the `CBPS` package. The default is now the just-identified versions of the method; the over-identified version can be requested by setting `over = TRUE`. The ATT for multi-category treatments is now supported, as are arbitrary numbers of treatment groups (`CBPS` only natively support up to 4 groups and only the ATE for multi-category treatments). For binary treatments, generalized linear models other than logistic regression are now supported (e.g., probit or Poisson regression).
+
+* New function `calibrate()` to apply Platt scaling to calibrate propensity scores as recommended by [Gutman et al. (2024)](https://doi.org/10.1097/EDE.0000000000001733).
+
+* A new argument `quantile` can be supplied to `weightit()` with all the methods that accept `moments` and `int` (`"ebal"`, `"cbps"`, `"ipt"`, `"npcbps"`, `"optweight"`, and `"energy"`). This allows one to request balance on the quantiles of the covariates, which can add some robustness as demonstrated by [Beręsewicz (2023)](https://arxiv.org/abs/2310.11969).
+
+* `as.weightit()` now has a method for `weightit.fit` objects, which now have additional components included in the output.
+
+* `trim()` now has a `drop` argument; setting to `TRUE` sets the weights of all trimmed units to 0 (effectively dropping them).
+
+* When using `weightit()` with a continuous treatment and a `method` that estimates the generalized propensity score (e.g., `"glm"`, `"gbm"`, `"super"`), sampling weights are now be incorporated into the density when `use.kernel = FALSE` (the default) when supplied to `s.weights`. Previously they were ignored in calculating the density, but have always been and remain used in the modeling the treatment (when allowed).
+
+* Fixed a bug when `criterion` was not specified when using `method = "gbm"`.
+
+* Fixed a bug when `ps` was supplied for continuous treatments. Thanks to @taylordunn. (#53)
+
+* Warning messages now display immediately rather than at the end of evaluation.
+
+* The vignettes have been changed to use a slightly different estimator for weighted g-computation. The estimated weights are no longer to be included in the call to `avg_comparisons()`, etc.; that is, they are only used to fit the outcome model. This makes the estimators more consistent with other software, including `teffects ipwra` in Stata, and most of the literature on weighted g-computation. Note this will not effect any estimates for the ATT or ATC and will only yield at most minor changes for the ATE. For other estimands (e.g., ATO), the weights are still to be included.
+
+* The word "multinomial" to describe treatments with more than two categories has been replaced with "multi-category" in all documentation and messages.
+
+* Transferred all help files to Roxygen and reorganized package scripts.
+
+* Reorganization of some functions.
+
+# `WeightIt` 0.14.2
+
+* Fixed a bug when using `estimand = "ATC"` with multi-category treatments. (#47)
+
+* Fixed a bug in the Estimating Effects vignette. (#46)
+
+# `WeightIt` 0.14.1
+
+* `cobalt` version 4.5.1 or greater is now required.
+
+* Fixed a bug when using balance Super Learner with `cobalt` 4.5.1.
+
+* Added a section to the Estimating Effects vignette (`vignette("estimating-effects")`) on estimating the effect of a continuous treatment after weighting.
+
+# `WeightIt` 0.14.0
+
+* Added energy balancing for continuous treatments, requested using `method = "energy"`, as described in [Huling et al. (2023)](https://doi.org/10.1080/01621459.2023.2213485). These weights minimize the distance covariance between the treatment and covariates while maintaining representativeness. This method supports exact balance constraints, distributional balance constraints, and sampling weights. The implementation is similar to that in the `independenceWeights` package. See `?method_energy` for details.
+
+* Added a new vignette on estimating effects after weighting, accessible using `vignette("estimating-effects", package = "WeightIt")`. The new workflow relies on the `marginaleffects` package. The main vignette (`vignette("WeightIt")`) has been modernized as well.
+
+* Added a new dataset, `msmdata`, to demonstrate capabilities for longitudinal treatments. `twang` is no longer a dependency.
+
+* Methods that use a balance criterion to select a tuning parameter, in particular GBM and balance Super Learner, now rely on `cobalt`'s `bal.init()` and `bal.compute()` functionality, which adds new balance criteria. The `stop.method` argument for these functions has been renamed to `criterion` and `help("stop.method")` has been removed; the same page is now available at `help("bal.compute", package = "cobalt")`, which describes the additional statistics available. This also fixes some bugs that were present in some balance criteria.
+
+* Renamed `method = "ps"` to `method = "glm"`. `"ps"` continues to work as it always had for back compatibility. `"glm"` is a more descriptive name since many methods use propensity scores; what distinguishes this method is that it uses generalized linear models.
+
+* Using `method = "ebcw"` for empirical balancing calibration weighting is no longer available because the `ATE` package has been removed. Use `method = "ebal"` for entropy balancing instead, which is essentially identical.
+
+* Updated the `trim()` documentation to clarify the form of trimming that is implemented (i.e., winsorizing). Suggested by David Novgorodsky.
+
+* Fixed bugs when some `s.weights` are equal to zero with `method = "ebal"`, "`cbps"`, and `"energy"`. Suggested by @statzhero. (#41)
+
+* Improved performance of `method = "energy"` for the ATT.
+
+* Fixed a bug when using `method = "energy"` with `by`.
+
+* With `method = "energy"`, setting `int = TRUE` automatically sets `moments = 1` if unspecified.
+
+* Errors and warnings have been updated to use `chk`.
+
+* The missingness indicator approach now imputes the variable median rather than 0 for missing values. This will not change the performance of most methods, but change others, and doesn't affect balance assessment.
+
+# `WeightIt` 0.13.1
+
+* For ordinal multi-category treatments, setting `link = "br.logit"` now uses `brglm2::bracl()` to fit a bias-reduced ordinal regression model.
+
+* Added the vignette "Installing Supporting Packages" to explain how to install the various packages that might be needed for `WeightIt` to use certain methods, including when the package is not on CRAN. See the vignette at `vignette("installing-packages")`.
+
+* Fixed a bug that would occur when a factor or character predictor with a single level was passed to `weightit()`.
+
+* Improved the code for entropy balancing, fixing a bug when using `s.weights` with a continuous treatment and improving messages when the optimization fails to converge. (#33)
+
+* Improved robustness of documentation to missing packages.
+
+* Updated the logo, thanks to [Ben Stillerman](https://stillben.com).
+
+# `WeightIt` 0.13.0
+
+* Fixed a bug that would occur when the `formula.tools` package was loaded, which would occur most commonly when `logistf` was loaded. It would cause the error `The treatment and covariates must have the same number of units.` (#25)
+
+* Fixed a bug where the `info` component would not be included in the output of `weightit()` when using `method = "super"`.
+
+* Added the ability to specify `num.formula` as a list of formulas in `weightitMSM()`. This is primarily to get around the fact that when `stabilize = TRUE`, a fully saturated model with all treatments is used to compute the stabilization factor, which, for many time points, is time-consuming and may be impossible (especially if not all treatment combinations are observed). Thanks to @maellecoursonnais for bringing up this issue (#27).
+
+* `ps.cont()` has been retired since the same functionality is available using `weightit()` with `method = "gbm"` and in the `twangContinuous` package.
+
+* With `method = "energy"`, a new argument, `lambda`, can be supplied, which puts a penalty on the square of the weights to control the effective sample size. Typically this is not needed but can help when the balancing is too aggressive.
+
+* With `method = "energy"`, `min.w` can now be negative, allowing for negative weights.
+
+* With `method = "energy"`, `dist.mat` can now be supplied as the name of a method to compute the distance matrix: `"scaled_euclidean"`, `"mahalanobis"`, or `"euclidean"`.
+
+* Support for negative weights added to `summary()`. Negative weights are possible (though not by default) when using `method = "energy"` or `method = "optweight"`.
+
+* Fixed a bug where `glm()` would fail to converge with `method = "ps"` for binary treatments due to bad starting values. (#31)
+
+* `miss = "saem"` can once again be used with `method = "ps"` when missing values are present in the covariates.
+
+* Fixed bugs with processing input formulas.
+
+* An error is now thrown if an incorrect `link` is supplied with `method = "ps"`.
+
+# `WeightIt` 0.12.0
+
+* The use of `method = "twang"` has been retired and will now give an error message. Use `method = "gbm"` for nearly identical functionality with more options, as detailed at `?method_gbm`.
+
+* With multinomial treatments with `link = "logit"` (the default), if the `mclogit` package is installed, it can be requested for estimating the propensity score by setting the option `use.mclogit = TRUE`, which uses `mclogit::mblogit()`. It should give the same results as the default, which uses `mlogit`, but can be faster and so is recommended.
+
+* Added a `plot()` method for `summary.weightitMSM` objects that functions just like `plot.summary.weightit()` for each time point.
+
+* Fixed a bug in `summary.weightit()` where the labels of the top weights were incorrect. Thanks to Adam Lilly.
+
+* Fixed a bug in `sbps()` when using a stochastic search (i.e., `full.search = FALSE` or more than 8 moderator levels). (#17)
+
+* Fixed a bug that would occur when all weights in a treatment group were `NA`. Bad weights (i.e., all the same) now produce a warning rather than an error so the weights can be diagnosed manually. (#18)
+
+* Fixed a bug when using `method = "energy"` with `estimand = "ATE"` and `improved = TRUE` (the default). The between-treatment energy distance contribution was half of what it should have been; this has now been corrected.
+
+* Added L1 median measure as a balance criterion. See `?stop.method` for details.
+
+* Fixed a bug where logical treatments would yield an error. (#21)
+
+* Fixed a bug where `Warning: Deprecated` would appear sometimes when `purrr` (part of the `tidyverse`) was loaded. (#22) Thanks to MrFlick on StackOverflow for the [solution](https://stackoverflow.com/a/66897921/6348551).
+
+# `WeightIt` 0.11.0
+
+* Added support for estimating propensity scores using Bayesian additive regression trees (BART) with `method = "bart"`. This method fits a BART model for the treatment using functions in the `dbarts` package to estimate propensity scores that are used in weights. Binary, multinomial, and continuous treatments are supported. BART uses Bayesian priors for its hyperparameters, so no hyperparameter tuning is necessary to get well-performing predictions.
+
+* Fixed a bug when using `method = "gbm"` with `stop.method = "cv{#}"`.
+
+* Fixed a bug when setting `estimand = "ATC"` for methods that produce a propensity score. In the past, the output propensity score was the probability of being in the control group; now, it is the probability of being in the treated group, as it is for all other estimands. This does not affect the weights.
+
+* Setting `method = "twang"` is now deprecated. Use `method = "gbm"` for improved performance and increased functionality. `method = "twang"` relies on the `twang` package; `method = "gbm"` calls `gbm` directly.
+
+* Using `method = "ebal"` no longer requires the `ebal` package. Instead, `optim()` is used, as it has been with continuous treatments. Balance is a little better, but some options have been removed. 
+
+* When using `method = "ebal"` with continuous treatments, a new argument, `d.moments`, can now be specified. This controls the number of moments of the covariate and treatment distributions that are constrained to be the same in the weighted sample as they are in the original sample. Vegetabile et al. (2020) recommend setting `d.moments` to at least 3 to ensure generalizability and reduce bias due to effect modification.
+
+* Made some minor changes to `summary.weightit()` and `plot.summary.weightit()`. Fixed how negative entropy was computed.
+
+* The option `use.mnlogit` in `weightit()` with multi-category treatments and `method = "ps"` has been removed because `mnlogit` appears uncooperative.
+
+* Fixed a bug (#16) when using `method = "cbps"` with factor variables, thanks to @danielebottigliengo.
+
+* Fixed a bug when using binary factor treatments, thanks to Darren Stewart.
+
+* Cleaned up the documentation.
+
+# `WeightIt` 0.10.2
+
+* Fixed a bug where treatment values were accidentally switched for some methods.
+
+# `WeightIt` 0.10.1
+
+* With `method = "gbm"`, added the ability to tune hyperparameters like `interaction.depth` and `distribution` using the same criteria as is used to select the optimal tree. A summary of the tuning results is included in `info` in the `weightit` output object.
+
+* Fixed a bug where `moments` and `int` were ignored unless both were specified.
+
+* Effective sample sizes now print only up to two digits (believe me, you don't need three) and print more cleanly with whole numbers.
+
+* Fixed a bug when using `by`, thanks to @frankpopham. (#11)
+
+* Fixed a bug when using `weightitMSM` with methods that process `int` and `moments` (though you probably shouldn't use them anyway). Thanks to Sven Reiger.
+
+* Fixed a bug when using `method = "npcbps"` where weights could be excessively small and mistaken for all being the same. The weights now sum to the number of units.
+
+# `WeightIt` 0.10.0
+
+* Added support for energy balancing with `method = "energy"`. This method minimizes the energy distance between samples, which is a multivariate distance measure. This method uses code written specifically for `WeightIt` (i.e., it does not call a package specifically designed for energy balancing) using the `osqp` package for the optimization (same as `optweight`). See Huling & Mak (2020) for details on this method. Also included is an option to require exact balance on moments of the covariates while minimizing the energy distance. The method works for binary and multinomial treatments with the ATE, ATT, or ATC. Sampling weights are supported. Because the method requires the calculation and manipulation of a distance matrix for all units, it can be slow and/or memory intensive for large datasets.
+
+* Improvements to `method = "gbm"` and to `method = "super"` with `SL.method = "method.balance"`. A new suite of `stop.method`s are allowed. For binary treatments, these include the energy distance, sample Mahalanobis distance, and pseudo-R2 of the weighted treatment model, among others. See `?stop.method` for allowable options. In addition, performance for both is quite a bit faster.
+
+* With multinomial treatments with `link = "logit"` (the default), if the `mnlogit` package is installed, it can be requested for estimating the propensity score by setting the option `use.mnlogit = TRUE`. It should give the same results as the default, which uses `mlogit`, but can be faster for large datasets.
+
+* Added option `estimand = "ATOS"` for the "optimal subset" treatment effect as described by Crump et al. (2009). This estimand finds the subset of units who, with ATE weights applied, yields a treatment effect with the lowest variance, assuming homoscedasticity (and other assumptions). It is only available for binary treatments with `method = "ps"`. In general it makes more sense to use `estimand = "ATO"` if you want a low-variance estimate and don't care about the target population, but I added this here for completeness. It is available in `get_w_from_ps()` as well.
+
+* `make_full_rank()` is now faster.
+
+* Cleaning up of some error messages.
+
+* Fixed a bug when using `link = "log"` for `method = "ps"` with binary treatments.
+
+* Fixed a bug when using `method = "cbps"` with continuous treatments and sampling weights. Previously the returned weights included the sampling weights multiplied in; now they are separated, as they are in all other scenarios and for all other methods.
+
+* Improved processing of non-0/1 binary treatments, including for `method = "gbm"`. A guess will be made as to which treatment is considered "treated"; this only affects produced propensity scores but not weights.
+
+* Changed default value of `at` in `trim()` from .99 to 0.
+
+* Added output for the number of weights equal to zero in `summary.weightit`. This can be especially helpful when using `"optweight"` or `"energy"` methods or when using `estimand = "ATOS"`.
+
+# `WeightIt` 0.9.0
+
+* Added support for entropy balancing (`method = "ebal"`) for continuous treatments as described by Tübbicke (2020). Relies on hand-written code contributed by Stefan Tübbicke rather than another R package. Sampling weights and base weights are both supported as they are with binary and multi-category treatments.
+
+* Added support for Balance SuperLearner as described by Pirracchio and Carone (2018) with `method = "super"`. Rather than using NNLS to choose the optimal combination of predictions, you can now optimize balance. To do so, set `SL.method = "method.balance"`. You will need to set an argument to `stop.method`, which works identically to how it does for `method = "gbm"`. For example, for `stop.method = "es.max"`, the predicted values given will be the combination of predicted values that minimizes the largest absolute standardized mean difference of the covariates in the sample weighted using the predicted values as propensity scores.
+
+* Changed some of the statistics displayed when using `summary()`: the weight ratio is gone (because weights can be 0, which is not problematic but would explode the ratio), and the mean absolute deviation and entropy of the weights are now present.
+
+* Added `crayon` for prettier printing of `summary()` output.
+
+# `WeightIt` 0.8.0
+
+* Formula interfaces now accept `poly(x, .)` and other matrix-generating functions of variables, including the `rms`-class-generating functions from the `rms` package (e.g., `pol()`, `rcs()`, etc.) (the `rms` package must be loaded to use these latter ones) and the `basis`-class-generating functions from the `splines` package (i.e., `bs()` and `ns()`). A bug in an early version of this was found by @ahinton-mmc.
+
+* Added support for marginal mean weighting through stratification (MMWS) as described by Hong (2010, 2012) for `weightit()` and `get_w_from_ps()` through the `subclass` argument (see References at `?get_w_from_ps`). With this method, subclasses are formed based on the propensity score and weights are computed based on the number of units in each subclass. MMWS can be used with any method that produces a propensity score. The implementation here ensures all subclasses have a least one member by filling in empty subclasses with neighboring units.
+
+* Added `stabilize` option to `get_w_from_ps()`. 
+
+* A new `missing` argument has been added to `weightit()` to choose how missing data in the covariates is handled. For most methods, only `"ind"` (i.e., missing indicators with single-value imputation) is allowed, but for `"ps"`, `"gbm"`, and `"twang"`, other methods are possible. For `method = "ps"`, a stochastic approximation of the EM algorithm (SAEM) can be used through the `misaem` package by setting `missing = "saem"`. 
+
+* For continuous treatments with the `"ps"`, `"gbm"`, and `"super"` methods (i.e., where the conditional density of the treatment needs to be estimated), the user can now supply their own density as a string or function rather than using the normal density or kernel density estimation. For example, to use the density of the t-distribution with 3 degrees of freedom, one can set `density = "dt_3"`. T-distributions often work better than normal distributions for extreme values of the treatment.
+
+* Some methods now have an `info` component in the output object. This contains information that might be useful in diagnosing or reporting the method. For example, when `method = "gbm"`, `info` contains the tree that was used to compute the weights and the balance resulting from all the trees, which can be plotted using `plot()`. When `method = "super"`, `info` contains the coefficients in the stacking model and the cross-validation risk of each of the component methods.
+
+* For `method = "gbm"`, the best tree can be chosen using cross validation rather than balance by setting `stop.method = "cv5"`, e.g., to do 5-fold cross-validation.
+
+* For `method = "gbm"`, a new optional argument `start.tree` can be set to select the tree at which balance begins to be computed. This can speed things up when you know that the best tree is not within the first 100 trees, for example.
+
+* When using `method = "gbm"` with multi-category treatments and estimands other than the `ATE`, `ATT`, or `ATC` are used with standardized mean differences as the stopping rule, the mean differences will be between the weighted overall sample and each treatment group. Otherwise, some efficiency improvements.
+
+* When using `method = "ps"` with multi-category treatments, the use of `use.mlogit = FALSE` to request multiple binary regressions instead of multinomial regression is now documented and an associated bug is now fixed, thanks to @ahinton-mmc.
+
+* When use `method = "super"`, one can now set `discrete = TRUE` to use discrete SuperLearner instead of stacked SuperLearner, but you probably shouldn't.
+
+* `moments` and `int` can now be used with `method = "npcbps"`.
+
+* Performance enhancements.
+
+# `WeightIt` 0.7.1
+
+* Fixed bug when using `weightit()` inside another function that passed a `by` argument explicitly. Also changed the syntax for `by`; it must now either be a string (which was always possible) or a one-sided formula with the stratifying variable on the right-hand side. To use a variable that is not in `data`, you must use the formula interface. 
+
+* Fixed bug when trying to use `ps` with `by` in `weightit()`.
+
+# `WeightIt` 0.7.0
+
+* Added new `sbps()` function for estimating subgroup balancing propensity score weights, including both the standard method and a new smooth version.
+
+* Setting `method = "gbm"` and `method = "twang"` will now do two different things. `method = "gbm"` uses `gbm` and `cobalt` functions to estimate the weights and is much faster, while `method = "twang"` uses `twang` functions to estimate the weights. The results are similar between the two methods. Prior to this version, `method = "gbm"` and `method = "twang"` both did what `method = "twang"` does now. 
+
+* Bug fixes when `stabilize = TRUE`, thanks to @ulriksartipy and Sven Rieger.
+
+* Fixes for using `base.weight` argument with `method = "ebal"`. Now the supplied vector should have a length equal to the number of units in the dataset (in contrast to its use in `ebalance`, which requires a length equal to the number of control units).
+
+* Restored dependency on `cobalt` for examples and vignette.
+
+* When `method = "ps"` and the treatment is ordered (i.e., ordinal), `MASS::polr()` is used to fit an ordinal regression. Make the treatment un-ordered to to use multinomial regression instead.
+
+* Added support for using bias-reduced fitting functions when `method = "ps"` as provided by the `brglm2` package. These can be accessed by changing the `link` to, for example, `"br.logit"` or `"br.probit"`. For multinomial treatments, setting `link = "br.logit"` fits a bias-reduced multinomial regression model using `brglm2::brmultinom()`. This can be helpful when regular maximum likelihood models fail to converge, though this may also be a sign of lack of overlap.
+
+# `WeightIt` 0.6.0
+
+* Bug fixes. Functions now work better when used inside other functions (e.g., `lapply`).
+
+* Behavior of `weightit()` in the presence of non-`NULL` `focal` has changed. When `focal` is specified, `estimand` is assumed to be `ATT`. Previously, `focal` would be ignored unless `estimand = "ATT"`.
+
+* Processing of `estimand` and `focal` is improved. Functions are smarter about guessing which group is the focal group when one isn't specified, especially with non-numeric treatments. `focal` can now be used with `estimand = "ATC"` to indicate which group is the control group, so `"ATC"` and `"ATT"` now function more similarly. 
+
+* Added function `get_w_from_ps()` to transform propensity scores into weights (instead of having to go through `weightit()`).
+
+* Added functions `as.weightit()` and `as.weightitMSM()` to convert weights and treatments and other components into `weightit` objects so that `summary.weightit()` can be used on them.
+
+* Updated documentation to describe how missing data in the covariates is handled. Some bugs related to missing data have been fixed as well, thanks to Yong Hao Pua.
+
+* `ps.cont()` had the "z-transformed correlation" options removed to simplify output. This function and its supporting functions will be deprecated as soon as the new version of `twang` is released.
+
+* When using `method = "ps"` or `method = "super"` with continuous treatments, setting `use.kernel = TRUE` and `plot = TRUE`, the plot is now made with `ggplot2` rather than the base R plots.
+
+* Added `plot.summary.weightit()` to plot the distribution of weights (a feature also in `optweight`).
+
+* Removed dependency on `cobalt` temporarily, which means the examples and vignette won't run. 
+
+* Added `ggplot2` to Imports.
+
+# `WeightIt` 0.5.1
+
+* Fixed a bug when using the `ps` argument in `weightit()`.
+
+* Fixed a bug when setting `include.obj = TRUE` in `weightitMSM()`.
+
+* Added warnings for using certain methods with longitudinal treatments as they are not validated and may lead to incorrect inferences.
+
+# `WeightIt` 0.5.0
+
+* Added `super` method to estimate propensity scores using the `SuperLearner` package.
+
+* Added `optweight` method to estimate weights using optimization (but you should probably just use the `optweight` package).
+
+* `weightit()` now uses the correct formula to estimate weights for the ATO with multinomial treatments as described by Li & Li (2018).
+
+* Added `include.obj` option in `weightit()` and `weightitMSM()` to include the fitted object in the output object for inspection. For example, with `method = "ps"`, the `glm` object containing the propensity score model will be included in the output.
+
+* Rearranged the help pages. Each method now has its own documentation page, linked from the `weightit` help page.
+
+* Propensity scores are now included in the output for binary treatments with `gbm` and `cbps` methods. Thanks to @Blanch-Font for the suggestion.
+
+* Other bug fixes and minor changes.
+
+# `WeightIt` 0.4.0
+
+* Added `trim()` function to trim weights.
+
+* Added `ps.cont()` function, which estimates generalized propensity score weights for continuous treatments using generalized boosted modeling, as in `twang`. This function uses the same syntax as `ps()` in `twang`, and can also be accessed using `weightit()` with `method = "gbm"`. Support functions were added to make it compatible with `twang` functions for assessing balance (e.g., `summary`, `bal.table`, `plot`). Thanks to Donna Coffman for enlightening me about this method and providing the code to implement it.
+
+* The input formula is now much more forgiving, allowing objects in the environment to be included. The `data` argument to `weightit()` is now optional. To simplify things, the output object no longer contains a `data` field.
+
+* Under-the-hood changes to facilitate adding new features and debugging. Some aspects of the output objects have been slightly changed, but it shouldn't affect use for most users.
+
+* Fixed a bug where variables would be thrown out when `method = "ebal"`.
+
+# `WeightIt` 0.3.2
+
+* Added new `moments` and `int` options for some `weightit()` methods to easily specify moments and interactions of covariates.
+
+* Fixed bug when using objects not in the data set in `weightit()`. Behavior has changed to include transformed covariates entered in formula in `weightit()` output.
+
+* Fixed bug resulting from potential collinearity when using `ebal` or `ebcw`.
+
+* Added a vignette.
+
+# `WeightIt` 0.3.1
+
+* Edits to code and help files to protect against missing `CBPS` package.
+
+* Corrected sampling weights functionality so they work correctly. Also expanded sampling weights to be able to be used with all methods, including those that do not natively allow for sampling weights (e.g., `ATE`).
+
+* Minor bug fixes and spelling corrections.
+
+# `WeightIt` 0.3.0
+
+* Added `weightitMSM()` function (and supporting `print()` and `summary()` functions) to estimate weights for marginal structural models with time-varying treatments and covariates.
+
+* Fixed some bugs, including when using CBPS with continuous treatments, and when using `focal` incorrectly.
+
+# `WeightIt` 0.2.0
+
+* Added `method = "sbw"` for stable balancing weights (now removed and replaced with `method = "optweight"`)
+
+* Allowed for estimation of multinomial propensity scores using multiple binary regressions if `mlogit` is not installed
+
+* Allowed for estimation of multinomial CBPS using multiple binary CBPS for more than 4 groups
+
+* Added README and NEWS
+
+# `WeightIt` 0.1.0
+
+* First version!

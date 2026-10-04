@@ -1,0 +1,12 @@
+rdrobust-package	rdrobust-package
+plot.rdrobust	plot.rdrobust
+print.rdbwselect	rdbwselect
+print.rdplot	rdplot
+print.rdrobust	rdrobust
+rdbwselect	rdbwselect
+rdplot	rdplot
+rdrobust	rdrobust
+rdrobust_RDsenate	rdrobust_RDsenate
+summary.rdbwselect	rdbwselect
+summary.rdplot	rdplot
+summary.rdrobust	rdrobust

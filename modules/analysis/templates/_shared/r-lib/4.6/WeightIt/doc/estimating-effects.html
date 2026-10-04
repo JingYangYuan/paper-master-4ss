@@ -1,0 +1,1952 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Noah Greifer" />
+
+<meta name="date" content="2026-09-28" />
+
+<title>Estimating Effects After Weighting</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Estimating Effects After Weighting</h1>
+<h4 class="author">Noah Greifer</h4>
+<h4 class="date">2026-09-28</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction" id="toc-introduction">Introduction</a>
+<ul>
+<li><a href="#identifying-the-estimand" id="toc-identifying-the-estimand">Identifying the estimand</a></li>
+<li><a href="#g-computation" id="toc-g-computation">G-computation</a></li>
+<li><a href="#modeling-the-outcome" id="toc-modeling-the-outcome">Modeling the Outcome</a></li>
+<li><a href="#estimating-standard-errors-and-confidence-intervals" id="toc-estimating-standard-errors-and-confidence-intervals">Estimating
+Standard Errors and Confidence Intervals</a></li>
+</ul></li>
+<li><a href="#estimating-treatment-effects-and-standard-errors-after-weighting" id="toc-estimating-treatment-effects-and-standard-errors-after-weighting">Estimating
+Treatment Effects and Standard Errors After Weighting</a>
+<ul>
+<li><a href="#the-standard-case-binary-treatment-with-asymptotically-correct-ses" id="toc-the-standard-case-binary-treatment-with-asymptotically-correct-ses">The
+Standard Case: Binary Treatment with Asymptotically Correct SEs</a></li>
+<li><a href="#adjustments-to-the-standard-case" id="toc-adjustments-to-the-standard-case">Adjustments to the Standard
+Case</a></li>
+<li><a href="#multi-category-treatments" id="toc-multi-category-treatments">Multi-Category Treatments</a></li>
+<li><a href="#continuous-treatments" id="toc-continuous-treatments">Continuous Treatments</a></li>
+<li><a href="#longitudinal-treatments" id="toc-longitudinal-treatments">Longitudinal Treatments</a></li>
+<li><a href="#moderation-analysis" id="toc-moderation-analysis">Moderation Analysis</a></li>
+</ul></li>
+<li><a href="#reporting-results" id="toc-reporting-results">Reporting
+Results</a></li>
+<li><a href="#references" id="toc-references">References</a></li>
+<li><a href="#code-to-generate-data-used-in-examples" id="toc-code-to-generate-data-used-in-examples">Code to Generate Data
+used in Examples</a></li>
+</ul>
+</div>
+
+<style>
+pre {
+overflow-x: auto;
+}
+pre code {
+word-wrap: normal;
+white-space: pre;
+}
+</style>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>After assessing balance and deciding on a weighting specification, it
+comes time to estimate the effect of the treatment in the weighted
+sample. How the effect is estimated and interpreted depends on the
+desired estimand and the effect measure used. In addition to estimating
+effects, estimating the uncertainty of the effects is critical in
+communicating them and assessing whether the observed effect is
+compatible with there being no effect in the population. This guide
+explains how to estimate effects after weighting for point and
+longitudinal treatments and with various outcome types.</p>
+<p>This guide is structured as follows: first, information on the
+concepts related to effect and standard error (SE) estimation is
+presented below. Then, instructions for how to estimate effects and SEs
+are described for the standard case (weighting for the ATE with a binary
+treatment and continuous outcome) and some other common circumstances.
+Finally, recommendations for reporting results and tips to avoid making
+common mistakes are presented.</p>
+<div id="identifying-the-estimand" class="section level3">
+<h3>Identifying the estimand</h3>
+<p>Before an effect is estimated, the estimand must be specified and
+clarified. Although some aspects of the estimand are determined by the
+weighting method itself, other aspects must be considered at the time of
+effect estimation and interpretation. Here, we consider three aspects of
+the estimand: the population the effect is meant to generalize to (the
+target population), the effect measure, and whether the effect is
+marginal or conditional.</p>
+<p><strong>The target population.</strong> Different weighting methods
+allow you to estimate effects that can generalize to different target
+populations. The most common estimand in weighting is the average
+treatment effect in the population (ATE), which is the average effect of
+treatment for the population from which the sample is a random sample.
+Other common estimands include the average treatment effect in the
+treated (ATT), the average treatment effect in the control (ATC), and
+the average treatment effect in the overlap (ATO). These are defined and
+explained in <span class="citation">Greifer and Stuart (<a href="#ref-greiferChoosingEstimandWhen2021">2021</a>)</span>. The
+estimand for weighting is controlled by the <code>estimand</code>
+argument in the call to <code>weightit()</code>. Other allowable
+estimands for some weighting methods include the average treatment
+effect in the matched sample (ATM) and the average treatment effect in
+the optimal subset (ATOS). These are treated just like the ATO and will
+not be differentiated further.</p>
+<p><strong>Marginal and conditional effects.</strong> A marginal effect
+is a comparison between the expected potential outcome under treatment
+and the expected potential outcome under control. This is the same
+quantity estimated in randomized trials without blocking or covariate
+adjustment and is particularly useful for quantifying the overall effect
+of a policy or population-wide intervention. A conditional effect is the
+comparison between the expected potential outcomes in the treatment
+groups within strata. This is useful for identifying the effect of a
+treatment for an individual patient or a subset of the population.</p>
+<p><strong>Effect measures.</strong> The main outcome types we consider
+here are continuous, with the effect measured by the mean difference;
+binary, with the effect measured by the risk difference (RD), risk ratio
+(RR), or odds ratio (OR); and time-to-event (i.e., survival), with the
+effect measured by the hazard ratio (HR). The RR, OR, and HR are
+<em>non-collapsible</em> effect measures, which means the marginal
+effect on that scale is not a (possibly) weighted average of the
+conditional effects within strata, even if the stratum-specific effects
+are of the same magnitude. For these effect measures, it is critical to
+distinguish between marginal and conditional effects because different
+statistical methods target different types of effects. The mean
+difference and RD are <em>collapsible</em> effect measures, so the same
+methods can be used to estimate marginal and conditional effects.</p>
+<p>Our primary focus will be on marginal effects, which are appropriate
+for all effect measures, easily interpretable, and require few modeling
+assumptions.</p>
+</div>
+<div id="g-computation" class="section level3">
+<h3>G-computation</h3>
+<p>To estimate marginal effects, we use a method known as g-computation
+<span class="citation">(<a href="#ref-snowdenImplementationGComputationSimulated2011">Snowden et
+al. 2011</a>)</span> or regression estimation <span class="citation">(<a href="#ref-schaferAverageCausalEffects2008">Schafer and Kang
+2008</a>)</span>. This involves first specifying a model for the outcome
+as a function of the treatment and covariates. Then, for each unit, we
+compute their predicted values of the outcome setting their treatment
+status to treated, and then again for control, leaving us with two
+predicted outcome values for each unit, which are estimates of the
+potential outcomes under each treatment level. We compute the mean of
+each of the estimated potential outcomes across the entire sample, which
+leaves us with two average estimated potential outcomes. Finally, the
+contrast of these average estimated potential outcomes (e.g., their
+difference or ratio, depending on the effect measure desired) is the
+estimate of the treatment effect.</p>
+<p>When doing g-computation after weighting, a few additional
+considerations are required. First, the outcome model should be fit
+incorporating the estimated weights (e.g., using weighted least squares
+or weighted maximum likelihood estimation) <span class="citation">(<a href="#ref-vansteelandtInvitedCommentaryGComputation2011">Vansteelandt
+and Keiding 2011</a>; <a href="#ref-gabrielInverseProbabilityTreatment2024">Gabriel et al.
+2024</a>)</span>. Second, when we take the average of the estimated
+potential outcomes under each treatment level, if an estimand other than
+the ATT, ATC, or ATE is used or sampling weights are included, this must
+be a weighted average that incorporates the weights<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. Third, if we want to
+target the ATT or ATC, we only estimate potential outcomes for the
+treated or control group, respectively (though we still generate
+predicted values under both treatment and control) <span class="citation">(<a href="#ref-wangGcomputationAverageTreatment2017">Wang et al.
+2017</a>)</span>.</p>
+<p>G-computation as a framework for estimating effects after weighting
+has a number of advantages over other approaches. It works the same
+regardless of the form of the outcome model or type of outcome (e.g.,
+whether a linear model is used for a continuous outcome or a logistic
+model is used for a binary outcome); the only difference might be how
+the average expected potential outcomes are contrasted in the final
+step. In simple cases, the estimated effect is numerically identical to
+effects estimated using other methods; for example, if no covariates are
+included in the outcome model, the g-computation estimate is equal to
+the difference in means from a t-test or coefficient of the treatment in
+a linear model for the outcome. There are analytic and bootstrap
+approximations to the SEs of the g-computation estimate. The analytic
+approximation is computed using the delta method, a technique for
+computing the SE of a quantity derived from the regression model
+parameters, such as the g-computation estimate <span class="citation">(<a href="#ref-hansenVarianceEstimationAverage2024">Hansen and Overgaard
+2024</a>)</span>.</p>
+<p>For the reasons above, we use weighted g-computation when possible
+for all effect estimates, even if there are simpler methods that would
+yield the same estimates. Using a single workflow (with some slight
+modifications depending on the context; see below) facilitates
+implementing best practices regardless of what choices a user makes.</p>
+<p>There are other methods to incorporate the outcome model into
+estimation of the treatment effect, the best studied of which is
+augmented inverse probability weighting (AIPW), which also involves a
+g-computation step. We only describe weighted g-computation here because
+of its conceptual simplicity, ease of implementation, and connection
+with best practices for estimating effects after matching.</p>
+</div>
+<div id="modeling-the-outcome" class="section level3">
+<h3>Modeling the Outcome</h3>
+<p>The goal of the outcome model is to generate good predictions for use
+in the g-computation procedure described above. The type and form of the
+outcome model should depend on the outcome type. For continuous
+outcomes, one can use a linear model regressing the outcome on the
+treatment; for binary outcomes, one can use a generalized linear model
+with, e.g., a logistic link; for time-to-event outcomes, one can use a
+Cox proportional hazards model. Note that the primary purpose of
+including the outcome model is not to arrive at a doubly robust
+estimator (i.e., one that is consistent if either the outcome or
+propensity score model is correct), though that is a benefit of
+including covariates in it (see below); rather, it is to increase the
+precision of the weighted estimate essentially for free. To take
+advantage of this feature, it is important to use a canonical link
+(i.e., the default link for a given family), as recommended by <span class="citation">Gabriel et al. (<a href="#ref-gabrielInverseProbabilityTreatment2024">2024</a>)</span>.</p>
+<p>An additional decision to make is whether (and how) to include
+covariates in the outcome model. One may ask, why use weighting at all
+if you are going to model the outcome with covariates anyway? Weighting
+reduces the dependence of the effect estimate on correct specification
+of the outcome model; this is the central thesis of <span class="citation">Ho et al. (<a href="#ref-hoMatchingNonparametricPreprocessing2007">2007</a>)</span>
+(though applied to matching in their case). Including covariates in the
+outcome model after weighting has several functions: it can increase
+precision in the effect estimate, reduce the bias due to residual
+imbalance, and make the effect estimate “doubly robust”, which means it
+is consistent if either the weighting removes sufficient imbalance in
+the covariates or if the outcome model is correct. For these reasons, we
+recommend covariate adjustment after weighting when possible. There is
+some evidence that covariate adjustment is most helpful for covariates
+with standardized mean differences greater than .1 <span class="citation">(<a href="#ref-nguyenDoubleadjustmentPropensityScore2017">Nguyen et al.
+2017</a>)</span>, so these covariates and covariates thought to be
+highly predictive of the outcome should be prioritized in treatment
+effect models if not all can be included due to sample size
+constraints.</p>
+<p>Although there are many possible ways to include covariates (e.g.,
+not just main effects but interactions, smoothing terms like splines, or
+other nonlinear transformations), it is important not to engage in
+specification search (i.e., trying many outcome models in search of the
+“best” one). Doing so can invalidate results and yield a conclusion that
+fails to replicate. For this reason, we recommend only including the
+same terms included in the weighting model unless there is a strong
+<em>a priori</em> and justifiable reason to model the outcome
+differently.</p>
+<p>It is important not to interpret the coefficients and tests of
+covariates in the outcome model. These are not causal effects and their
+estimates may be severely confounded. Only the treatment effect estimate
+can be interpreted as causal assuming the relevant assumptions about
+unconfoundedness are met. Inappropriately interpreting the coefficients
+of covariates in the outcome model is known as the Table 2 fallacy <span class="citation">(<a href="#ref-westreichTableFallacyPresenting2013">Westreich and Greenland
+2013</a>)</span>. To avoid this, we only display the results of the
+g-computation procedure and do not examine or interpret the outcome
+models themselves.</p>
+</div>
+<div id="estimating-standard-errors-and-confidence-intervals" class="section level3">
+<h3>Estimating Standard Errors and Confidence Intervals</h3>
+<p>Uncertainty estimation (i.e., of SEs, confidence intervals, and
+p-values) may consider the variety of sources of uncertainty present in
+the analysis, including (but not limited to!) estimation of the
+propensity score (if used) and estimation of the treatment effect (i.e.,
+because of sampling error). For some methods, procedures for
+analytically computing the correct asymptotic SE have been described and
+are implemented in <em>WeightIt</em> when available. These methods rely
+on M-estimation <span class="citation">(<a href="#ref-stefanskiCalculusMEstimation2002">Stefanski and Boos
+2002</a>; <a href="#ref-rossMestimationCommonEpidemiological2024">Ross
+et al. 2024</a>)</span>, a method of combining estimation of multiple
+models to adjust the standard errors for their joint estimation. For
+other methods, one must rely on an approximation that treats the weights
+as fixed and known, which can either yield conservative or
+anti-conservative standard errors depending on the method and estimand
+<span class="citation">(<a href="#ref-austin2022">Austin 2022</a>; <a href="#ref-reifeisVarianceTreatmentEffect2022">Reifeis and Hudgens
+2022</a>)</span>. Alternatively, one can use the bootstrap, which tends
+to have good performance regardless of the situation but can be
+computationally intensive for large datasets or slow weight estimation
+methods <span class="citation">(<a href="#ref-austin2022">Austin
+2022</a>)</span>. We describe the correct asymptotic standard errors,
+the robust standard errors treating the weights as fixed, and the
+bootstrap below.</p>
+<div id="asymptotically-correct-standard-errors-using-m-estimation" class="section level4">
+<h4>Asymptotically Correct Standard Errors Using M-estimation</h4>
+<p>M-estimation involves specifying a stack of estimating equations, one
+for each parameter to be estimated, that are each a function of the
+parameters. The final parameter estimates are those that yield a vector
+of 0s for the solutions of the estimating equations. These estimating
+equations include the parameters of the weighting model (e.g., the
+coefficients in the logistic regression model for the propensity score)
+and the parameters of the outcome model (i.e., the coefficients on
+treatment and the covariates). It is possible to compute the joint
+covariance matrix of all the estimated parameters using functions of the
+estimating equations and the estimated parameters. We refer curious
+readers to <span class="citation">Stefanski and Boos (<a href="#ref-stefanskiCalculusMEstimation2002">2002</a>)</span> for an
+introduction.</p>
+<p>Most theoretical developments on the estimation of asymptotically
+correct standard errors for propensity score-weighted treatment effect
+estimates rely on M-estimation theory <span class="citation">(<a href="#ref-luncefordStratificationWeightingPropensity2004">Lunceford and
+Davidian 2004</a>; <a href="#ref-reifeisVarianceTreatmentEffect2022">Reifeis and Hudgens
+2022</a>; <a href="#ref-gabrielInverseProbabilityTreatment2024">Gabriel
+et al. 2024</a>; <a href="#ref-shuVarianceEstimationInverse2021">Shu et
+al. 2021</a>)</span>. This method can only be used when the model used
+to estimate the weights involves estimating equations. Currently, only
+weights estimated using a generalized linear model propensity score,
+entropy balancing, inverse probability tilting, or the just-identified
+covariate balancing propensity score can be accommodated with this
+method. <code>glm_weightit()</code> can be used to fit generalized
+linear models for the outcome that account for estimation of the
+weights; <code>ordinal_weightit()</code>,
+<code>multinom_weightit()</code>, and <code>coxph_weightit()</code> can
+be used to fit ordinal, multinomial, and Cox proportional hazards
+models, respectively. When estimating equations are not available for a
+given method, the weights are treated as fixed and known, and the
+M-estimation standard errors are equal to the robust standard errors
+described below.</p>
+</div>
+<div id="robust-standard-errors" class="section level4">
+<h4>Robust Standard Errors</h4>
+<p>Also known as sandwich SEs (due to the form of the formula for
+computing them), heteroscedasticity-consistent SEs, or Huber-White SEs,
+robust SEs are an adjustment to the usual maximum likelihood or ordinary
+least squares SEs that are robust to violations of some of the
+assumptions required for usual SEs to be valid <span class="citation">(<a href="#ref-mackinnonHeteroskedasticityconsistentCovarianceMatrix1985">MacKinnon
+and White 1985</a>)</span>. They can also be adjusted to accommodate
+arbitrary levels of clustering in the data (e.g., when units are sampled
+from schools). Robust SEs have been shown to be conservative (i.e.,
+yielding overly large SEs and wide confidence intervals) for estimating
+the ATE after some forms of weighting <span class="citation">(<a href="#ref-robinsMarginalStructuralModels2000">Robins et al.
+2000</a>)</span>, though they can be either conservative or not for
+other weighting methods and estimands, such as for the ATT <span class="citation">(<a href="#ref-reifeisVarianceTreatmentEffect2022">Reifeis and Hudgens
+2022</a>)</span> or for entropy balancing <span class="citation">(<a href="#ref-chanGloballyEfficientNonparametric2016">Chan et al.
+2016</a>)</span>. Robust SEs treat the estimated weights as if they were
+fixed and known, ignoring uncertainty in their estimation that is
+otherwise accounted for by the asymptotically correct standard errors
+described above. Although they are quick and simple to estimate using
+functionality in the <em>sandwich</em> and <em>survey</em> packages or
+using <code>glm_weightit()</code>, they should be used with caution, and
+the bootstrap (described below) or asymptotically correct standard
+errors should be preferred in most cases.</p>
+</div>
+<div id="bootstrapping" class="section level4">
+<h4>Bootstrapping</h4>
+<p>Some problems with the robust SEs described above include that they
+fail to take into account the estimation of the weights and are only an
+approximation when used to compute derived quantities from nonlinear
+models, which is often true when using g-computation to estimate
+effects. One solution to these problems is bootstrapping, which is a
+technique used to simulate the sampling distribution of an estimator by
+repeatedly drawing samples with replacement and estimating the effect in
+each bootstrap sample <span class="citation">(<a href="#ref-efronBootstrapMethodsStandard1986">Efron and Tibshirani
+1986</a>)</span>. From the bootstrap distribution, SEs and confidence
+intervals can be computed in several ways, including using the standard
+deviation of the bootstrap estimates as the SE estimate or using the 2.5
+and 97.5 percentiles as 95% confidence interval bounds. Bootstrapping
+tends to be most useful when no analytic estimator of a SE is possible
+or has been derived yet. Bootstrapping has been found to be effective at
+estimating SEs and confidence intervals after weighting, often
+performing better even than the asymptotically correct method when it is
+available, especially in smaller samples <span class="citation">(<a href="#ref-austin2022">Austin 2022</a>)</span>.</p>
+<p>Typically, bootstrapping involves performing the entire estimation
+process in each bootstrap sample, including estimation both of the
+weights and the outcome model parameters. More bootstrap replications
+are always better but can take time and increase the chances that at
+least one error will occur within the bootstrap analysis (e.g., a
+bootstrap sample with zero treated units or zero units with an event).
+In general, numbers of replications upwards of 1000 are recommended. The
+traditional bootstrap resamples units from the dataset, and the
+fractional weighted bootstrap <span class="citation">(<a href="#ref-xuApplicationsFractionalRandomWeightBootstrap2020a">Xu et al.
+2020</a>)</span> draws a weight for each unit from a specified
+distribution and treats the weights as sampling weights in each
+replication. Both are equally valid in most cases, but the fractional
+weighted bootstrap can outperform the traditional bootstrap when sparse
+categorical variables are present in the data.</p>
+<p>Bootstrap standard errors can be computed manually using
+<em>boot</em> (for the traditional bootstrap) or <em>fwb</em> (for the
+fractional weighted bootstrap) or automatically using functionality in
+<code>glm_weightit()</code>, which, in each bootstrap sample,
+re-estimates the weights and then uses those weights to fit the outcome
+model. The covariance of the bootstrap estimates is used as the
+parameter variance matrix. There are some methods of computing bootstrap
+confidence intervals that use the bootstrap replications themselves,
+e.g., by using the quantiles of the bootstrap distribution. Those are
+not available in <em>WeightIt</em> and must be programmed manually.</p>
+<p>Because bootstrap standard errors involve a random component, it is
+imperative to set a seed using <code>set.seed()</code> to ensure
+reproducibility.</p>
+</div>
+</div>
+</div>
+<div id="estimating-treatment-effects-and-standard-errors-after-weighting" class="section level2">
+<h2>Estimating Treatment Effects and Standard Errors After
+Weighting</h2>
+<p>Below, we describe effect estimation after weighting. The focus here
+is not on evaluating the methods but simply on demonstrating them. In
+all cases, the correct propensity score model is used. We will present
+the asymptotically correct method that uses M-estimation, the method
+that uses robust SEs that treat the weights as fixed, and
+bootstrapping.</p>
+<p>We’ll be using a simulated toy dataset <code>d</code> with several
+outcome and treatment types. Code to generate the dataset is at the end
+of this document. Below we display the first six rows of
+<code>d</code>:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">head</span>(d)</span></code></pre></div>
+<div class="kable-table">
+<table style="width:100%;">
+<colgroup>
+<col width="2%" />
+<col width="2%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="2%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="6%" />
+<col width="3%" />
+<col width="5%" />
+<col width="7%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">A</th>
+<th align="left">Am</th>
+<th align="right">Ac</th>
+<th align="right">X1</th>
+<th align="right">X2</th>
+<th align="right">X3</th>
+<th align="right">X4</th>
+<th align="right">X5</th>
+<th align="right">X6</th>
+<th align="right">X7</th>
+<th align="right">X8</th>
+<th align="right">X9</th>
+<th align="right">Y_C</th>
+<th align="right">Y_B</th>
+<th align="right">Y_S</th>
+<th align="right">Y_death</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0</td>
+<td align="left">C1</td>
+<td align="right">-2.2185</td>
+<td align="right">0.1725</td>
+<td align="right">-1.4283</td>
+<td align="right">-0.4103</td>
+<td align="right">-2.3606</td>
+<td align="right">1</td>
+<td align="right">-1.1199</td>
+<td align="right">0.6398</td>
+<td align="right">-0.4840</td>
+<td align="right">-0.5939</td>
+<td align="right">-3.591</td>
+<td align="right">0</td>
+<td align="right">500.0</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="right">0</td>
+<td align="left">C2</td>
+<td align="right">-2.2837</td>
+<td align="right">-1.0959</td>
+<td align="right">0.8463</td>
+<td align="right">0.2456</td>
+<td align="right">-0.1233</td>
+<td align="right">1</td>
+<td align="right">-2.2687</td>
+<td align="right">-1.4491</td>
+<td align="right">-0.5514</td>
+<td align="right">-0.3144</td>
+<td align="right">-1.548</td>
+<td align="right">0</td>
+<td align="right">311.6</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="right">0</td>
+<td align="left">C1</td>
+<td align="right">-1.1362</td>
+<td align="right">0.1768</td>
+<td align="right">0.7905</td>
+<td align="right">-0.8436</td>
+<td align="right">0.8237</td>
+<td align="right">1</td>
+<td align="right">-0.2221</td>
+<td align="right">0.2971</td>
+<td align="right">-0.6966</td>
+<td align="right">-0.6952</td>
+<td align="right">6.071</td>
+<td align="right">0</td>
+<td align="right">241.2</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="right">0</td>
+<td align="left">C1</td>
+<td align="right">-0.8865</td>
+<td align="right">-0.4595</td>
+<td align="right">0.1726</td>
+<td align="right">1.9542</td>
+<td align="right">-0.6266</td>
+<td align="right">1</td>
+<td align="right">-0.4019</td>
+<td align="right">-0.8294</td>
+<td align="right">-0.5384</td>
+<td align="right">0.2073</td>
+<td align="right">2.491</td>
+<td align="right">1</td>
+<td align="right">142.4</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="right">1</td>
+<td align="left">T</td>
+<td align="right">0.8613</td>
+<td align="right">0.3563</td>
+<td align="right">-1.8121</td>
+<td align="right">0.8135</td>
+<td align="right">-0.6719</td>
+<td align="right">1</td>
+<td align="right">-0.8297</td>
+<td align="right">1.7297</td>
+<td align="right">-0.6439</td>
+<td align="right">-0.0265</td>
+<td align="right">-1.100</td>
+<td align="right">0</td>
+<td align="right">206.8</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="right">0</td>
+<td align="left">C2</td>
+<td align="right">-2.1697</td>
+<td align="right">-2.4313</td>
+<td align="right">-1.7984</td>
+<td align="right">-1.2940</td>
+<td align="right">0.0461</td>
+<td align="right">1</td>
+<td align="right">-1.2419</td>
+<td align="right">-1.1252</td>
+<td align="right">-1.8659</td>
+<td align="right">-0.5651</td>
+<td align="right">-9.850</td>
+<td align="right">0</td>
+<td align="right">500.0</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code>A</code> is a binary treatment variable, <code>X1</code>
+through <code>X9</code> are covariates, <code>Y_C</code> is a continuous
+outcome, <code>Y_B</code> is a binary outcome, and <code>Y_S</code> is a
+survival outcome (time-to-death) where <code>Y_death</code> denotes
+whether the unit died (<code>1</code>) or was censored (<code>0</code>).
+<code>Am</code> and <code>Ac</code> are multi-category and continuous
+treatment variables, respectively.</p>
+<p>In addition to <em>WeightIt</em> and whatever package may be required
+to estimate the weights, we will need the following packages to perform
+the analyses:</p>
+<ul>
+<li><em>marginaleffects</em> provides the <code>avg_comparisons()</code>
+function for performing g-computation and estimating the SEs and
+confidence intervals of the average estimated potential outcomes and
+treatment effects</li>
+<li><em>survival</em> provides functionality to estimate the
+coefficients in a Cox proportional hazards model for the marginal hazard
+ratio, which is called internally by <code>coxph_weightit()</code> for
+survival outcomes</li>
+<li><em>adrftools</em> provides tools for estimating, visualizing, and
+testing the effect of a continuous treatment on an outcome</li>
+</ul>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;WeightIt&quot;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;marginaleffects&quot;</span>)</span></code></pre></div>
+<p>Effect estimates will be computed using
+<code>marginaleffects::avg_comparisons()</code>, even when its use may
+be superfluous (e.g., for comparing the weighted difference in means).
+As previously mentioned, this is because it is useful to have a single
+workflow that works no matter the situation, perhaps with very slight
+modifications to accommodate different contexts. Using
+<code>avg_comparisons()</code> has several advantages, even when the
+alternatives are simple: it only provides the effect estimate and not
+other coefficients, and it always produces average marginal effects for
+the correct population if requested.</p>
+<p>Other packages may be of use but are not used here. There are
+alternatives to the <em>marginaleffects</em> package for computing
+average marginal effects, including <em>margins</em> and
+<em>stdReg</em>. The <em>survey</em> package can be used to estimate
+robust SEs incorporating weights and provides functions for
+survey-weighted generalized linear models and Cox proportional hazards
+models. Much of the code here can be adapted to be used with
+<em>survey</em>, and we will demonstrate that as well.</p>
+<div id="the-standard-case-binary-treatment-with-asymptotically-correct-ses" class="section level3">
+<h3>The Standard Case: Binary Treatment with Asymptotically Correct
+SEs</h3>
+<p>For many weighting methods, estimating the effect after weighting is
+straightforward and involves fitting a model for the outcome that
+incorporates the estimated weights using <code>lm_weightit()</code> or
+<code>glm_weightit()</code>, then estimating the treatment effect using
+g-computation (i.e., using <code>avg_comparisons()</code>). This
+procedure is the same for continuous and binary outcomes with and
+without covariates. This method uses the asymptotically correct
+M-estimation-based SEs when available and robust SEs otherwise or
+bootstrap standard errors if requested.</p>
+<p>There are a few adjustments that need to be made for certain
+scenarios, which we describe in the section “Adjustments to the Standard
+Case”. These adjustments are needed in the following cases: when
+weighting for the ATT or ATC, for estimating effects with binary
+outcomes, and for estimating effects with survival outcomes. Estimation
+for all estimands other than the ATT and ATC proceeds as it does for the
+ATE. You must read the Standard Case to understand the basic procedure
+before reading about these special scenarios. We also demonstrate how to
+estimate effects for multi-category, continuous, and sequential
+treatments.</p>
+<p>Here, we demonstrate the faster analytic approach to estimating
+confidence intervals; for the bootstrap approach, see the section “Using
+Bootstrapping to Estimate Confidence Intervals” below.</p>
+<p>First, we will perform propensity score weighting for the ATE.
+Remember, all weighting methods use this exact procedure or a slight
+variation, so this section is critical even if you are using a different
+weighting method.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co">#PS weighting for the ATE with a logistic regression PS</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>W <span class="ot">&lt;-</span> <span class="fu">weightit</span>(A <span class="sc">~</span> X1 <span class="sc">+</span> X2 <span class="sc">+</span> X3 <span class="sc">+</span> X4 <span class="sc">+</span> X5 <span class="sc">+</span> </span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>                X6 <span class="sc">+</span> X7 <span class="sc">+</span> X8 <span class="sc">+</span> X9, <span class="at">data =</span> d,</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>              <span class="at">method =</span> <span class="st">&quot;glm&quot;</span>, <span class="at">estimand =</span> <span class="st">&quot;ATE&quot;</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>W</span></code></pre></div>
+<pre><code>## A weightit object
+##  - method: &quot;glm&quot; (propensity score weighting with GLM)
+##  - number of obs.: 2000
+##  - sampling weights: none
+##  - treatment: 2-category
+##  - estimand: ATE
+##  - covariates: X1, X2, X3, X4, X5, X6, X7, X8, X9</code></pre>
+<p>Typically one would assess balance and ensure that this weighting
+specification works, but we will skip that step here to focus on effect
+estimation. See <code>vignette(&quot;WeightIt&quot;)</code> and
+<code>vignette(&quot;cobalt&quot;, package = &quot;cobalt&quot;)</code> for more information
+on this necessary step.</p>
+<p>First, we fit a model for the outcome given the treatment and
+(optionally) the covariates. It’s usually a good idea to include
+treatment-covariate interactions, which we do below, but this is not
+always necessary, especially when excellent balance has been
+achieved.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co">#Linear model with covariates</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">lm_weightit</span>(Y_C <span class="sc">~</span> A <span class="sc">*</span> (X1 <span class="sc">+</span> X2 <span class="sc">+</span> X3 <span class="sc">+</span> X4 <span class="sc">+</span> X5 <span class="sc">+</span> </span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>                        X6 <span class="sc">+</span> X7 <span class="sc">+</span> X8 <span class="sc">+</span> X9),</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>                    <span class="at">data =</span> d, <span class="at">weightit =</span> W)</span></code></pre></div>
+<p>Next, we use <code>avg_comparisons()</code> to estimate the ATE.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">avg_comparisons</span>(fit, <span class="at">variables =</span> <span class="st">&quot;A&quot;</span>)</span></code></pre></div>
+<pre><code>## 
+##  Estimate Std. Error    z Pr(&gt;|z|)    S 2.5 % 97.5 %
+##      1.96      0.346 5.66   &lt;0.001 26.0  1.28   2.63
+## 
+## Term: A
+## Type: probs
+## Comparison: 1 - 0</code></pre>
+<p>If, in addition to the effect estimate, we want the average estimated
+potential outcomes, we can use <code>avg_predictions()</code>, which we
+demonstrate below. Note the interpretation of the resulting estimates as
+the expected potential outcomes is only valid if all covariates present
+in the outcome model (if any) are interacted with the treatment.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">avg_predictions</span>(fit, <span class="at">variables =</span> <span class="st">&quot;A&quot;</span>)</span></code></pre></div>
+<pre><code>## 
+##  A Estimate Std. Error    z Pr(&gt;|z|)    S 2.5 % 97.5 %
+##  0     1.42      0.135 10.5   &lt;0.001 84.0  1.16   1.68
+##  1     3.38      0.318 10.6   &lt;0.001 84.8  2.75   4.00
+## 
+## Type: probs</code></pre>
+<p>We can see that the difference in potential outcome means is equal to
+the average treatment effect computed previously<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>. The arguments to
+<code>avg_predictions()</code> are the same as those to
+<code>avg_comparisons()</code>.</p>
+</div>
+<div id="adjustments-to-the-standard-case" class="section level3">
+<h3>Adjustments to the Standard Case</h3>
+<p>This section explains how the procedure might differ if any of the
+following special circumstances occur.</p>
+<div id="weighting-for-the-att-or-atc" class="section level4">
+<h4>Weighting for the ATT or ATC</h4>
+<p>When weighting for the ATT, everything is identical to the Standard
+Case except that in the calls to <code>avg_comparisons()</code> and
+<code>avg_predictions()</code>, the <code>newdata</code> argument must
+additionally be supplied as</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>newdata <span class="ot">=</span> <span class="fu">subset</span>(A <span class="sc">==</span> <span class="dv">1</span>)</span></code></pre></div>
+<p>This requests that g-computation be done only for the treated units.
+For the ATC, replace <code>1</code> with <code>0</code>.</p>
+</div>
+<div id="weighting-for-estimands-other-than-the-att-atc-or-ate" class="section level4">
+<h4>Weighting for estimands other than the ATT, ATC, or ATE</h4>
+<p>When weighting for an estimand that changes the target population
+away from one naturally defined by the data, e.g., for the ATO, ATM, or
+ATOS, or when trimming weights in such a way that trimmed units are
+dropped from the sample (i.e., receive a weight of 0), an adjustment
+needs to be made to the call to <code>avg_comparisons()</code> and
+<code>avg_predictions()</code>. For the estimands listed, we need to
+supply the estimated weights to the <code>wts</code> argument. So, after
+weighting for the ATO for example, we need to specify the following:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>wts <span class="ot">=</span> W<span class="sc">$</span>weights</span></code></pre></div>
+</div>
+<div id="binary-count-and-categorical-outcomes" class="section level4">
+<h4>Binary, count, and categorical outcomes</h4>
+<p>Estimating effects on binary and count outcomes is essentially the
+same as for continuous outcomes. The main difference is that there are
+several measures of the effect one can consider, which include the odds
+ratio (OR), risk ratio/relative risk (RR), and risk difference (RD) for
+binary outcomes and the count/incidence ratio for count outcomes, and
+the syntax to <code>avg_comparisons()</code> depends on which one is
+desired. The outcome model should be one appropriate for the outcomes
+(e.g., logistic regression for binary outcomes or Poisson regression for
+count outcomes) but is unrelated to the desired effect measure because
+we can compute any of the above effect measures using
+<code>avg_comparisons()</code> after fitting the model.</p>
+<p>To fit a generalized linear model, change <code>lm_weightit()</code>
+to <code>glm_weightit()</code> and set <code>family = binomial</code>
+for binary outcomes or <code>family = poisson</code> for count outcomes.
+To compute the marginal RD or mean difference, we can use exactly the
+same syntax as in the Standard Case; nothing needs to change<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a>.</p>
+<p>To compute the marginal RR or count/incidence ratio, first we need to
+add <code>comparison = &quot;lnratioavg&quot;</code> to
+<code>avg_comparisons()</code>; this computes the marginal log ratio. To
+get the marginal ratio itself, we need to add
+<code>transform = &quot;exp&quot;</code> to <code>avg_comparisons()</code>, which
+exponentiates the marginal log ratio and its confidence interval<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a>. The code
+below computes the effects and displays the statistics of interest for a
+binary outcome <code>Y_B</code>:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co">#Logistic regression model with covariates</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">glm_weightit</span>(Y_B <span class="sc">~</span> A <span class="sc">*</span> (X1 <span class="sc">+</span> X2 <span class="sc">+</span> X3 <span class="sc">+</span> X4 <span class="sc">+</span> X5 <span class="sc">+</span> </span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>                        X6 <span class="sc">+</span> X7 <span class="sc">+</span> X8 <span class="sc">+</span> X9),</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>                    <span class="at">data =</span> d, <span class="at">weightit =</span> W,</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>                    <span class="at">family =</span> binomial)</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="co">#Compute effects; RR and confidence interval</span></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="fu">avg_comparisons</span>(fit,</span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a>                <span class="at">variables =</span> <span class="st">&quot;A&quot;</span>,</span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a>                <span class="at">comparison =</span> <span class="st">&quot;lnratioavg&quot;</span>,</span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a>                <span class="at">transform =</span> <span class="st">&quot;exp&quot;</span>)</span></code></pre></div>
+<pre><code>## 
+##  Estimate Pr(&gt;|z|)    S 2.5 % 97.5 %
+##      1.64   &lt;0.001 39.5  1.43   1.88
+## 
+## Term: A
+## Type: probs
+## Comparison: ln(mean(1) / mean(0))</code></pre>
+<p>The output displays the marginal RR, its Z-value, the p-value for the
+Z-test of the log RR against 0, and its confidence interval. (Note that
+even though the <code>Comparison</code> label still suggests the log RR,
+the RR is actually displayed.) To view the log RR and its standard
+error, omit the <code>transform</code> argument.</p>
+<p>For the marginal OR, the only thing that needs to change is that
+<code>comparison</code> should be set to <code>&quot;lnoravg&quot;</code>.</p>
+<p>Categorical outcomes can be modeled using
+<code>ordinal_weightit()</code> and <code>multinom_weightit()</code>,
+which fit ordinal and multinomial regression models, respectively.</p>
+</div>
+<div id="survival-outcomes" class="section level4">
+<h4>Survival outcomes</h4>
+<p>There are several measures of effect size for survival outcomes, some
+of which are described by <span class="citation">Mao et al. (<a href="#ref-mao2018">2018</a>)</span>. A common quantity of interest is
+the hazard ratio (HR) between the treated and control groups, which can
+be estimated using a Cox proportional hazards model. As with the OR, the
+HR is non-collapsible, which means the estimated HR will only be a valid
+estimate of the marginal HR when no other covariates are included in the
+model. Other effect measures, such as the difference in mean survival
+times or probability of survival after a given time, can be treated just
+like continuous and binary outcomes as previously described.</p>
+<p>For the HR, we cannot compute average marginal effects and must use
+the coefficient on treatment in a Cox model fit without covariates. This
+means that we cannot use the procedures from the Standard Case. Here we
+describe estimating the marginal HR using <code>coxph_weightit()</code>,
+which adapts <code>coxph()</code> from the <em>survival</em> package but
+allows for estimation of SEs that account for estimation of the weights.
+Robust SEs for HRs were studied by <span class="citation">Austin (<a href="#ref-austin2016">2016</a>)</span> and were found to be
+conservative. Other formulas have been developed for estimating standard
+errors more accurately <span class="citation">(<a href="#ref-mao2018">Mao et al. 2018</a>; <a href="#ref-hajage2018">Hajage et al. 2018</a>; <a href="#ref-shuVarianceEstimationInverse2021">Shu et al.
+2021</a>)</span>, though <span class="citation">Austin (<a href="#ref-austin2016">2016</a>)</span> also found the bootstrap to be
+adequate. The M-estimation-based standard error as described by <span class="citation">Shu et al. (<a href="#ref-shuVarianceEstimationInverse2021">2021</a>)</span> is
+requested by default, and bootstrap standard errors can be requested by
+setting <code>vcov</code> to <code>&quot;BS&quot;</code> or
+<code>&quot;FWB&quot;</code>.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="co">#Cox Regression for marginal HR</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">coxph_weightit</span>(survival<span class="sc">::</span><span class="fu">Surv</span>(Y_S, Y_death) <span class="sc">~</span> A,</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>                      <span class="at">data =</span> d, <span class="at">weightit =</span> W)</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="co">#Log HR estimates</span></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a><span class="fu">summary</span>(fit)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## coxph_weightit(formula = survival::Surv(Y_S, Y_death) ~ A, data = d, 
+##     weightit = W)
+## 
+## Coefficients:
+##   Estimate Std. Error z value Pr(&gt;|z|)    
+## A    0.356      0.106    3.37  0.00074 ***
+## Standard error: HC0 robust (adjusted for estimation of weights)</code></pre>
+<p>Note that the output differs from that of
+<code>survival::coxph()</code> and is more similar to that of
+<code>glm()</code>. The <code>Estimate</code> column contains the log
+HR. We can request the HR by setting <code>transform = &quot;exp&quot;</code> in
+the call to <code>summary()</code>.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co">#HR and CIs; requested by exponentiating log HRs</span></span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="fu">summary</span>(fit, <span class="at">ci =</span> <span class="cn">TRUE</span>, <span class="at">transform =</span> <span class="st">&quot;exp&quot;</span>)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## coxph_weightit(formula = survival::Surv(Y_S, Y_death) ~ A, data = d, 
+##     weightit = W)
+## 
+## Coefficients (transformed):
+##   Estimate z value Pr(&gt;|z|) 2.5 % 97.5 %    
+## A     1.43    3.37  0.00074  1.16   1.76 ***
+## Standard error: HC0 robust (adjusted for estimation of weights)</code></pre>
+<p>A more interpretable estimand is the survival probability difference
+at a given time, which can be computed using
+<code>avg_comparisons()</code> on the <code>coxph_weightit()</code>
+output. We must specify the desired follow-up time (in this case, 300
+days) using the <code>newdata</code> argument as follows:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">avg_comparisons</span>(fit, <span class="at">variables =</span> <span class="st">&quot;A&quot;</span>,</span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>                <span class="at">type =</span> <span class="st">&quot;survival&quot;</span>,</span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>                <span class="at">newdata =</span> <span class="fu">datagrid</span>(<span class="at">Y_S =</span> <span class="dv">300</span>, <span class="at">grid_type =</span> <span class="st">&quot;counterfactual&quot;</span>))</span></code></pre></div>
+<pre><code>## 
+##  Estimate Std. Error     z Pr(&gt;|z|)    S  2.5 %  97.5 %
+##    -0.127     0.0357 -3.57   &lt;0.001 11.4 -0.197 -0.0574
+## 
+## Term: A
+## Type: survival
+## Comparison: 1 - 0</code></pre>
+<p>A negative value for the survival probability difference indicates
+that the treatment decreases the probability of survival for 300 days
+(i.e., increases the probability of death within 300 days), consistent
+with an HR greater than 1 (also indicating an increased probability of
+death). For the survival probability difference, additional covariates
+can be included in the Cox regression model and the estimate retains its
+interpretation as a marginal effect.</p>
+<p>The <a href="https://cran.r-project.org/package=adjustedCurves"><em>adjustedCurves</em></a>
+package provides integration with <em>WeightIt</em> to estimate adjusted
+survival estimands. Although that integration is limited, we recommend
+using this package to estimate effects after weighting.</p>
+</div>
+<div id="using-sampling-weights-with-complex-surveys" class="section level4">
+<h4>Using sampling weights with complex surveys</h4>
+<p>When sampling weights are required to generalize to the correct
+population, they must be included in the call to <code>weightit()</code>
+to estimate the balancing weights, in the outcome model, and in the call
+to <code>avg_comparisons()</code>, etc. In most cases, this can be
+handled without modifying the standard case except that
+<code>s.weights</code> must be supplied to <code>weightit()</code>, and
+<code>wts = W$s.weights</code> must be supplied to
+<code>avg_comparisons()</code>, etc. <code>lm_weightit()</code> and
+<code>glm_weightit()</code> automatically incorporate the sampling
+weights into estimation of the outcome model.</p>
+<p>If there is clustering in the sampling design, such clustering can be
+accounted for by using the <code>cluster</code> argument to
+<code>glm_weightit()</code>, which accepts a one-sided formula with the
+clustering variable(s) on the right side. These can be used with the
+traditional or fractional weighted bootstrap as well.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="co">#Estimate the balancing weights, with sampling weights called &quot;sw&quot;</span></span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a>W <span class="ot">&lt;-</span> <span class="fu">weightit</span>(A <span class="sc">~</span> X1 <span class="sc">+</span> X2 <span class="sc">+</span> X3 <span class="sc">+</span> X4 <span class="sc">+</span> X5 <span class="sc">+</span> </span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a>                X6 <span class="sc">+</span> X7 <span class="sc">+</span> X8 <span class="sc">+</span> X9, <span class="at">data =</span> d,</span>
+<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a>              <span class="at">method =</span> <span class="st">&quot;glm&quot;</span>, <span class="at">estimand =</span> <span class="st">&quot;ATE&quot;</span>,</span>
+<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a>              <span class="at">s.weights =</span> <span class="st">&quot;sw&quot;</span>)</span>
+<span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a></span>
+<span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a><span class="co">#Fit the outcome model, with clustering variable &quot;clu&quot;</span></span>
+<span id="cb20-8"><a href="#cb20-8" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">glm_weightit</span>(Y_C <span class="sc">~</span> A <span class="sc">*</span> (X1 <span class="sc">+</span> X2 <span class="sc">+</span> X3 <span class="sc">+</span> X4 <span class="sc">+</span> X5 <span class="sc">+</span> </span>
+<span id="cb20-9"><a href="#cb20-9" tabindex="-1"></a>                           X6 <span class="sc">+</span> X7 <span class="sc">+</span> X8 <span class="sc">+</span> X9),</span>
+<span id="cb20-10"><a href="#cb20-10" tabindex="-1"></a>                    <span class="at">data =</span> d, <span class="at">weightit =</span> W,</span>
+<span id="cb20-11"><a href="#cb20-11" tabindex="-1"></a>                    <span class="at">cluster =</span> <span class="sc">~</span>clu)</span>
+<span id="cb20-12"><a href="#cb20-12" tabindex="-1"></a></span>
+<span id="cb20-13"><a href="#cb20-13" tabindex="-1"></a><span class="co">#Compute the ATE, include sampling weights in the estimation</span></span>
+<span id="cb20-14"><a href="#cb20-14" tabindex="-1"></a><span class="fu">avg_comparisons</span>(fit,</span>
+<span id="cb20-15"><a href="#cb20-15" tabindex="-1"></a>                <span class="at">variables =</span> <span class="st">&quot;A&quot;</span>,</span>
+<span id="cb20-16"><a href="#cb20-16" tabindex="-1"></a>                <span class="at">wts =</span> W<span class="sc">$</span>s.weights)</span></code></pre></div>
+<p>More complicated survey designs might require the use of the
+<em>survey</em> package to handle them; it is important to note that
+using <code>survey::svyglm()</code> instead of
+<code>glm_weightit()</code> will produce standard errors that do not
+account for estimation of the balancing weights. See an example below
+for using <em>survey</em> to estimate effects after weighting.</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;survey&quot;</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a><span class="co">#Multiply sampling weights and estimated weights</span></span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>d<span class="sc">$</span>weights <span class="ot">&lt;-</span> W<span class="sc">$</span>weights <span class="sc">*</span> d<span class="sc">$</span>sw</span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a></span>
+<span id="cb21-6"><a href="#cb21-6" tabindex="-1"></a><span class="co">#Declare a survey design using the combined weights with</span></span>
+<span id="cb21-7"><a href="#cb21-7" tabindex="-1"></a><span class="co">#appropriate clustering</span></span>
+<span id="cb21-8"><a href="#cb21-8" tabindex="-1"></a>des <span class="ot">&lt;-</span> <span class="fu">svydesign</span>(<span class="sc">~</span>clu, <span class="at">weights =</span> <span class="sc">~</span>weights, <span class="at">data =</span> d)</span>
+<span id="cb21-9"><a href="#cb21-9" tabindex="-1"></a></span>
+<span id="cb21-10"><a href="#cb21-10" tabindex="-1"></a><span class="co">#Fit the outcome model</span></span>
+<span id="cb21-11"><a href="#cb21-11" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">svyglm</span>(Y_C <span class="sc">~</span> A <span class="sc">*</span> (X1 <span class="sc">+</span> X2 <span class="sc">+</span> X3 <span class="sc">+</span> X4 <span class="sc">+</span> X5 <span class="sc">+</span> </span>
+<span id="cb21-12"><a href="#cb21-12" tabindex="-1"></a>                           X6 <span class="sc">+</span> X7 <span class="sc">+</span> X8 <span class="sc">+</span> X9),</span>
+<span id="cb21-13"><a href="#cb21-13" tabindex="-1"></a>              <span class="at">design =</span> des)</span>
+<span id="cb21-14"><a href="#cb21-14" tabindex="-1"></a></span>
+<span id="cb21-15"><a href="#cb21-15" tabindex="-1"></a><span class="co">#G-computation for the difference in means, including sampling weights</span></span>
+<span id="cb21-16"><a href="#cb21-16" tabindex="-1"></a><span class="fu">avg_comparisons</span>(fit,</span>
+<span id="cb21-17"><a href="#cb21-17" tabindex="-1"></a>                <span class="at">variables =</span> <span class="st">&quot;A&quot;</span>,</span>
+<span id="cb21-18"><a href="#cb21-18" tabindex="-1"></a>                <span class="at">wts =</span> d<span class="sc">$</span>sw)</span></code></pre></div>
+</div>
+</div>
+<div id="multi-category-treatments" class="section level3">
+<h3>Multi-Category Treatments</h3>
+<p>Multi-category treatments work essentially the same way as binary
+treatments. The main practical differences are in choosing the estimand
+and estimating the weights. The ATE and ATO are straightforward. The ATT
+requires choosing one group to be the treated or “focal” group. Effects
+are then estimated for members of that group. The contrast in the focal
+group between the expected potential outcomes under a non-focal
+treatment and the expected potential outcomes for the focal (actual)
+treatment can be interpreted similarly to how ATTs are interpreted for
+binary treatments. The contrasts in the focal group between expected
+potential outcomes under a pair of non-focal treatments can be
+interpreted as the contrast between the ATTs of the non-focal
+treatments. Weights may be estimated differently for multi-category
+treatments from binary treatments; see the individual methods pages for
+how they differ.</p>
+<p>Below, we’ll estimate the ATTs of the multi-category treatment
+<code>Am</code> for a focal level.</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="fu">table</span>(d<span class="sc">$</span>Am)</span></code></pre></div>
+<pre><code>## 
+##  C1  C2   T 
+## 751 801 448</code></pre>
+<p>We have a focal treatment group, <code>&quot;T&quot;</code>, and two control
+groups <code>&quot;C1&quot;</code> and <code>&quot;C2&quot;</code>. We expect the ATTs for
+the two control groups to be the same since we assigned them randomly
+from within the original control group.</p>
+<p>First, we estimate our weights using entropy balancing <span class="citation">(<a href="#ref-hainmuellerEntropyBalancingCausal2012">Hainmueller
+2012</a>)</span>, identifying the focal group using
+<code>focal</code>:</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a>W <span class="ot">&lt;-</span> <span class="fu">weightit</span>(Am <span class="sc">~</span> X1 <span class="sc">+</span> X2 <span class="sc">+</span> X3 <span class="sc">+</span> X4 <span class="sc">+</span> X5 <span class="sc">+</span> </span>
+<span id="cb24-2"><a href="#cb24-2" tabindex="-1"></a>                X6 <span class="sc">+</span> X7 <span class="sc">+</span> X8 <span class="sc">+</span> X9, <span class="at">data =</span> d,</span>
+<span id="cb24-3"><a href="#cb24-3" tabindex="-1"></a>              <span class="at">method =</span> <span class="st">&quot;ebal&quot;</span>, <span class="at">estimand =</span> <span class="st">&quot;ATT&quot;</span>,</span>
+<span id="cb24-4"><a href="#cb24-4" tabindex="-1"></a>              <span class="at">focal =</span> <span class="st">&quot;T&quot;</span>)</span>
+<span id="cb24-5"><a href="#cb24-5" tabindex="-1"></a>W</span></code></pre></div>
+<pre><code>## A weightit object
+##  - method: &quot;ebal&quot; (entropy balancing)
+##  - number of obs.: 2000
+##  - sampling weights: none
+##  - treatment: 3-category (C1, C2, T)
+##  - estimand: ATT (focal: T)
+##  - covariates: X1, X2, X3, X4, X5, X6, X7, X8, X9</code></pre>
+<p>Typically one would assess the performance of the weights (balance
+and effective sample size) but we will skip that for now. Next, we fit
+the outcome model and perform weighted g-computation. We use
+<code>avg_predictions()</code> first to compute the expected potential
+outcome under each treatment for the focal group, and then use
+<code>hypotheses()</code> to test all pairwise comparisons.</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a><span class="co">#Fit the outcome model</span></span>
+<span id="cb26-2"><a href="#cb26-2" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">lm_weightit</span>(Y_C <span class="sc">~</span> Am <span class="sc">*</span> (X1 <span class="sc">+</span> X2 <span class="sc">+</span> X3 <span class="sc">+</span> X4 <span class="sc">+</span> X5 <span class="sc">+</span> </span>
+<span id="cb26-3"><a href="#cb26-3" tabindex="-1"></a>                                 X6 <span class="sc">+</span> X7 <span class="sc">+</span> X8 <span class="sc">+</span> X9),</span>
+<span id="cb26-4"><a href="#cb26-4" tabindex="-1"></a>                   <span class="at">data =</span> d, <span class="at">weightit =</span> W)</span>
+<span id="cb26-5"><a href="#cb26-5" tabindex="-1"></a></span>
+<span id="cb26-6"><a href="#cb26-6" tabindex="-1"></a><span class="co">#G-computation</span></span>
+<span id="cb26-7"><a href="#cb26-7" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">avg_predictions</span>(fit,</span>
+<span id="cb26-8"><a href="#cb26-8" tabindex="-1"></a>                     <span class="at">variables =</span> <span class="st">&quot;Am&quot;</span>,</span>
+<span id="cb26-9"><a href="#cb26-9" tabindex="-1"></a>                     <span class="at">newdata =</span> <span class="fu">subset</span>(Am <span class="sc">==</span> <span class="st">&quot;T&quot;</span>))</span>
+<span id="cb26-10"><a href="#cb26-10" tabindex="-1"></a>p</span></code></pre></div>
+<pre><code>## 
+##  Am Estimate Std. Error     z Pr(&gt;|z|)     S 2.5 % 97.5 %
+##  C1     1.64      0.355  4.62   &lt;0.001  18.0 0.945   2.34
+##  C2     1.84      0.301  6.12   &lt;0.001  30.0 1.252   2.43
+##  T      3.75      0.217 17.27   &lt;0.001 219.7 3.324   4.17
+## 
+## Type: probs</code></pre>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a><span class="fu">hypotheses</span>(p, <span class="sc">~</span>pairwise)</span></code></pre></div>
+<pre><code>## 
+##   Hypothesis Estimate Std. Error     z Pr(&gt;|z|)    S  2.5 % 97.5 %
+##  (b2) - (b1)     0.20      0.465 0.431    0.667  0.6 -0.712   1.11
+##  (b3) - (b1)     2.11      0.416 5.064   &lt;0.001 21.2  1.292   2.92
+##  (b3) - (b2)     1.91      0.371 5.144   &lt;0.001 21.8  1.181   2.63</code></pre>
+<p>We find significant ATTs between the focal treatment and control
+levels (<code>T - C1</code> and <code>T - C2</code>), but the difference
+between control levels (<code>C2 - C1</code>), which can be interpreted
+as the difference between these ATTs, is nonsignificant, as
+expected.</p>
+</div>
+<div id="continuous-treatments" class="section level3">
+<h3>Continuous Treatments</h3>
+<p>For continuous treatments, one estimand of interest is the average
+dose-response function (ADRF), which links the value of the treatment to
+the expected potential outcome under that treatment value across the
+full sample. The <a href="https://ngreifer.github.io/adrftools/"><em>adrftools</em></a>
+package implements methods for estimating, visualizing, and testing the
+ADRF and related estimands.</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;adrftools&quot;</span>)</span></code></pre></div>
+<p>We do not provide a detailed account of the ADRF but will demonstrate
+how to estimate weights that balance covariates with respect to a
+continuous treatment and how to estimate, plot, and test the ADRF in the
+weighted sample. We’ll use the continuous treatment <code>Ac</code>,
+which ranges from -10.37 to 6.26, and estimate its effect on the binary
+outcome <code>Y_B</code>.</p>
+<p>First, we’ll estimate entropy balancing weights <span class="citation">(<a href="#ref-vegetabileNonparametricEstimationPopulation2021">Vegetabile
+et al. 2021</a>)</span> using <code>weightit()</code>.</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a>W <span class="ot">&lt;-</span> <span class="fu">weightit</span>(Ac <span class="sc">~</span> X1 <span class="sc">+</span> X2 <span class="sc">+</span> X3 <span class="sc">+</span> X4 <span class="sc">+</span> X5 <span class="sc">+</span> </span>
+<span id="cb31-2"><a href="#cb31-2" tabindex="-1"></a>                X6 <span class="sc">+</span> X7 <span class="sc">+</span> X8 <span class="sc">+</span> X9, <span class="at">data =</span> d,</span>
+<span id="cb31-3"><a href="#cb31-3" tabindex="-1"></a>              <span class="at">moments =</span> <span class="dv">2</span>, <span class="at">int =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb31-4"><a href="#cb31-4" tabindex="-1"></a>              <span class="at">method =</span> <span class="st">&quot;ebal&quot;</span>)</span>
+<span id="cb31-5"><a href="#cb31-5" tabindex="-1"></a>W</span></code></pre></div>
+<pre><code>## A weightit object
+##  - method: &quot;ebal&quot; (entropy balancing)
+##  - number of obs.: 2000
+##  - sampling weights: none
+##  - treatment: continuous
+##  - covariates: X1, X2, X3, X4, X5, X6, X7, X8, X9</code></pre>
+<p>Typically one would assess the performance of the weights (balance
+and effective sample size) but we will skip that for now. Next, we fit
+the outcome model, on which we will perform weighted g-computation. For
+the outcome model, we will use a logistic regression with a natural
+cubic spline on <code>Ac</code> with 4 df. One can use any
+transformation of the treatment, e.g., a polynomial transformation using
+<code>poly()</code>, as long as it is flexible enough to capture any
+possible ADRF. Covariates can be included in the model, but with many
+covariates, many basis functions for the treatment, and a full set of
+treatment-covariate interactions, the resulting estimates may be
+imprecise.</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" tabindex="-1"></a><span class="co">#Fit the outcome model</span></span>
+<span id="cb33-2"><a href="#cb33-2" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">glm_weightit</span>(Y_B <span class="sc">~</span> splines<span class="sc">::</span><span class="fu">ns</span>(Ac, <span class="at">df =</span> <span class="dv">4</span>) <span class="sc">*</span></span>
+<span id="cb33-3"><a href="#cb33-3" tabindex="-1"></a>                     (X1 <span class="sc">+</span> X2 <span class="sc">+</span> X3 <span class="sc">+</span> X4 <span class="sc">+</span> X5 <span class="sc">+</span> </span>
+<span id="cb33-4"><a href="#cb33-4" tabindex="-1"></a>                        X6 <span class="sc">+</span> X7 <span class="sc">+</span> X8 <span class="sc">+</span> X9),</span>
+<span id="cb33-5"><a href="#cb33-5" tabindex="-1"></a>                   <span class="at">data =</span> d,</span>
+<span id="cb33-6"><a href="#cb33-6" tabindex="-1"></a>                   <span class="at">weightit =</span> W,</span>
+<span id="cb33-7"><a href="#cb33-7" tabindex="-1"></a>                   <span class="at">family =</span> binomial)</span></code></pre></div>
+<p>Next we use <code>adrf()</code> in <em>adrftools</em> to perform
+g-computation to estimate the ADRF:</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" tabindex="-1"></a>ADRF_Ac <span class="ot">&lt;-</span> <span class="fu">adrf</span>(fit, <span class="at">treat =</span> <span class="st">&quot;Ac&quot;</span>)</span>
+<span id="cb34-2"><a href="#cb34-2" tabindex="-1"></a></span>
+<span id="cb34-3"><a href="#cb34-3" tabindex="-1"></a>ADRF_Ac</span></code></pre></div>
+<pre><code>## An &lt;effect_curve&gt; object
+## 
+##  - curve type: ADRF
+##  - response: Y_B
+##  - treatment: Ac
+##    + range: -6.3049 to 2.4624
+##  - inference: unconditional</code></pre>
+<p>We can generate a plot of the ADRF and its simultaneous confidence
+band using <code>plot()</code>:</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a><span class="fu">plot</span>(ADRF_Ac)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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XH311ca62d2xAwYMkEsuuUQ222wzefnll7vbndtJgARIIK0IUICmVXUwMyRAAk4kcO+998rw4cNlp512kpNOOkkWLVokL730UlxFycnJMYLS5/PJm2++GfOxjY2NgmOZSIAESMBJBChAnVRbzCsJkEDaEfj222/lnXfekdNOO83k7ZhjjjFOQbfffnvceR0zZow5Bv07w1Nra6tAaNo/NL9/8MEHcuSRR0p1dbVMmjQpfHczv27dulCTfXjzPZr9mUiABEgg1QToBZ/qGuD1SYAEHE0ATkNwIELzOxKcf4477jh58MEHTd/LcOeh7goKb/bc3Fz57rvvIna96aabBL+OCde68sor5cILL+y4SWbMmGF+HTdceumlcu2113ZczWUSIAESSCoBCtCk4ubFSIAE3ETA7/fLAw88ILvuuquxRMIaiTR+/HjjzX7XXXfJNddcE3OREXappaVF0L8zPB100EFy7LHHmn6lixcvFvQxHTJkiLz44osydOjQ8F1D8+hPCqeojmnbbbftuIrLJEACJJB0AhSgSUfOC5IACbiFwAsvvCCrVq0yv1122WWTYt1zzz1yxRVXxNxH84cffjDn2G677SLOBYE7ZcqU0Lpf/vKXsv/++8uECRNMUzxiiXZMCPV0yCGHdFzNZRIgARJICwLsA5oW1cBMkAAJOJEAwi0VFBTInDlzTDgkhESyfxdccIGsXr1annnmmZiL9uijj5p999tvv6jHoK/oDTfcIAsWLJATTzzRxBONegA3kgAJkECaEaAATbMKYXZIgAScQQCOQAgAf9RRR8nYsWNNMzwslfYPzd/oG3rHHXfEVKD33ntPbrzxRnM8LJvdpTPPPFMOP/xw0wzfXdzR7s7F7SRAAiSQbAJsgk82cV6PBEjAFQQeeughgXe67XzUsVBoAoeQRDM9LJXhw2z+7W9/M6MdYSQkBKGH09Err7wiFRUVgvPGmuBpv+OOO8pFF11kxChigjKRAAmQgBMI0ALqhFpiHkmABNKOAKyOGCLz4IMP7jJvsFIidbSCwnP98ssvN/1DMTTnihUrBE32c+fOlZ133rnL83XcAA97jJwE56Vzzz2342YukwAJkEDaEuBY8GlbNcwYCZAACZAACZAACbiTAC2g7qxXlooESIAESIAESIAE0pYABWjaVg0zRgIkQAIkQAIkQALuJEAB6s56ZalIgARIgARIgARIIG0JUICmbdUwYyRAAiRAAiRAAiTgTgIUoO6sV5aKBEiABEiABEiABNKWAAVo2lYNM0YCJEACJEACJEAC7iRAAerOemWpSIAESIAESIAESCBtCVCApm3VMGMkQAIkQAIkQAIk4E4CFKDurFeWigRIgARIgARIgATSlgAFaNpWDTNGAiRAAiRAAiRAAu4kkKVjEl/pzqKxVCTQNYH169fLQw89JG+++aaUlZXJoEGDInaeP3++vPrqq/L555+HfuvWrZPtttvO7Ld8+XK59tprpaqqSkaOHCleb/u33L///W9pamqSbbfdNuKcyV54+umnBXn58MMPBXlfvHix7LDDDp1m4/XXXzcsdt999063p3LlZ599Zurqxz/+cVKzccstt5jrbbHFFnFd98svv5Tbb79d3nrrLXPcNttsE9fx6bDzmjVrzL2z5557SlZWllxzzTUydOhQ6d+/v8leTU2N5OXlmflHHnkk6r2VyPI0Nzebv7thw4aZv9venBt/2w888IDsvffevTlNl8dOmzZNVq9eLdtvv73Zp6WlRVpbWyU7O7vLY5yyAc9OPF9wj+OZkZ+f75SsM59pRKD9rZlGmWJWSKAvCUAg7LzzznL55ZfLJ598InvttZdcdtllEZe87rrr5Oyzz5b/+7//C/3uvfdes09tba3ssssuMmrUKHn44Yfl6quvDh0LkXfTTTfJ+PHjQ+tSMTN37lw55phjBEJh8803l8cee0yef/75LrMCAXrfffd1uT2VGz799FP55z//mfQs3HzzzfLBBx/EfV3cX/bHSWNjY9zHp8MBEE6wTdTV1Ynf75e//OUvsmjRIpM13EeHHnpoKJvd3VuhHRMwgw875GvZsmW9PhsE6L/+9a9en6erE0CAvvjii2bzhg0bZPTo0bJ06dKudnfUetwX33//vamLjRs3OirvzGz6EHD+p1j6sGROHELg3HPPlcGDBxtxUVBQILBmwloJC9vPfvYzU4p58+aZl+7vf//7TUr18ssvG6vnaaedJrDEnHPOOSERCjF6wQUXSGFh4SbHJXPFF198ISUlJQLrFKyzyCNT8gjAOnjjjTcm74J9eKXc3FxjubMvgXurvr7eXpSnnnoqNO+kmZNOOknwS0aCSFuwYEEyLpWUa/zmN7+Rfffd17RMJOWCvIgrCdAC6spqZaG6IhAIBOS9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" /><!-- --></p>
+<p>We can see that the ADRF has a bit of an elbow-shape, with a zone of
+little evidence of treatment effect (between, say -6 and -2) followed by
+a zone of increasing values of the outcome as the treatment
+increases.</p>
+<p>We can test the null hypothesis that the ADRF is flat using
+<code>summary()</code>:</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" tabindex="-1"></a><span class="fu">summary</span>(ADRF_Ac, <span class="at">hypothesis =</span> <span class="st">&quot;flat&quot;</span>)</span></code></pre></div>
+<div class="kable-table">
+<table>
+<thead>
+<tr class="header">
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The small p-value indicates that the ADRF is not flat and therefore
+that there is an effect of <code>Ac</code> on <code>Y_B</code>.</p>
+<p>We can produce estimates of the ADRF at different values of
+<code>Ac</code>, which can aid in interpreting the output
+quantitatively:</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" tabindex="-1"></a><span class="fu">ADRF_Ac</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="dv">6</span>, <span class="sc">-</span><span class="dv">4</span>, <span class="sc">-</span><span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">2</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb38-2"><a href="#cb38-2" tabindex="-1"></a>  <span class="fu">summary</span>()</span></code></pre></div>
+<div class="kable-table">
+<table>
+<thead>
+<tr class="header">
+<th align="right">Ac</th>
+<th align="right">estimate</th>
+<th align="right">conf.low</th>
+<th align="right">conf.high</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">-6</td>
+<td align="right">0.2372</td>
+<td align="right">0.1437</td>
+<td align="right">0.3655</td>
+</tr>
+<tr class="even">
+<td align="right">-4</td>
+<td align="right">0.2807</td>
+<td align="right">0.2199</td>
+<td align="right">0.3507</td>
+</tr>
+<tr class="odd">
+<td align="right">-2</td>
+<td align="right">0.2374</td>
+<td align="right">0.1960</td>
+<td align="right">0.2846</td>
+</tr>
+<tr class="even">
+<td align="right">0</td>
+<td align="right">0.3219</td>
+<td align="right">0.2699</td>
+<td align="right">0.3786</td>
+</tr>
+<tr class="odd">
+<td align="right">2</td>
+<td align="right">0.5064</td>
+<td align="right">0.4002</td>
+<td align="right">0.6121</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>For more information on all of the capabilities of
+<em>adrftools</em>, see its <a href="https://ngreifer.github.io/adrftools/">website</a>.</p>
+</div>
+<div id="longitudinal-treatments" class="section level3">
+<h3>Longitudinal Treatments</h3>
+<p>For longitudinal treatments, estimation proceeds as usual, except
+that we estimate weights using <code>weightitMSM()</code> and fit a
+weighted outcome model that includes treatment at all time periods (and,
+optionally, any covariates measured prior to the first treatment). It is
+important not to include any covariates possibly caused by any of the
+treatments to avoid any bias; this is the whole point of using weighting
+to estimate the marginal structural model in the first place.</p>
+<p><code>glm_weightit()</code> makes it easy to incorporate the weights
+and account for their estimation in computing the parameter variance
+matrix, if desired. As with other methods, when the components required
+for M-estimation are included in the <code>weightitMSM()</code> output,
+they will be used to estimate standard errors that adjust for estimation
+of the weights. Otherwise, the weights can be treated as fixed or the
+whole estimation can be done through bootstrapping.</p>
+<p>Below, we demonstrate using the usual inverse probability weights for
+a marginal structural model. Because these weights are computed from
+propensity scores estimated with logistic regression, we can use
+M-estimation to adjust for their estimation in computing the parameter
+covariance matrix. This also includes estimation of the stabilization
+factor, if any. We’ll use the toy dataset <code>msmdata</code> that
+comes with <em>WeightIt</em>.</p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;msmdata&quot;</span>)</span>
+<span id="cb39-2"><a href="#cb39-2" tabindex="-1"></a></span>
+<span id="cb39-3"><a href="#cb39-3" tabindex="-1"></a>Wmsm <span class="ot">&lt;-</span> <span class="fu">weightitMSM</span>(<span class="fu">list</span>(A_1 <span class="sc">~</span> X1_0 <span class="sc">+</span> X2_0,</span>
+<span id="cb39-4"><a href="#cb39-4" tabindex="-1"></a>                             A_2 <span class="sc">~</span> X1_1 <span class="sc">+</span> X2_1 <span class="sc">+</span></span>
+<span id="cb39-5"><a href="#cb39-5" tabindex="-1"></a>                               A_1 <span class="sc">+</span> X1_0 <span class="sc">+</span> X2_0,</span>
+<span id="cb39-6"><a href="#cb39-6" tabindex="-1"></a>                             A_3 <span class="sc">~</span> X1_2 <span class="sc">+</span> X2_2 <span class="sc">+</span></span>
+<span id="cb39-7"><a href="#cb39-7" tabindex="-1"></a>                               A_2 <span class="sc">+</span> X1_1 <span class="sc">+</span> X2_1 <span class="sc">+</span></span>
+<span id="cb39-8"><a href="#cb39-8" tabindex="-1"></a>                               A_1 <span class="sc">+</span> X1_0 <span class="sc">+</span> X2_0),</span>
+<span id="cb39-9"><a href="#cb39-9" tabindex="-1"></a>                        <span class="at">data =</span> msmdata, <span class="at">method =</span> <span class="st">&quot;glm&quot;</span>,</span>
+<span id="cb39-10"><a href="#cb39-10" tabindex="-1"></a>                        <span class="at">stabilize =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<p>Next we’ll fit the outcome model using <code>glm_weightit()</code>,
+which includes the baseline covariates (i.e., only those measured prior
+to the first treatment).</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">glm_weightit</span>(Y_B <span class="sc">~</span> A_1 <span class="sc">*</span> A_2 <span class="sc">*</span> A_3 <span class="sc">*</span> (X1_0 <span class="sc">+</span> X2_0),</span>
+<span id="cb40-2"><a href="#cb40-2" tabindex="-1"></a>                    <span class="at">data =</span> msmdata, <span class="at">weightit =</span> Wmsm,</span>
+<span id="cb40-3"><a href="#cb40-3" tabindex="-1"></a>                    <span class="at">family =</span> binomial)</span></code></pre></div>
+<p>Then, we compute the average expected potential outcomes under each
+treatment regime using
+<code>marginaleffects::avg_predictions()</code>:</p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">avg_predictions</span>(fit,</span>
+<span id="cb41-2"><a href="#cb41-2" tabindex="-1"></a>                     <span class="at">variables =</span> <span class="fu">c</span>(<span class="st">&quot;A_1&quot;</span>, <span class="st">&quot;A_2&quot;</span>, <span class="st">&quot;A_3&quot;</span>))</span>
+<span id="cb41-3"><a href="#cb41-3" tabindex="-1"></a></span>
+<span id="cb41-4"><a href="#cb41-4" tabindex="-1"></a>p</span></code></pre></div>
+<pre><code>## 
+##  A_1 A_2 A_3 Estimate Std. Error    z Pr(&gt;|z|)     S 2.5 % 97.5 %
+##    0   0   0    0.687     0.0166 41.4   &lt;0.001   Inf 0.654  0.719
+##    0   0   1    0.521     0.0379 13.7   &lt;0.001 140.3 0.447  0.595
+##    0   1   0    0.491     0.0213 23.1   &lt;0.001 389.1 0.449  0.532
+##    0   1   1    0.438     0.0295 14.8   &lt;0.001 163.2 0.380  0.496
+##    1   0   0    0.602     0.0211 28.5   &lt;0.001 590.8 0.561  0.644
+##    1   0   1    0.544     0.0314 17.3   &lt;0.001 221.0 0.482  0.605
+##    1   1   0    0.378     0.0163 23.2   &lt;0.001 393.1 0.346  0.410
+##    1   1   1    0.422     0.0261 16.1   &lt;0.001 192.3 0.371  0.473
+## 
+## Type: probs</code></pre>
+<p>We can compare individual predictions using
+<code>marginaleffects::hypotheses()</code>. For example, to compare all
+treatment histories to just the first treatment history (i.e., in which
+all units are untreated for all time periods), we can run the
+following:</p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" tabindex="-1"></a><span class="fu">hypotheses</span>(p, <span class="sc">~</span>reference)</span></code></pre></div>
+<pre><code>## 
+##   Hypothesis Estimate Std. Error      z Pr(&gt;|z|)     S  2.5 %  97.5 %
+##  (b2) - (b1)  -0.1658     0.0414  -4.00  &lt; 0.001  14.0 -0.247 -0.0846
+##  (b3) - (b1)  -0.1960     0.0269  -7.29  &lt; 0.001  41.5 -0.249 -0.1433
+##  (b4) - (b1)  -0.2488     0.0337  -7.38  &lt; 0.001  42.6 -0.315 -0.1828
+##  (b5) - (b1)  -0.0842     0.0270  -3.12  0.00179   9.1 -0.137 -0.0314
+##  (b6) - (b1)  -0.1428     0.0356  -4.02  &lt; 0.001  14.0 -0.212 -0.0731
+##  (b7) - (b1)  -0.3083     0.0232 -13.30  &lt; 0.001 131.6 -0.354 -0.2629
+##  (b8) - (b1)  -0.2647     0.0308  -8.61  &lt; 0.001  56.9 -0.325 -0.2044</code></pre>
+</div>
+<div id="moderation-analysis" class="section level3">
+<h3>Moderation Analysis</h3>
+<p>Moderation analysis involves determining whether a treatment effect
+differs across levels of another variable. The use of weighting with
+moderation analysis is described in <span class="citation">Griffin et
+al. (<a href="#ref-griffinTutorialPropensityScore2023">2023</a>)</span>.
+The goal is to achieve balance within each subgroup of the potential
+moderating variable, and there are several ways of doing so. Broadly,
+one can either perform weighting in the full dataset and interact the
+moderator with the other covariates in the weighting model, or one can
+perform completely separate analyses in each subgroup.</p>
+<p>In some cases, e.g., when using unregularized parametric methods like
+GLM propensity score weighting, CBPS, entropy balancing, or inverse
+probability tilting, both methods yield identical results. To fit a
+weighting model within each subgroup, one can use the <code>by</code>
+argument to <code>weightit()</code>, which does just this<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a>. There is also the
+possibility of using the subgroup balancing propensity score <span class="citation">(<a href="#ref-dongSubgroupBalancingPropensity2020">Dong et al.
+2020</a>)</span> implemented using <code>sbps()</code>, which determines
+whether a single weighting model fit to the whole sample or a
+subgroup-specific weighting model is best for each subgroup and overall.
+The chosen approach should be that which achieves the best balance,
+though we don’t demonstrate assessing balance here to maintain focus on
+effect estimation.</p>
+<p>We’ll consider the binary variable <code>X5</code> to be the
+potential moderator of the effect of <code>A</code> on <code>Y_C</code>.
+Below, we’ll estimate weights using CBPS for the ATE within each level
+of <code>X5</code> by supplying it to the <code>by</code> argument.</p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" tabindex="-1"></a>Wm <span class="ot">&lt;-</span> <span class="fu">weightit</span>(A <span class="sc">~</span> X1 <span class="sc">+</span> X2 <span class="sc">+</span> X3 <span class="sc">+</span> X4 <span class="sc">+</span> X5 <span class="sc">+</span> </span>
+<span id="cb45-2"><a href="#cb45-2" tabindex="-1"></a>                 X6 <span class="sc">+</span> X7 <span class="sc">+</span> X8 <span class="sc">+</span> X9, <span class="at">data =</span> d,</span>
+<span id="cb45-3"><a href="#cb45-3" tabindex="-1"></a>               <span class="at">method =</span> <span class="st">&quot;cbps&quot;</span>, <span class="at">estimand =</span> <span class="st">&quot;ATE&quot;</span>,</span>
+<span id="cb45-4"><a href="#cb45-4" tabindex="-1"></a>               <span class="at">by =</span> <span class="sc">~</span>X5)</span>
+<span id="cb45-5"><a href="#cb45-5" tabindex="-1"></a></span>
+<span id="cb45-6"><a href="#cb45-6" tabindex="-1"></a>Wm</span></code></pre></div>
+<pre><code>## A weightit object
+##  - method: &quot;cbps&quot; (covariate balancing propensity score weighting)
+##  - number of obs.: 2000
+##  - sampling weights: none
+##  - treatment: 2-category
+##  - estimand: ATE
+##  - covariates: X1, X2, X3, X4, X5, X6, X7, X8, X9
+##  - by: X5</code></pre>
+<p>Because we are using CBPS, equivalent weights could be estimated by
+interacting <code>X5</code> with the other covariates, e.g.,
+<code>A ~ X5 * (X1 + X2 + ...)</code>.</p>
+<p>It is straightforward to check subgroup balance using
+<code>cobalt::bal.tab()</code>, which has a <code>cluster</code>
+argument that can be used to assess balance within subgroups, e.g., by
+<code>cobalt::bal.tab(Wm, cluster = &quot;X5&quot;)</code>. See
+<code>vignette(&quot;segmented-data&quot;, package = &quot;cobalt&quot;)</code> for
+details.</p>
+<p>If we are satisfied with balance, we can then model the outcome with
+an interaction between the treatment, the moderator, and, optionally,
+the covariates. This is equivalent to fitting a model for the outcome
+within each combination of the treatment and moderator, so it can be a
+good idea to simplify this model to include just the most important
+covariates to the outcome in order to avoid estimating too many
+parameters. At a minimum, you must include an interaction between the
+treatment and moderator. Here, we’ll fit a linear regression model
+including just the first three covariates in addition to the treatment
+and moderator (allowing the covariates to interact with both).</p>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">lm_weightit</span>(Y_C <span class="sc">~</span> A <span class="sc">*</span> X5 <span class="sc">*</span> (X1 <span class="sc">+</span> X2 <span class="sc">+</span> X3),</span>
+<span id="cb47-2"><a href="#cb47-2" tabindex="-1"></a>                    <span class="at">data =</span> d, <span class="at">weightit =</span> Wm)</span></code></pre></div>
+<p>To estimate the subgroup ATEs, we can use
+<code>avg_comparisons()</code>, this time specifying the <code>by</code>
+argument to signify that we want treatment effects stratified by the
+moderator.</p>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">avg_comparisons</span>(fit, <span class="at">variables =</span> <span class="st">&quot;A&quot;</span>,</span>
+<span id="cb48-2"><a href="#cb48-2" tabindex="-1"></a>                     <span class="at">by =</span> <span class="st">&quot;X5&quot;</span>)</span>
+<span id="cb48-3"><a href="#cb48-3" tabindex="-1"></a>a</span></code></pre></div>
+<pre><code>## 
+##  X5 Estimate Std. Error    z Pr(&gt;|z|)    S 2.5 % 97.5 %
+##   0     1.16      0.461 2.51    0.012  6.4 0.255   2.06
+##   1     2.38      0.427 5.56   &lt;0.001 25.2 1.539   3.21
+## 
+## Term: A
+## Type: probs
+## Comparison: 1 - 0</code></pre>
+<p>We can see that the subgroup mean differences differ from each other,
+and we can formally test for moderation using
+<code>hypotheses()</code>:</p>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" tabindex="-1"></a><span class="fu">hypotheses</span>(a, <span class="sc">~</span>pairwise)</span></code></pre></div>
+<pre><code>## 
+##   Hypothesis Estimate Std. Error    z Pr(&gt;|z|)   S   2.5 % 97.5 %
+##  (b2) - (b1)     1.22      0.628 1.94   0.0524 4.3 -0.0124   2.45</code></pre>
+<p>Though the subgroup effects differ from each other in the sample,
+this difference is not statistically significant at the .05 level, so
+there is no evidence of moderation by <code>X5</code>.</p>
+<p>When the moderator has more than two levels, it is possible to run an
+omnibus test for moderation by changing <code>hypothesis</code> to
+<code>~reference</code> and supplying the output to
+<code>hypotheses()</code> with <code>joint = TRUE</code>, e.g.,</p>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" tabindex="-1"></a><span class="fu">avg_comparisons</span>(fit, <span class="at">variables =</span> <span class="st">&quot;A&quot;</span>,</span>
+<span id="cb52-2"><a href="#cb52-2" tabindex="-1"></a>                <span class="at">by =</span> <span class="st">&quot;X5&quot;</span>,</span>
+<span id="cb52-3"><a href="#cb52-3" tabindex="-1"></a>                <span class="at">hypothesis =</span> <span class="sc">~</span>reference) <span class="sc">|&gt;</span></span>
+<span id="cb52-4"><a href="#cb52-4" tabindex="-1"></a>  <span class="fu">hypotheses</span>(<span class="at">joint =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<p>This produces a single p-value for the test that all pairwise
+differences between subgroups are equal to zero.</p>
+<p>It is important to remember that the presence of moderation does not
+imply that the moderator causes differences in the treatment effect; it
+may simply be associated with a variable that interacts with the
+treatment <span class="citation">(<a href="#ref-vanderweeleDistinctionInteractionEffect2009">VanderWeele
+2009</a>)</span>. In addition, depending on which variables are adjusted
+for and how, moderation may not necessarily represent a disparity, even
+if one group experiences less benefit than another group <span class="citation">(<a href="#ref-jacksonMeaningfulCausalDecompositions2021">Jackson
+2021</a>)</span>.</p>
+<p>For continuous treatments, moderation analysis is possible using
+<em>adrftools</em>.</p>
+</div>
+</div>
+<div id="reporting-results" class="section level2">
+<h2>Reporting Results</h2>
+<p>It is important to be as thorough and complete as possible when
+describing the methods of estimating the treatment effect and the
+results of the analysis. This improves transparency and replicability of
+the analysis. Results should at least include the following:</p>
+<ul>
+<li>a description of the outcome model used (e.g., logistic regression,
+a linear model with treatment-covariate interactions and covariates, a
+Cox proportional hazards model with the propensity score weights
+applied)</li>
+<li>the way the effect was estimated (e.g., using g-computation or as
+the coefficient in the outcome model)</li>
+<li>the way SEs were estimated (e.g., using M-estimation, using robust
+SEs that treat the weights as fixed, using the fractional weighted
+bootstrap with 1000 bootstrap replications and the entire process of
+weighting and effect estimation included in each replication)</li>
+<li>R packages and functions used in estimating the effect and its SE
+(e.g., <code>glm_weightit()</code> in <em>WeightIt</em>,
+<code>avg_comparisons()</code> in <em>marginaleffects</em>,
+<code>adrf()</code> in <em>adrftools</em>)</li>
+<li>The effect and its SE and confidence interval</li>
+</ul>
+<p>All this is in addition to information about the weighting method,
+estimand, propensity score estimation procedure (if used), balance
+assessment, etc.</p>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-austin2016" class="csl-entry">
+Austin, Peter C. 2016. <span>“Variance Estimation When Using Inverse
+Probability of Treatment Weighting (IPTW) with Survival
+Analysis.”</span> <em>Statistics in Medicine</em> 35 (30): 5642–55. <a href="https://doi.org/10.1002/sim.7084">https://doi.org/10.1002/sim.7084</a>.
+</div>
+<div id="ref-austin2022" class="csl-entry">
+Austin, Peter C. 2022. <span>“Bootstrap Vs Asymptotic Variance
+Estimation When Using Propensity Score Weighting with Continuous and
+Binary Outcomes.”</span> <em>Statistics in Medicine</em> 41 (22):
+4426–43. <a href="https://doi.org/10.1002/sim.9519">https://doi.org/10.1002/sim.9519</a>.
+</div>
+<div id="ref-chanGloballyEfficientNonparametric2016" class="csl-entry">
+Chan, Kwun Chuen Gary, Sheung Chi Phillip Yam, and Zheng Zhang. 2016.
+<span>“Globally Efficient Non-Parametric Inference of Average Treatment
+Effects by Empirical Balancing Calibration Weighting.”</span>
+<em>Journal of the Royal Statistical Society: Series B (Statistical
+Methodology)</em> 78 (3): 673–700. <a href="https://doi.org/10.1111/rssb.12129">https://doi.org/10.1111/rssb.12129</a>.
+</div>
+<div id="ref-dongSubgroupBalancingPropensity2020" class="csl-entry">
+Dong, Jing, Junni L Zhang, Shuxi Zeng, and Fan Li. 2020. <span>“Subgroup
+Balancing Propensity Score.”</span> <em>Statistical Methods in Medical
+Research</em> 29 (3): 659–76. <a href="https://doi.org/10.1177/0962280219870836">https://doi.org/10.1177/0962280219870836</a>.
+</div>
+<div id="ref-efronBootstrapMethodsStandard1986" class="csl-entry">
+Efron, B., and R. Tibshirani. 1986. <span>“Bootstrap Methods for
+Standard Errors, Confidence Intervals, and Other Measures of Statistical
+Accuracy.”</span> <em>Statistical Science</em> 1 (1): 54–75. <a href="https://www.jstor.org/stable/2245500">https://www.jstor.org/stable/2245500</a>.
+</div>
+<div id="ref-gabrielInverseProbabilityTreatment2024" class="csl-entry">
+Gabriel, Erin E., Michael C. Sachs, Torben Martinussen, et al. 2024.
+<span>“Inverse Probability of Treatment Weighting with Generalized
+Linear Outcome Models for Doubly Robust Estimation.”</span>
+<em>Statistics in Medicine</em> 43 (3): 534–47. <a href="https://doi.org/10.1002/sim.9969">https://doi.org/10.1002/sim.9969</a>.
+</div>
+<div id="ref-greiferChoosingEstimandWhen2021" class="csl-entry">
+Greifer, Noah, and Elizabeth A. Stuart. 2021. <span>“Choosing the
+Estimand When Matching or Weighting in Observational Studies.”</span>
+<em>arXiv:2106.10577 [Stat]</em>, June 19. <a href="https://arxiv.org/abs/2106.10577">https://arxiv.org/abs/2106.10577</a>.
+</div>
+<div id="ref-griffinTutorialPropensityScore2023" class="csl-entry">
+Griffin, Beth Ann, Megan S. Schuler, Matt Cefalu, et al. 2023. <span>“A
+Tutorial for Propensity Score Weighting for Moderation Analysis with
+Categorical Variables: An Application Examining Smoking Disparities
+Among Sexual Minority Adults.”</span> <em>Medical Care</em> 61 (12):
+836–45. <a href="https://doi.org/10.1097/MLR.0000000000001922">https://doi.org/10.1097/MLR.0000000000001922</a>.
+</div>
+<div id="ref-hainmuellerEntropyBalancingCausal2012" class="csl-entry">
+Hainmueller, J. 2012. <span>“Entropy Balancing for Causal Effects:
+<span>A</span> Multivariate Reweighting Method to Produce Balanced
+Samples in Observational Studies.”</span> <em>Political Analysis</em> 20
+(1): 25–46. <a href="https://doi.org/10.1093/pan/mpr025">https://doi.org/10.1093/pan/mpr025</a>.
+</div>
+<div id="ref-hajage2018" class="csl-entry">
+Hajage, David, Guillaume Chauvet, Lisa Belin, Alexandre Lafourcade,
+Florence Tubach, and Yann De Rycke. 2018. <span>“Closed-Form Variance
+Estimator for Weighted Propensity Score Estimators with Survival
+Outcome.”</span> <em>Biometrical Journal</em> 60 (6): 1151–63. <a href="https://doi.org/10.1002/bimj.201700330">https://doi.org/10.1002/bimj.201700330</a>.
+</div>
+<div id="ref-hansenVarianceEstimationAverage2024" class="csl-entry">
+Hansen, Stefan Nygaard, and Morten Overgaard. 2024. <span>“Variance
+Estimation for Average Treatment Effects Estimated by
+g-Computation.”</span> <em>Metrika</em>, ahead of print, April. <a href="https://doi.org/10.1007/s00184-024-00962-4">https://doi.org/10.1007/s00184-024-00962-4</a>.
+</div>
+<div id="ref-hoMatchingNonparametricPreprocessing2007" class="csl-entry">
+Ho, Daniel E., Kosuke Imai, Gary King, and Elizabeth A. Stuart. 2007.
+<span>“Matching as Nonparametric Preprocessing for Reducing Model
+Dependence in Parametric Causal Inference.”</span> <em>Political
+Analysis</em> 15 (3): 199–236. <a href="https://doi.org/10.1093/pan/mpl013">https://doi.org/10.1093/pan/mpl013</a>.
+</div>
+<div id="ref-jacksonMeaningfulCausalDecompositions2021" class="csl-entry">
+Jackson, John W. 2021. <span>“Meaningful Causal Decompositions in Health
+Equity Research: Definition, Identification, and Estimation Through a
+Weighting Framework.”</span> <em>Epidemiology</em> 32 (2): 282. <a href="https://doi.org/10.1097/EDE.0000000000001319">https://doi.org/10.1097/EDE.0000000000001319</a>.
+</div>
+<div id="ref-luncefordStratificationWeightingPropensity2004" class="csl-entry">
+Lunceford, Jared K., and Marie Davidian. 2004. <span>“Stratification and
+Weighting via the Propensity Score in Estimation of Causal Treatment
+Effects: A Comparative Study.”</span> <em>Statistics in Medicine</em> 23
+(19): 29372960. <a href="https://doi.org/10.1002/sim.1903">https://doi.org/10.1002/sim.1903</a>.
+</div>
+<div id="ref-mackinnonHeteroskedasticityconsistentCovarianceMatrix1985" class="csl-entry">
+MacKinnon, James G, and Halbert White. 1985. <span>“Some
+Heteroskedasticity-Consistent Covariance Matrix Estimators with Improved
+Finite Sample Properties.”</span> <em>Journal of Econometrics</em> 29
+(3): 305–25. <a href="https://doi.org/10.1016/0304-4076(85)90158-7">https://doi.org/10.1016/0304-4076(85)90158-7</a>.
+</div>
+<div id="ref-mao2018" class="csl-entry">
+Mao, Huzhang, Liang Li, Wei Yang, and Yu Shen. 2018. <span>“On the
+Propensity Score Weighting Analysis with Survival Outcome: Estimands,
+Estimation, and Inference.”</span> <em>Statistics in Medicine</em> 37
+(26): 3745–63. <a href="https://doi.org/10.1002/sim.7839">https://doi.org/10.1002/sim.7839</a>.
+</div>
+<div id="ref-nguyenDoubleadjustmentPropensityScore2017" class="csl-entry">
+Nguyen, Tri-Long, Gary S. Collins, Jessica Spence, et al. 2017.
+<span>“Double-Adjustment in Propensity Score Matching Analysis: Choosing
+a Threshold for Considering Residual Imbalance.”</span> <em>BMC Medical
+Research Methodology</em> 17: 78. <a href="https://doi.org/10.1186/s12874-017-0338-0">https://doi.org/10.1186/s12874-017-0338-0</a>.
+</div>
+<div id="ref-reifeisVarianceTreatmentEffect2022" class="csl-entry">
+Reifeis, Sarah A, and Michael G Hudgens. 2022. <span>“On Variance of the
+Treatment Effect in the Treated When Estimated by Inverse Probability
+Weighting.”</span> <em>American Journal of Epidemiology</em> 191 (6):
+1092–97. <a href="https://doi.org/10.1093/aje/kwac014">https://doi.org/10.1093/aje/kwac014</a>.
+</div>
+<div id="ref-robinsMarginalStructuralModels2000" class="csl-entry">
+Robins, James M., Miguel Ángel Hernán, and Babette Brumback. 2000.
+<span>“Marginal Structural Models and Causal Inference in
+Epidemiology.”</span> <em>Epidemiology</em> 11 (5): 550–60. <a href="https://doi.org/10.1097/00001648-200009000-00011">https://doi.org/10.1097/00001648-200009000-00011</a>.
+</div>
+<div id="ref-rossMestimationCommonEpidemiological2024" class="csl-entry">
+Ross, Rachael K, Paul N Zivich, Jeffrey S A Stringer, and Stephen R
+Cole. 2024. <span>“M-Estimation for Common Epidemiological Measures:
+Introduction and Applied Examples.”</span> <em>International Journal of
+Epidemiology</em> 53 (2): dyae030. <a href="https://doi.org/10.1093/ije/dyae030">https://doi.org/10.1093/ije/dyae030</a>.
+</div>
+<div id="ref-schaferAverageCausalEffects2008" class="csl-entry">
+Schafer, Joseph L., and Joseph Kang. 2008. <span>“Average Causal Effects
+from Nonrandomized Studies: A Practical Guide and Simulated
+Example.”</span> <em>Psychological Methods</em> 13 (4): 279–313. <a href="https://doi.org/10.1037/a0014268">https://doi.org/10.1037/a0014268</a>.
+</div>
+<div id="ref-shuVarianceEstimationInverse2021" class="csl-entry">
+Shu, Di, Jessica G. Young, Sengwee Toh, and Rui Wang. 2021.
+<span>“Variance Estimation in Inverse Probability Weighted Cox
+Models.”</span> <em>Biometrics</em> 77 (3): 1101–17. <a href="https://doi.org/10.1111/biom.13332">https://doi.org/10.1111/biom.13332</a>.
+</div>
+<div id="ref-snowdenImplementationGComputationSimulated2011" class="csl-entry">
+Snowden, Jonathan M., Sherri Rose, and Kathleen M. Mortimer. 2011.
+<span>“Implementation of g-Computation on a Simulated Data Set:
+Demonstration of a Causal Inference Technique.”</span> <em>American
+Journal of Epidemiology</em> 173 (7): 731–38. <a href="https://doi.org/10.1093/aje/kwq472">https://doi.org/10.1093/aje/kwq472</a>.
+</div>
+<div id="ref-stefanskiCalculusMEstimation2002" class="csl-entry">
+Stefanski, Leonard A., and Dennis D. Boos. 2002. <span>“The Calculus of
+m-Estimation.”</span> <em>The American Statistician</em> 56 (1): 29–38.
+<a href="https://doi.org/10.1198/000313002753631330">https://doi.org/10.1198/000313002753631330</a>.
+</div>
+<div id="ref-vanderweeleDistinctionInteractionEffect2009" class="csl-entry">
+VanderWeele, Tyler J. 2009. <span>“On the Distinction Between
+Interaction and Effect Modification.”</span> <em>Epidemiology</em> 20
+(6): 863–71. <a href="https://www.jstor.org/stable/25662776">https://www.jstor.org/stable/25662776</a>.
+</div>
+<div id="ref-vansteelandtInvitedCommentaryGComputation2011" class="csl-entry">
+Vansteelandt, Stijn, and Niels Keiding. 2011. <span>“Invited Commentary:
+G-Computation<span></span>lost in Translation?”</span> <em>American
+Journal of Epidemiology</em> 173 (7): 739–42. <a href="https://doi.org/10.1093/aje/kwq474">https://doi.org/10.1093/aje/kwq474</a>.
+</div>
+<div id="ref-vegetabileNonparametricEstimationPopulation2021" class="csl-entry">
+Vegetabile, Brian G., Beth Ann Griffin, Donna L. Coffman, Matthew
+Cefalu, Michael W. Robbins, and Daniel F. McCaffrey. 2021.
+<span>“Nonparametric Estimation of Population Average Dose-Response
+Curves Using Entropy Balancing Weights for Continuous Exposures.”</span>
+<em>Health Services and Outcomes Research Methodology</em> 21 (1):
+69–110. <a href="https://doi.org/10.1007/s10742-020-00236-2">https://doi.org/10.1007/s10742-020-00236-2</a>.
+</div>
+<div id="ref-wangGcomputationAverageTreatment2017" class="csl-entry">
+Wang, Aolin, Roch A. Nianogo, and Onyebuchi A. Arah. 2017.
+<span>“G-Computation of Average Treatment Effects on the Treated and the
+Untreated.”</span> <em>BMC Medical Research Methodology</em> 17 (1): 3.
+<a href="https://doi.org/10.1186/s12874-016-0282-4">https://doi.org/10.1186/s12874-016-0282-4</a>.
+</div>
+<div id="ref-westreichTableFallacyPresenting2013" class="csl-entry">
+Westreich, Daniel, and Sander Greenland. 2013. <span>“The Table 2
+Fallacy: Presenting and Interpreting Confounder and Modifier
+Coefficients.”</span> <em>American Journal of Epidemiology</em> 177 (4):
+292–98. <a href="https://doi.org/10.1093/aje/kws412">https://doi.org/10.1093/aje/kws412</a>.
+</div>
+<div id="ref-xuApplicationsFractionalRandomWeightBootstrap2020a" class="csl-entry">
+Xu, Li, Chris Gotwalt, Yili Hong, Caleb B. King, and William Q. Meeker.
+2020. <span>“Applications of the Fractional-Random-Weight
+Bootstrap.”</span> <em>The American Statistician</em> 74 (4): 345–58. <a href="https://doi.org/10.1080/00031305.2020.1731599">https://doi.org/10.1080/00031305.2020.1731599</a>.
+</div>
+</div>
+</div>
+<div id="code-to-generate-data-used-in-examples" class="section level2">
+<h2>Code to Generate Data used in Examples</h2>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" tabindex="-1"></a><span class="co">#Generating data similar to Austin (2009) for demonstrating treatment effect estimation</span></span>
+<span id="cb53-2"><a href="#cb53-2" tabindex="-1"></a>gen_X <span class="ot">&lt;-</span> <span class="cf">function</span>(n) {</span>
+<span id="cb53-3"><a href="#cb53-3" tabindex="-1"></a>  X <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="dv">9</span> <span class="sc">*</span> n), <span class="at">nrow =</span> n, <span class="at">ncol =</span> <span class="dv">9</span>)</span>
+<span id="cb53-4"><a href="#cb53-4" tabindex="-1"></a>  X[,<span class="dv">5</span>] <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(X[,<span class="dv">5</span>] <span class="sc">&lt;</span> .<span class="dv">5</span>)</span>
+<span id="cb53-5"><a href="#cb53-5" tabindex="-1"></a>  X</span>
+<span id="cb53-6"><a href="#cb53-6" tabindex="-1"></a>}</span>
+<span id="cb53-7"><a href="#cb53-7" tabindex="-1"></a></span>
+<span id="cb53-8"><a href="#cb53-8" tabindex="-1"></a>gen_Ac <span class="ot">&lt;-</span> <span class="cf">function</span>(X) {</span>
+<span id="cb53-9"><a href="#cb53-9" tabindex="-1"></a>  LP_A <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">1.2</span> <span class="sc">+</span> <span class="fu">log</span>(<span class="dv">2</span>)<span class="sc">*</span>X[,<span class="dv">1</span>] <span class="sc">-</span> <span class="fu">log</span>(<span class="fl">1.5</span>)<span class="sc">*</span>X[,<span class="dv">2</span>] <span class="sc">+</span> <span class="fu">log</span>(<span class="dv">2</span>)<span class="sc">*</span>X[,<span class="dv">4</span>] <span class="sc">-</span> <span class="fu">log</span>(<span class="fl">2.4</span>)<span class="sc">*</span>X[,<span class="dv">5</span>] <span class="sc">+</span> <span class="fu">log</span>(<span class="dv">2</span>)<span class="sc">*</span>X[,<span class="dv">7</span>] <span class="sc">-</span> <span class="fu">log</span>(<span class="fl">1.5</span>)<span class="sc">*</span>X[,<span class="dv">8</span>]</span>
+<span id="cb53-10"><a href="#cb53-10" tabindex="-1"></a>  LP_A <span class="sc">+</span> <span class="fu">rlogis</span>(<span class="fu">nrow</span>(X))</span>
+<span id="cb53-11"><a href="#cb53-11" tabindex="-1"></a>}</span>
+<span id="cb53-12"><a href="#cb53-12" tabindex="-1"></a></span>
+<span id="cb53-13"><a href="#cb53-13" tabindex="-1"></a><span class="co">#~20% treated</span></span>
+<span id="cb53-14"><a href="#cb53-14" tabindex="-1"></a>gen_A <span class="ot">&lt;-</span> <span class="cf">function</span>(Ac) {</span>
+<span id="cb53-15"><a href="#cb53-15" tabindex="-1"></a>  <span class="dv">1</span> <span class="sc">*</span> (Ac <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb53-16"><a href="#cb53-16" tabindex="-1"></a>}</span>
+<span id="cb53-17"><a href="#cb53-17" tabindex="-1"></a></span>
+<span id="cb53-18"><a href="#cb53-18" tabindex="-1"></a>gen_Am <span class="ot">&lt;-</span> <span class="cf">function</span>(A) {</span>
+<span id="cb53-19"><a href="#cb53-19" tabindex="-1"></a>  <span class="fu">factor</span>(<span class="fu">ifelse</span>(A <span class="sc">==</span> <span class="dv">1</span>, <span class="st">&quot;T&quot;</span>, <span class="fu">sample</span>(<span class="fu">c</span>(<span class="st">&quot;C1&quot;</span>, <span class="st">&quot;C2&quot;</span>), <span class="fu">length</span>(A), <span class="cn">TRUE</span>)))</span>
+<span id="cb53-20"><a href="#cb53-20" tabindex="-1"></a>}</span>
+<span id="cb53-21"><a href="#cb53-21" tabindex="-1"></a></span>
+<span id="cb53-22"><a href="#cb53-22" tabindex="-1"></a><span class="co"># Continuous outcome</span></span>
+<span id="cb53-23"><a href="#cb53-23" tabindex="-1"></a>gen_Y_C <span class="ot">&lt;-</span> <span class="cf">function</span>(A, X) {</span>
+<span id="cb53-24"><a href="#cb53-24" tabindex="-1"></a>  <span class="dv">2</span><span class="sc">*</span>A <span class="sc">+</span> <span class="dv">2</span><span class="sc">*</span>X[,<span class="dv">1</span>] <span class="sc">+</span> <span class="dv">2</span><span class="sc">*</span>X[,<span class="dv">2</span>] <span class="sc">+</span> <span class="dv">2</span><span class="sc">*</span>X[,<span class="dv">3</span>] <span class="sc">+</span> <span class="dv">1</span><span class="sc">*</span>X[,<span class="dv">4</span>] <span class="sc">+</span> <span class="dv">2</span><span class="sc">*</span>X[,<span class="dv">5</span>] <span class="sc">+</span> <span class="dv">1</span><span class="sc">*</span>X[,<span class="dv">6</span>] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="fu">length</span>(A), <span class="dv">0</span>, <span class="dv">5</span>)</span>
+<span id="cb53-25"><a href="#cb53-25" tabindex="-1"></a>}</span>
+<span id="cb53-26"><a href="#cb53-26" tabindex="-1"></a><span class="co">#Conditional:</span></span>
+<span id="cb53-27"><a href="#cb53-27" tabindex="-1"></a><span class="co">#  MD: 2</span></span>
+<span id="cb53-28"><a href="#cb53-28" tabindex="-1"></a><span class="co">#Marginal:</span></span>
+<span id="cb53-29"><a href="#cb53-29" tabindex="-1"></a><span class="co">#  MD: 2</span></span>
+<span id="cb53-30"><a href="#cb53-30" tabindex="-1"></a></span>
+<span id="cb53-31"><a href="#cb53-31" tabindex="-1"></a><span class="co"># Binary outcome</span></span>
+<span id="cb53-32"><a href="#cb53-32" tabindex="-1"></a>gen_Y_B <span class="ot">&lt;-</span> <span class="cf">function</span>(A, X) {</span>
+<span id="cb53-33"><a href="#cb53-33" tabindex="-1"></a>  LP_B <span class="ot">&lt;-</span> <span class="sc">-</span><span class="dv">2</span> <span class="sc">+</span> <span class="fu">log</span>(<span class="fl">2.4</span>)<span class="sc">*</span>A <span class="sc">+</span> <span class="fu">log</span>(<span class="dv">2</span>)<span class="sc">*</span>X[,<span class="dv">1</span>] <span class="sc">+</span> <span class="fu">log</span>(<span class="dv">2</span>)<span class="sc">*</span>X[,<span class="dv">2</span>] <span class="sc">+</span> <span class="fu">log</span>(<span class="dv">2</span>)<span class="sc">*</span>X[,<span class="dv">3</span>] <span class="sc">+</span> <span class="fu">log</span>(<span class="fl">1.5</span>)<span class="sc">*</span>X[,<span class="dv">4</span>] <span class="sc">+</span> <span class="fu">log</span>(<span class="fl">2.4</span>)<span class="sc">*</span>X[,<span class="dv">5</span>] <span class="sc">+</span> <span class="fu">log</span>(<span class="fl">1.5</span>)<span class="sc">*</span>X[,<span class="dv">6</span>]</span>
+<span id="cb53-34"><a href="#cb53-34" tabindex="-1"></a>  P_B <span class="ot">&lt;-</span> <span class="fu">plogis</span>(LP_B)</span>
+<span id="cb53-35"><a href="#cb53-35" tabindex="-1"></a>  <span class="fu">rbinom</span>(<span class="fu">length</span>(A), <span class="dv">1</span>, P_B)</span>
+<span id="cb53-36"><a href="#cb53-36" tabindex="-1"></a>}</span>
+<span id="cb53-37"><a href="#cb53-37" tabindex="-1"></a><span class="co">#Conditional:</span></span>
+<span id="cb53-38"><a href="#cb53-38" tabindex="-1"></a><span class="co">#  OR:   2.4</span></span>
+<span id="cb53-39"><a href="#cb53-39" tabindex="-1"></a><span class="co">#  logOR: .875</span></span>
+<span id="cb53-40"><a href="#cb53-40" tabindex="-1"></a><span class="co">#Marginal:</span></span>
+<span id="cb53-41"><a href="#cb53-41" tabindex="-1"></a><span class="co">#  RD:    .144</span></span>
+<span id="cb53-42"><a href="#cb53-42" tabindex="-1"></a><span class="co">#  RR:   1.54</span></span>
+<span id="cb53-43"><a href="#cb53-43" tabindex="-1"></a><span class="co">#  logRR: .433</span></span>
+<span id="cb53-44"><a href="#cb53-44" tabindex="-1"></a><span class="co">#  OR:   1.92</span></span>
+<span id="cb53-45"><a href="#cb53-45" tabindex="-1"></a><span class="co">#  logOR  .655</span></span>
+<span id="cb53-46"><a href="#cb53-46" tabindex="-1"></a></span>
+<span id="cb53-47"><a href="#cb53-47" tabindex="-1"></a><span class="co"># Survival outcome</span></span>
+<span id="cb53-48"><a href="#cb53-48" tabindex="-1"></a>gen_Y_S <span class="ot">&lt;-</span> <span class="cf">function</span>(A, X) {</span>
+<span id="cb53-49"><a href="#cb53-49" tabindex="-1"></a>  LP_S <span class="ot">&lt;-</span> <span class="sc">-</span><span class="dv">2</span> <span class="sc">+</span> <span class="fu">log</span>(<span class="fl">2.4</span>)<span class="sc">*</span>A <span class="sc">+</span> <span class="fu">log</span>(<span class="dv">2</span>)<span class="sc">*</span>X[,<span class="dv">1</span>] <span class="sc">+</span> <span class="fu">log</span>(<span class="dv">2</span>)<span class="sc">*</span>X[,<span class="dv">2</span>] <span class="sc">+</span> <span class="fu">log</span>(<span class="dv">2</span>)<span class="sc">*</span>X[,<span class="dv">3</span>] <span class="sc">+</span> <span class="fu">log</span>(<span class="fl">1.5</span>)<span class="sc">*</span>X[,<span class="dv">4</span>] <span class="sc">+</span> <span class="fu">log</span>(<span class="fl">2.4</span>)<span class="sc">*</span>X[,<span class="dv">5</span>] <span class="sc">+</span> <span class="fu">log</span>(<span class="fl">1.5</span>)<span class="sc">*</span>X[,<span class="dv">6</span>]</span>
+<span id="cb53-50"><a href="#cb53-50" tabindex="-1"></a>  <span class="fu">sqrt</span>(<span class="sc">-</span><span class="fu">log</span>(<span class="fu">runif</span>(<span class="fu">length</span>(A)))<span class="sc">*</span><span class="fl">2e4</span><span class="sc">*</span><span class="fu">exp</span>(<span class="sc">-</span>LP_S))</span>
+<span id="cb53-51"><a href="#cb53-51" tabindex="-1"></a>}</span>
+<span id="cb53-52"><a href="#cb53-52" tabindex="-1"></a><span class="co">#Conditional:</span></span>
+<span id="cb53-53"><a href="#cb53-53" tabindex="-1"></a><span class="co">#  HR:   2.4</span></span>
+<span id="cb53-54"><a href="#cb53-54" tabindex="-1"></a><span class="co">#  logHR: .875</span></span>
+<span id="cb53-55"><a href="#cb53-55" tabindex="-1"></a><span class="co">#Marginal:</span></span>
+<span id="cb53-56"><a href="#cb53-56" tabindex="-1"></a><span class="co">#  HR:   1.57</span></span>
+<span id="cb53-57"><a href="#cb53-57" tabindex="-1"></a><span class="co">#  logHR: .452</span></span>
+<span id="cb53-58"><a href="#cb53-58" tabindex="-1"></a></span>
+<span id="cb53-59"><a href="#cb53-59" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">19599</span>)</span>
+<span id="cb53-60"><a href="#cb53-60" tabindex="-1"></a></span>
+<span id="cb53-61"><a href="#cb53-61" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">2000</span></span>
+<span id="cb53-62"><a href="#cb53-62" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">gen_X</span>(n)</span>
+<span id="cb53-63"><a href="#cb53-63" tabindex="-1"></a>Ac <span class="ot">&lt;-</span> <span class="fu">gen_Ac</span>(X)</span>
+<span id="cb53-64"><a href="#cb53-64" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="fu">gen_A</span>(Ac)</span>
+<span id="cb53-65"><a href="#cb53-65" tabindex="-1"></a>Am <span class="ot">&lt;-</span> <span class="fu">gen_Am</span>(A)</span>
+<span id="cb53-66"><a href="#cb53-66" tabindex="-1"></a></span>
+<span id="cb53-67"><a href="#cb53-67" tabindex="-1"></a>Y_C <span class="ot">&lt;-</span> <span class="fu">gen_Y_C</span>(A, X)</span>
+<span id="cb53-68"><a href="#cb53-68" tabindex="-1"></a>Y_B <span class="ot">&lt;-</span> <span class="fu">gen_Y_B</span>(A, X)</span>
+<span id="cb53-69"><a href="#cb53-69" tabindex="-1"></a></span>
+<span id="cb53-70"><a href="#cb53-70" tabindex="-1"></a>Y_S_ <span class="ot">&lt;-</span> <span class="fu">gen_Y_S</span>(A, X)</span>
+<span id="cb53-71"><a href="#cb53-71" tabindex="-1"></a>cens_time <span class="ot">&lt;-</span> <span class="dv">500</span></span>
+<span id="cb53-72"><a href="#cb53-72" tabindex="-1"></a>Y_death <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(Y_S_ <span class="sc">&lt;</span> cens_time)</span>
+<span id="cb53-73"><a href="#cb53-73" tabindex="-1"></a>Y_S <span class="ot">&lt;-</span> <span class="fu">pmin</span>(Y_S_, cens_time)</span>
+<span id="cb53-74"><a href="#cb53-74" tabindex="-1"></a></span>
+<span id="cb53-75"><a href="#cb53-75" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(A, Am, Ac, X, Y_C, Y_B, Y_S, Y_death)</span></code></pre></div>
+</div>
+<div class="footnotes footnotes-end-of-document">
+<hr />
+<ol>
+<li id="fn1"><p>Note: Previously, this guide recommended always
+including the weights. We believe best practice is to omit them, though
+this does not mean previous analyses using weighted averages are
+invalid.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p>To verify that they are equal, supply the output of
+<code>avg_predictions()</code> to <code>hypotheses()</code>, e.g.,
+<code>avg_predictions(...) |&gt; hypotheses(~pairwise)</code>; this
+explicitly compares the average potential outcomes and should yield
+identical estimates to the <code>avg_comparisons()</code> call.<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+<li id="fn3"><p>Note that for low or high average expected risks
+computed with <code>avg_predictions()</code>, the confidence intervals
+may go below 0 or above 1; this is because an approximation is used. To
+avoid this problem, bootstrapping or simulation-based inference can be
+used instead.<a href="#fnref3" class="footnote-back">↩︎</a></p></li>
+<li id="fn4"><p>Note: do not use <code>comparison = &quot;ratioavg&quot;</code> to
+compute the risk ratio. The confidence intervals around the estimate
+will be incorrect.<a href="#fnref4" class="footnote-back">↩︎</a></p></li>
+<li id="fn5"><p>Currently, when <code>by</code> is used, M-estimation
+based standard errors cannot be computed, but all methods compatible
+with M-estimation yield identical results when using <code>by</code>
+vs. interacting the moderator with the other covariates in the weighting
+model. Here, we demonstrate using <code>by</code> because it is more
+generalizable to other methods.<a href="#fnref5" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,24 @@
+add_s.weights           Add sampling weights to a 'matchit' object
+distance                Propensity scores and other distance measures
+lalonde                 Data from National Supported Work Demonstration
+                        and PSID, as analyzed by Dehejia and Wahba
+                        (1999).
+mahalanobis_dist        Compute a Distance Matrix
+match_data              Construct a matched dataset from a 'matchit'
+                        object
+matchit                 Matching for Causal Inference
+method_cardinality      Cardinality Matching
+method_cem              Coarsened Exact Matching
+method_exact            Exact Matching
+method_full             Optimal Full Matching
+method_genetic          Genetic Matching
+method_nearest          Nearest Neighbor Matching
+method_optimal          Optimal Pair Matching
+method_quick            Fast Generalized Full Matching
+method_subclass         Subclassification
+plot.matchit            Generate Balance Plots after Matching and
+                        Subclassification
+plot.summary.matchit    Generate a Love Plot of Standardized Mean
+                        Differences
+rbind.matchdata         Append matched datasets together
+summary.matchit         View a balance summary of a 'matchit' object

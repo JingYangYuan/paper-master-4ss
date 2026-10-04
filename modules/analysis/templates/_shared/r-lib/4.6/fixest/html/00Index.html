@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html>
+<head><title>R: Fast Fixed-Effects Estimations</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<link rel="stylesheet" type="text/css" href="R.css">
+</head><body><div class="container">
+<h1> Fast Fixed-Effects Estimations
+<img class="toplogo" src="../../../doc/html/Rlogo.svg" alt="[R logo]">
+</h1>
+<hr>
+<div style="text-align: center;">
+<a href="../../../doc/html/packages.html"><img class="arrow" src="../../../doc/html/left.jpg" alt="[Up]"></a>
+<a href="../../../doc/html/index.html"><img class="arrow" src="../../../doc/html/up.jpg" alt="[Top]"></a>
+</div><h2>Documentation for package &lsquo;fixest&rsquo; version 0.14.2</h2>
+
+<ul><li><a href="../DESCRIPTION" type="text/plain; charset=utf-8">DESCRIPTION file</a></li>
+<li><a href="../doc/index.html">User guides, package vignettes and other documentation</a></li>
+<li><a href="../demo">Code demos</a>.  Use <a href="../../utils/help/demo">demo()</a> to run them.</li>
+<li><a href="../NEWS.md">Package NEWS</a></li>
+<li><a href="../README.md">Package README</a></li>
+</ul>
+
+<h2>Help Pages</h2>
+
+
+<p style="text-align: center;">
+<a href="#A">A</a>
+<a href="#B">B</a>
+<a href="#C">C</a>
+<a href="#D">D</a>
+<a href="#E">E</a>
+<a href="#F">F</a>
+<a href="#G">G</a>
+<a href="#H">H</a>
+<a href="#I">I</a>
+<a href="#L">L</a>
+<a href="#M">M</a>
+<a href="#N">N</a>
+<a href="#O">O</a>
+<a href="#P">P</a>
+<a href="#R">R</a>
+<a href="#S">S</a>
+<a href="#T">T</a>
+<a href="#U">U</a>
+<a href="#V">V</a>
+<a href="#W">W</a>
+<a href="#X">X</a>
+<a href="#misc">misc</a>
+</p>
+
+
+<h2><a id="A">-- A --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="aggregate.fixest.html">aggregate.fixest</a></td>
+<td>Aggregates the values of DiD coefficients a la Sun and Abraham</td></tr>
+<tr><td style="width: 25%;"><a href="AIC.fixest.html">AIC.fixest</a></td>
+<td>Akaike's an information criterion</td></tr>
+<tr><td style="width: 25%;"><a href="as.dict.html">as.dict</a></td>
+<td>Transforms a character string into a dictionary</td></tr>
+<tr><td style="width: 25%;"><a href="as.list.fixest_multi.html">as.list.fixest_multi</a></td>
+<td>Transforms a fixest_multi object into a list</td></tr>
+</table>
+
+<h2><a id="B">-- B --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="base_did.html">base_did</a></td>
+<td>Sample data for difference in difference</td></tr>
+<tr><td style="width: 25%;"><a href="base_pub.html">base_pub</a></td>
+<td>Publication data sample</td></tr>
+<tr><td style="width: 25%;"><a href="base_stagg.html">base_stagg</a></td>
+<td>Sample data for staggered difference in difference</td></tr>
+<tr><td style="width: 25%;"><a href="BIC.fixest.html">BIC.fixest</a></td>
+<td>Bayesian information criterion</td></tr>
+<tr><td style="width: 25%;"><a href="bin.html">bin</a></td>
+<td>Bins the values of a variable (typically a factor)</td></tr>
+<tr><td style="width: 25%;"><a href="bread.fixest.html">bread.fixest</a></td>
+<td>Extracts the bread matrix from fixest objects</td></tr>
+</table>
+
+<h2><a id="C">-- C --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="obs.html">case.names.fixest</a></td>
+<td>Extracts the observations used for the estimation</td></tr>
+<tr><td style="width: 25%;"><a href="check_conv_feols.html">check_conv_feols</a></td>
+<td>Check the fixed-effects convergence of a 'feols' estimation</td></tr>
+<tr><td style="width: 25%;"><a href="coef.fixest.html">coef.fixest</a></td>
+<td>Extracts the coefficients from a 'fixest' estimation</td></tr>
+<tr><td style="width: 25%;"><a href="coef.fixest_multi.html">coef.fixest_multi</a></td>
+<td>Extracts the coefficients of fixest_multi objects</td></tr>
+<tr><td style="width: 25%;"><a href="coef.fixest.html">coefficients.fixest</a></td>
+<td>Extracts the coefficients from a 'fixest' estimation</td></tr>
+<tr><td style="width: 25%;"><a href="coef.fixest_multi.html">coefficients.fixest_multi</a></td>
+<td>Extracts the coefficients of fixest_multi objects</td></tr>
+<tr><td style="width: 25%;"><a href="coefplot.html">coefplot</a></td>
+<td>Plots confidence intervals and point estimates</td></tr>
+<tr><td style="width: 25%;"><a href="coeftable.html">coeftable</a></td>
+<td>Extracts the coefficients table from an estimation</td></tr>
+<tr><td style="width: 25%;"><a href="coeftable.default.html">coeftable.default</a></td>
+<td>Extracts the coefficients table from an estimation</td></tr>
+<tr><td style="width: 25%;"><a href="coeftable.fixest.html">coeftable.fixest</a></td>
+<td>Obtain various statistics from an estimation</td></tr>
+<tr><td style="width: 25%;"><a href="coeftable.fixest_multi.html">coeftable.fixest_multi</a></td>
+<td>Extracts the coefficients tables from 'fixest_multi' estimations</td></tr>
+<tr><td style="width: 25%;"><a href="collinearity.html">collinearity</a></td>
+<td>Collinearity diagnostics for 'fixest' objects</td></tr>
+<tr><td style="width: 25%;"><a href="confint.fixest.html">confint.fixest</a></td>
+<td>Confidence interval for parameters estimated with 'fixest'</td></tr>
+<tr><td style="width: 25%;"><a href="confint.fixest_multi.html">confint.fixest_multi</a></td>
+<td>Confidence intervals for 'fixest_multi' objects</td></tr>
+<tr><td style="width: 25%;"><a href="vcov_conley.html">conley</a></td>
+<td>Conley VCOV</td></tr>
+<tr><td style="width: 25%;"><a href="stepwise.html">csw</a></td>
+<td>Stepwise estimation tools</td></tr>
+<tr><td style="width: 25%;"><a href="stepwise.html">csw0</a></td>
+<td>Stepwise estimation tools</td></tr>
+</table>
+
+<h2><a id="D">-- D --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="l.html">d</a></td>
+<td>Lags a variable in a 'fixest' estimation</td></tr>
+<tr><td style="width: 25%;"><a href="degrees_freedom.html">degrees_freedom</a></td>
+<td>Gets the degrees of freedom of a 'fixest' estimation</td></tr>
+<tr><td style="width: 25%;"><a href="degrees_freedom.html">degrees_freedom_iid</a></td>
+<td>Gets the degrees of freedom of a 'fixest' estimation</td></tr>
+<tr><td style="width: 25%;"><a href="demean.html">demean</a></td>
+<td>Centers a set of variables around a set of factors</td></tr>
+<tr><td style="width: 25%;"><a href="demeaning_algo.html">demeaning_algo</a></td>
+<td>Controls the parameters of the demeaning procedure</td></tr>
+<tr><td style="width: 25%;"><a href="deviance.fixest.html">deviance.fixest</a></td>
+<td>Extracts the deviance of a fixest estimation</td></tr>
+<tr><td style="width: 25%;"><a href="df.residual.fixest.html">df.residual.fixest</a></td>
+<td>Residual degrees-of-freedom for 'fixest' objects</td></tr>
+<tr><td style="width: 25%;"><a href="did_means.html">did_means</a></td>
+<td>Treated and control sample descriptives</td></tr>
+<tr><td style="width: 25%;"><a href="vcov_hac.html">DK</a></td>
+<td>HAC VCOVs</td></tr>
+<tr><td style="width: 25%;"><a href="vcov_hac.html">driscoll_kraay</a></td>
+<td>HAC VCOVs</td></tr>
+<tr><td style="width: 25%;"><a href="dsb.html">dsb</a></td>
+<td>Simple and powerful string manipulation with the dot square bracket operator</td></tr>
+</table>
+
+<h2><a id="E">-- E --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="emmeans_support.html">emmeans_support</a></td>
+<td>Support for emmeans package</td></tr>
+<tr><td style="width: 25%;"><a href="estfun.fixest.html">estfun.fixest</a></td>
+<td>Extracts the scores from a fixest estimation</td></tr>
+<tr><td style="width: 25%;"><a href="etable.html">esttable</a></td>
+<td>Estimations table (export the results of multiples estimations to a DF or to Latex)</td></tr>
+<tr><td style="width: 25%;"><a href="etable.html">esttex</a></td>
+<td>Estimations table (export the results of multiples estimations to a DF or to Latex)</td></tr>
+<tr><td style="width: 25%;"><a href="est_env.html">est_env</a></td>
+<td>Estimates a 'fixest' estimation from a 'fixest' environment</td></tr>
+<tr><td style="width: 25%;"><a href="etable.html">etable</a></td>
+<td>Estimations table (export the results of multiples estimations to a DF or to Latex)</td></tr>
+<tr><td style="width: 25%;"><a href="extralines_register.html">extralines_register</a></td>
+<td>Register 'extralines' macros to be used in 'etable'</td></tr>
+</table>
+
+<h2><a id="F">-- F --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="l.html">f</a></td>
+<td>Lags a variable in a 'fixest' estimation</td></tr>
+<tr><td style="width: 25%;"><a href="fdim.html">fdim</a></td>
+<td>Formatted dimension</td></tr>
+<tr><td style="width: 25%;"><a href="feglm.html">feglm</a></td>
+<td>Fixed-effects GLM estimations</td></tr>
+<tr><td style="width: 25%;"><a href="feglm.html">feglm.fit</a></td>
+<td>Fixed-effects GLM estimations</td></tr>
+<tr><td style="width: 25%;"><a href="femlm.html">femlm</a></td>
+<td>Fixed-effects maximum likelihood models</td></tr>
+<tr><td style="width: 25%;"><a href="femlm.html">fenegbin</a></td>
+<td>Fixed-effects maximum likelihood models</td></tr>
+<tr><td style="width: 25%;"><a href="feNmlm.html">feNmlm</a></td>
+<td>Fixed effects nonlinear maximum likelihood models</td></tr>
+<tr><td style="width: 25%;"><a href="feols.html">feols</a></td>
+<td>Fixed-effects OLS estimation</td></tr>
+<tr><td style="width: 25%;"><a href="feols.html">feols.fit</a></td>
+<td>Fixed-effects OLS estimation</td></tr>
+<tr><td style="width: 25%;"><a href="feglm.html">fepois</a></td>
+<td>Fixed-effects GLM estimations</td></tr>
+<tr><td style="width: 25%;"><a href="fitstat.html">fitstat</a></td>
+<td>Computes fit statistics of fixest objects</td></tr>
+<tr><td style="width: 25%;"><a href="fitstat_register.html">fitstat_register</a></td>
+<td>Register custom fit statistics</td></tr>
+<tr><td style="width: 25%;"><a href="fitted.fixest.html">fitted.fixest</a></td>
+<td>Extracts fitted values from a 'fixest' fit</td></tr>
+<tr><td style="width: 25%;"><a href="fitted.fixest.html">fitted.values.fixest</a></td>
+<td>Extracts fitted values from a 'fixest' fit</td></tr>
+<tr><td style="width: 25%;"><a href="fixef.fixest.html">fixef.fixest</a></td>
+<td>Extract the Fixed-Effects from a 'fixest' estimation.</td></tr>
+<tr><td style="width: 25%;"><a href="fixest_data.html">fixest_data</a></td>
+<td>Retrieves the data set used for a 'fixest' estimation</td></tr>
+<tr><td style="width: 25%;"><a href="fixest_startup_msg.html">fixest_startup_msg</a></td>
+<td>Permanently removes the fixest package startup message</td></tr>
+<tr><td style="width: 25%;"><a href="formula.fixest.html">formula.fixest</a></td>
+<td>Extract the formula of a 'fixest' fit</td></tr>
+<tr><td style="width: 25%;"><a href="formula.fixest.html">formula.fixest_multi</a></td>
+<td>Extract the formula of a 'fixest' fit</td></tr>
+<tr><td style="width: 25%;"><a href="fulton.html">fulton</a></td>
+<td>Fulton Fish Market data</td></tr>
+</table>
+
+<h2><a id="G">-- G --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="setFixest_coefplot.html">getFixest_coefplot</a></td>
+<td>Sets the defaults of coefplot</td></tr>
+<tr><td style="width: 25%;"><a href="setFixest_dict.html">getFixest_dict</a></td>
+<td>Sets/gets the dictionary relabeling the variables</td></tr>
+<tr><td style="width: 25%;"><a href="setFixest_estimation.html">getFixest_estimation</a></td>
+<td>Default arguments for fixest estimations</td></tr>
+<tr><td style="width: 25%;"><a href="etable.html">getFixest_etable</a></td>
+<td>Estimations table (export the results of multiples estimations to a DF or to Latex)</td></tr>
+<tr><td style="width: 25%;"><a href="setFixest_fml.html">getFixest_fml</a></td>
+<td>Sets/gets formula macros</td></tr>
+<tr><td style="width: 25%;"><a href="setFixest_multi.html">getFixest_multi</a></td>
+<td>Sets properties of 'fixest_multi' objects</td></tr>
+<tr><td style="width: 25%;"><a href="setFixest_notes.html">getFixest_notes</a></td>
+<td>Sets/gets whether to display notes in 'fixest' estimation functions</td></tr>
+<tr><td style="width: 25%;"><a href="setFixest_nthreads.html">getFixest_nthreads</a></td>
+<td>Sets/gets the number of threads to use in 'fixest' functions</td></tr>
+<tr><td style="width: 25%;"><a href="print.fixest.html">getFixest_print</a></td>
+<td>A print facility for 'fixest' objects.</td></tr>
+<tr><td style="width: 25%;"><a href="getFixest_ssc.html">getFixest_ssc</a></td>
+<td>Gets the default values for the small sample correction</td></tr>
+<tr><td style="width: 25%;"><a href="setFixest_vcov.html">getFixest_vcov</a></td>
+<td>Sets the default type of standard errors to be used</td></tr>
+</table>
+
+<h2><a id="H">-- H --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="hatvalues.fixest.html">hatvalues.fixest</a></td>
+<td>Hat values for 'fixest' objects</td></tr>
+</table>
+
+<h2><a id="I">-- I --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="i.html">i</a></td>
+<td>Create, or interact variables with, factors</td></tr>
+<tr><td style="width: 25%;"><a href="coefplot.html">iplot</a></td>
+<td>Plots confidence intervals and point estimates</td></tr>
+</table>
+
+<h2><a id="L">-- L --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="l.html">l</a></td>
+<td>Lags a variable in a 'fixest' estimation</td></tr>
+<tr><td style="width: 25%;"><a href="lag.formula.html">lag.formula</a></td>
+<td>Lags a variable using a formula</td></tr>
+<tr><td style="width: 25%;"><a href="lag.formula.html">lag_fml</a></td>
+<td>Lags a variable using a formula</td></tr>
+<tr><td style="width: 25%;"><a href="logLik.fixest.html">logLik.fixest</a></td>
+<td>Extracts the log-likelihood</td></tr>
+<tr><td style="width: 25%;"><a href="etable.html">log_etable</a></td>
+<td>Estimations table (export the results of multiples estimations to a DF or to Latex)</td></tr>
+</table>
+
+<h2><a id="M">-- M --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="model.matrix.fixest.html">model.matrix.fixest</a></td>
+<td>Design matrix of a 'fixest' object</td></tr>
+<tr><td style="width: 25%;"><a href="models.html">models</a></td>
+<td>Extracts the models tree from a 'fixest_multi' object</td></tr>
+<tr><td style="width: 25%;"><a href="stepwise.html">mvsw</a></td>
+<td>Stepwise estimation tools</td></tr>
+</table>
+
+<h2><a id="N">-- N --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="vcov_hac.html">newey_west</a></td>
+<td>HAC VCOVs</td></tr>
+<tr><td style="width: 25%;"><a href="nobs.fixest.html">nobs.fixest</a></td>
+<td>Extracts the number of observations form a 'fixest' object</td></tr>
+<tr><td style="width: 25%;"><a href="vcov_hac.html">NW</a></td>
+<td>HAC VCOVs</td></tr>
+<tr><td style="width: 25%;"><a href="n_models.html">n_models</a></td>
+<td>Gets the dimension of 'fixest_multi' objects</td></tr>
+<tr><td style="width: 25%;"><a href="n_unik.html">n_unik</a></td>
+<td>Prints the number of unique elements in a data set</td></tr>
+</table>
+
+<h2><a id="O">-- O --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="obs.html">obs</a></td>
+<td>Extracts the observations used for the estimation</td></tr>
+<tr><td style="width: 25%;"><a href="osize.html">osize</a></td>
+<td>Formatted object size</td></tr>
+</table>
+
+<h2><a id="P">-- P --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="panel.html">panel</a></td>
+<td>Constructs a 'fixest' panel data base</td></tr>
+<tr><td style="width: 25%;"><a href="plot.fixest.html">plot.fixest</a></td>
+<td>plot methods for 'fixest' and 'fixest_multi' objects</td></tr>
+<tr><td style="width: 25%;"><a href="plot.fixest.fixef.html">plot.fixest.fixef</a></td>
+<td>Displaying the most notable fixed-effects</td></tr>
+<tr><td style="width: 25%;"><a href="predict.fixest.html">predict.fixest</a></td>
+<td>Predict method for 'fixest' fits</td></tr>
+<tr><td style="width: 25%;"><a href="etable.html">print.etable_df</a></td>
+<td>Estimations table (export the results of multiples estimations to a DF or to Latex)</td></tr>
+<tr><td style="width: 25%;"><a href="etable.html">print.etable_tex</a></td>
+<td>Estimations table (export the results of multiples estimations to a DF or to Latex)</td></tr>
+<tr><td style="width: 25%;"><a href="print.fixest.html">print.fixest</a></td>
+<td>A print facility for 'fixest' objects.</td></tr>
+<tr><td style="width: 25%;"><a href="print.fixest_fitstat.html">print.fixest_fitstat</a></td>
+<td>Print method for fit statistics of fixest estimations</td></tr>
+<tr><td style="width: 25%;"><a href="print.fixest_multi.html">print.fixest_multi</a></td>
+<td>Print method for fixest_multi objects</td></tr>
+<tr><td style="width: 25%;"><a href="print.fixest_vcov.html">print.fixest_vcov</a></td>
+<td>A print facility for the VCOVs from 'fixest' objects.</td></tr>
+<tr><td style="width: 25%;"><a href="n_unik.html">print.list_n_unik</a></td>
+<td>Prints the number of unique elements in a data set</td></tr>
+<tr><td style="width: 25%;"><a href="osize.html">print.osize</a></td>
+<td>Formatted object size</td></tr>
+<tr><td style="width: 25%;"><a href="print.ssc_type.html">print.ssc_type</a></td>
+<td>Method to print the type of small sample correction</td></tr>
+<tr><td style="width: 25%;"><a href="n_unik.html">print.vec_n_unik</a></td>
+<td>Prints the number of unique elements in a data set</td></tr>
+<tr><td style="width: 25%;"><a href="coeftable.html">pvalue</a></td>
+<td>Extracts the coefficients table from an estimation</td></tr>
+<tr><td style="width: 25%;"><a href="coeftable.default.html">pvalue.default</a></td>
+<td>Extracts the coefficients table from an estimation</td></tr>
+<tr><td style="width: 25%;"><a href="coeftable.fixest.html">pvalue.fixest</a></td>
+<td>Obtain various statistics from an estimation</td></tr>
+<tr><td style="width: 25%;"><a href="coeftable.fixest_multi.html">pvalue.fixest_multi</a></td>
+<td>Extracts the coefficients tables from 'fixest_multi' estimations</td></tr>
+</table>
+
+<h2><a id="R">-- R --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="r2.html">r2</a></td>
+<td>R2s of 'fixest' models</td></tr>
+<tr><td style="width: 25%;"><a href="ref.html">ref</a></td>
+<td>Refactors a variable</td></tr>
+<tr><td style="width: 25%;"><a href="rep.fixest.html">rep.fixest</a></td>
+<td>Replicates 'fixest' objects</td></tr>
+<tr><td style="width: 25%;"><a href="rep.fixest.html">rep.fixest_list</a></td>
+<td>Replicates 'fixest' objects</td></tr>
+<tr><td style="width: 25%;"><a href="resid.fixest.html">resid.fixest</a></td>
+<td>Extracts residuals from a 'fixest' object</td></tr>
+<tr><td style="width: 25%;"><a href="resid.fixest_multi.html">resid.fixest_multi</a></td>
+<td>Extracts the residuals from a 'fixest_multi' object</td></tr>
+<tr><td style="width: 25%;"><a href="resid.fixest.html">residuals.fixest</a></td>
+<td>Extracts residuals from a 'fixest' object</td></tr>
+<tr><td style="width: 25%;"><a href="resid.fixest_multi.html">residuals.fixest_multi</a></td>
+<td>Extracts the residuals from a 'fixest_multi' object</td></tr>
+</table>
+
+<h2><a id="S">-- S --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="sample_df.html">sample_df</a></td>
+<td>Randomly draws observations from a data set</td></tr>
+<tr><td style="width: 25%;"><a href="coeftable.html">se</a></td>
+<td>Extracts the coefficients table from an estimation</td></tr>
+<tr><td style="width: 25%;"><a href="coeftable.default.html">se.default</a></td>
+<td>Extracts the coefficients table from an estimation</td></tr>
+<tr><td style="width: 25%;"><a href="coeftable.fixest.html">se.fixest</a></td>
+<td>Obtain various statistics from an estimation</td></tr>
+<tr><td style="width: 25%;"><a href="coeftable.fixest_multi.html">se.fixest_multi</a></td>
+<td>Extracts the coefficients tables from 'fixest_multi' estimations</td></tr>
+<tr><td style="width: 25%;"><a href="coeftable.default.html">se.fixest_vcov</a></td>
+<td>Extracts the coefficients table from an estimation</td></tr>
+<tr><td style="width: 25%;"><a href="coeftable.default.html">se.matrix</a></td>
+<td>Extracts the coefficients table from an estimation</td></tr>
+<tr><td style="width: 25%;"><a href="setFixest_coefplot.html">setFixest_coefplot</a></td>
+<td>Sets the defaults of coefplot</td></tr>
+<tr><td style="width: 25%;"><a href="setFixest_dict.html">setFixest_dict</a></td>
+<td>Sets/gets the dictionary relabeling the variables</td></tr>
+<tr><td style="width: 25%;"><a href="setFixest_estimation.html">setFixest_estimation</a></td>
+<td>Default arguments for fixest estimations</td></tr>
+<tr><td style="width: 25%;"><a href="etable.html">setFixest_etable</a></td>
+<td>Estimations table (export the results of multiples estimations to a DF or to Latex)</td></tr>
+<tr><td style="width: 25%;"><a href="setFixest_fml.html">setFixest_fml</a></td>
+<td>Sets/gets formula macros</td></tr>
+<tr><td style="width: 25%;"><a href="setFixest_multi.html">setFixest_multi</a></td>
+<td>Sets properties of 'fixest_multi' objects</td></tr>
+<tr><td style="width: 25%;"><a href="setFixest_notes.html">setFixest_notes</a></td>
+<td>Sets/gets whether to display notes in 'fixest' estimation functions</td></tr>
+<tr><td style="width: 25%;"><a href="setFixest_nthreads.html">setFixest_nthreads</a></td>
+<td>Sets/gets the number of threads to use in 'fixest' functions</td></tr>
+<tr><td style="width: 25%;"><a href="print.fixest.html">setFixest_print</a></td>
+<td>A print facility for 'fixest' objects.</td></tr>
+<tr><td style="width: 25%;"><a href="setFixest_ssc.html">setFixest_ssc</a></td>
+<td>Sets the default values for the small sample correction</td></tr>
+<tr><td style="width: 25%;"><a href="setFixest_vcov.html">setFixest_vcov</a></td>
+<td>Sets the default type of standard errors to be used</td></tr>
+<tr><td style="width: 25%;"><a href="sigma.fixest.html">sigma.fixest</a></td>
+<td>Residual standard deviation of 'fixest' estimations</td></tr>
+<tr><td style="width: 25%;"><a href="sparse_model_matrix.html">sparse_model_matrix</a></td>
+<td>Design matrix of a 'fixest' object returned in sparse format</td></tr>
+<tr><td style="width: 25%;"><a href="ssc.html">ssc</a></td>
+<td>Governs the small sample correction in 'fixest' VCOVs</td></tr>
+<tr><td style="width: 25%;"><a href="stepwise.html">stepwise</a></td>
+<td>Stepwise estimation tools</td></tr>
+<tr><td style="width: 25%;"><a href="style.df.html">style.df</a></td>
+<td>Style of data.frames created by etable</td></tr>
+<tr><td style="width: 25%;"><a href="style.tex.html">style.tex</a></td>
+<td>Style definitions for Latex tables</td></tr>
+<tr><td style="width: 25%;"><a href="summary.fixest.html">summary.fixest</a></td>
+<td>Summary of a 'fixest' object. Computes different types of standard errors.</td></tr>
+<tr><td style="width: 25%;"><a href="summary.fixest.fixef.html">summary.fixest.fixef</a></td>
+<td>Summary method for fixed-effects coefficients</td></tr>
+<tr><td style="width: 25%;"><a href="check_conv_feols.html">summary.fixest_check_conv</a></td>
+<td>Check the fixed-effects convergence of a 'feols' estimation</td></tr>
+<tr><td style="width: 25%;"><a href="summary.fixest.html">summary.fixest_list</a></td>
+<td>Summary of a 'fixest' object. Computes different types of standard errors.</td></tr>
+<tr><td style="width: 25%;"><a href="summary.fixest_multi.html">summary.fixest_multi</a></td>
+<td>Summary for fixest_multi objects</td></tr>
+<tr><td style="width: 25%;"><a href="sunab.html">sunab</a></td>
+<td>Sun and Abraham interactions</td></tr>
+<tr><td style="width: 25%;"><a href="sunab.html">sunab_att</a></td>
+<td>Sun and Abraham interactions</td></tr>
+<tr><td style="width: 25%;"><a href="stepwise.html">sw</a></td>
+<td>Stepwise estimation tools</td></tr>
+<tr><td style="width: 25%;"><a href="stepwise.html">sw0</a></td>
+<td>Stepwise estimation tools</td></tr>
+</table>
+
+<h2><a id="T">-- T --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="terms.fixest.html">terms.fixest</a></td>
+<td>Extract the terms</td></tr>
+<tr><td style="width: 25%;"><a href="to_integer.html">to_integer</a></td>
+<td>Fast transform of any type of vector(s) into an integer vector</td></tr>
+<tr><td style="width: 25%;"><a href="trade.html">trade</a></td>
+<td>Trade data sample</td></tr>
+<tr><td style="width: 25%;"><a href="coeftable.html">tstat</a></td>
+<td>Extracts the coefficients table from an estimation</td></tr>
+<tr><td style="width: 25%;"><a href="coeftable.default.html">tstat.default</a></td>
+<td>Extracts the coefficients table from an estimation</td></tr>
+<tr><td style="width: 25%;"><a href="coeftable.fixest.html">tstat.fixest</a></td>
+<td>Obtain various statistics from an estimation</td></tr>
+<tr><td style="width: 25%;"><a href="coeftable.fixest_multi.html">tstat.fixest_multi</a></td>
+<td>Extracts the coefficients tables from 'fixest_multi' estimations</td></tr>
+</table>
+
+<h2><a id="U">-- U --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="unpanel.html">unpanel</a></td>
+<td>Dissolves a 'fixest' panel</td></tr>
+<tr><td style="width: 25%;"><a href="update.fixest.html">update.fixest</a></td>
+<td>Updates a 'fixest' estimation</td></tr>
+<tr><td style="width: 25%;"><a href="update.fixest.html">update.fixest_multi</a></td>
+<td>Updates a 'fixest' estimation</td></tr>
+</table>
+
+<h2><a id="V">-- V --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="vcov.fixest.html">vcov.fixest</a></td>
+<td>Computes the variance/covariance of a 'fixest' object</td></tr>
+<tr><td style="width: 25%;"><a href="vcov_cluster.html">vcov_cluster</a></td>
+<td>Clustered VCOV</td></tr>
+<tr><td style="width: 25%;"><a href="vcov_conley.html">vcov_conley</a></td>
+<td>Conley VCOV</td></tr>
+<tr><td style="width: 25%;"><a href="vcov_hac.html">vcov_DK</a></td>
+<td>HAC VCOVs</td></tr>
+<tr><td style="width: 25%;"><a href="vcov_hac.html">vcov_hac</a></td>
+<td>HAC VCOVs</td></tr>
+<tr><td style="width: 25%;"><a href="vcov_hetero.html">vcov_hetero</a></td>
+<td>Heteroskedasticity-Robust VCOV</td></tr>
+<tr><td style="width: 25%;"><a href="vcov_hac.html">vcov_NW</a></td>
+<td>HAC VCOVs</td></tr>
+</table>
+
+<h2><a id="W">-- W --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="wald.html">wald</a></td>
+<td>Wald test of nullity of coefficients</td></tr>
+<tr><td style="width: 25%;"><a href="weights.fixest.html">weights.fixest</a></td>
+<td>Extracts the weights from a 'fixest' object</td></tr>
+</table>
+
+<h2><a id="X">-- X --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="xpd.html">xpd</a></td>
+<td>Expands formula macros</td></tr>
+</table>
+
+<h2><a id="misc">-- misc --</a></h2>
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="rep.fixest.html">.l</a></td>
+<td>Replicates 'fixest' objects</td></tr>
+<tr><td style="width: 25%;"><a href="sub-.fixest_multi.html">[.fixest_multi</a></td>
+<td>Subsets a fixest_multi object</td></tr>
+<tr><td style="width: 25%;"><a href="sub-.fixest_panel.html">[.fixest_panel</a></td>
+<td>Method to subselect from a 'fixest_panel'</td></tr>
+<tr><td style="width: 25%;"><a href="sub-sub-.fixest_multi.html">[[.fixest_multi</a></td>
+<td>Extracts one element from a 'fixest_multi' object</td></tr>
+</table>
+</div></body></html>

@@ -1,0 +1,154 @@
+AIC.fixest              Akaike's an information criterion
+BIC.fixest              Bayesian information criterion
+[.fixest_multi          Subsets a fixest_multi object
+[.fixest_panel          Method to subselect from a 'fixest_panel'
+[[.fixest_multi         Extracts one element from a 'fixest_multi'
+                        object
+aggregate.fixest        Aggregates the values of DiD coefficients a la
+                        Sun and Abraham
+as.dict                 Transforms a character string into a dictionary
+as.list.fixest_multi    Transforms a fixest_multi object into a list
+base_did                Sample data for difference in difference
+base_pub                Publication data sample
+base_stagg              Sample data for staggered difference in
+                        difference
+bin                     Bins the values of a variable (typically a
+                        factor)
+bread.fixest            Extracts the bread matrix from fixest objects
+check_conv_feols        Check the fixed-effects convergence of a
+                        'feols' estimation
+coef.fixest             Extracts the coefficients from a 'fixest'
+                        estimation
+coef.fixest_multi       Extracts the coefficients of fixest_multi
+                        objects
+coefplot                Plots confidence intervals and point estimates
+coeftable               Extracts the coefficients table from an
+                        estimation
+coeftable.default       Extracts the coefficients table from an
+                        estimation
+coeftable.fixest        Obtain various statistics from an estimation
+coeftable.fixest_multi
+                        Extracts the coefficients tables from
+                        'fixest_multi' estimations
+collinearity            Collinearity diagnostics for 'fixest' objects
+confint.fixest          Confidence interval for parameters estimated
+                        with 'fixest'
+confint.fixest_multi    Confidence intervals for 'fixest_multi' objects
+degrees_freedom         Gets the degrees of freedom of a 'fixest'
+                        estimation
+demean                  Centers a set of variables around a set of
+                        factors
+demeaning_algo          Controls the parameters of the demeaning
+                        procedure
+deviance.fixest         Extracts the deviance of a fixest estimation
+df.residual.fixest      Residual degrees-of-freedom for 'fixest'
+                        objects
+did_means               Treated and control sample descriptives
+dsb                     Simple and powerful string manipulation with
+                        the dot square bracket operator
+emmeans_support         Support for emmeans package
+est_env                 Estimates a 'fixest' estimation from a 'fixest'
+                        environment
+estfun.fixest           Extracts the scores from a fixest estimation
+esttable                Estimations table (export the results of
+                        multiples estimations to a DF or to Latex)
+extralines_register     Register 'extralines' macros to be used in
+                        'etable'
+f                       Lags a variable in a 'fixest' estimation
+fdim                    Formatted dimension
+feNmlm                  Fixed effects nonlinear maximum likelihood
+                        models
+feglm                   Fixed-effects GLM estimations
+femlm                   Fixed-effects maximum likelihood models
+feols                   Fixed-effects OLS estimation
+fitstat                 Computes fit statistics of fixest objects
+fitstat_register        Register custom fit statistics
+fitted.fixest           Extracts fitted values from a 'fixest' fit
+fixef.fixest            Extract the Fixed-Effects from a 'fixest'
+                        estimation.
+fixest_data             Retrieves the data set used for a 'fixest'
+                        estimation
+fixest_startup_msg      Permanently removes the fixest package startup
+                        message
+formula.fixest          Extract the formula of a 'fixest' fit
+fulton                  Fulton Fish Market data
+getFixest_ssc           Gets the default values for the small sample
+                        correction
+hatvalues.fixest        Hat values for 'fixest' objects
+i                       Create, or interact variables with, factors
+lag.formula             Lags a variable using a formula
+logLik.fixest           Extracts the log-likelihood
+model.matrix.fixest     Design matrix of a 'fixest' object
+models                  Extracts the models tree from a 'fixest_multi'
+                        object
+n_models                Gets the dimension of 'fixest_multi' objects
+n_unik                  Prints the number of unique elements in a data
+                        set
+nobs.fixest             Extracts the number of observations form a
+                        'fixest' object
+obs                     Extracts the observations used for the
+                        estimation
+osize                   Formatted object size
+panel                   Constructs a 'fixest' panel data base
+plot.fixest             plot methods for 'fixest' and 'fixest_multi'
+                        objects
+plot.fixest.fixef       Displaying the most notable fixed-effects
+predict.fixest          Predict method for 'fixest' fits
+print.fixest            A print facility for 'fixest' objects.
+print.fixest_fitstat    Print method for fit statistics of fixest
+                        estimations
+print.fixest_multi      Print method for fixest_multi objects
+print.fixest_vcov       A print facility for the VCOVs from 'fixest'
+                        objects.
+print.ssc_type          Method to print the type of small sample
+                        correction
+r2                      R2s of 'fixest' models
+ref                     Refactors a variable
+rep.fixest              Replicates 'fixest' objects
+resid.fixest            Extracts residuals from a 'fixest' object
+resid.fixest_multi      Extracts the residuals from a 'fixest_multi'
+                        object
+sample_df               Randomly draws observations from a data set
+setFixest_coefplot      Sets the defaults of coefplot
+setFixest_dict          Sets/gets the dictionary relabeling the
+                        variables
+setFixest_estimation    Default arguments for fixest estimations
+setFixest_fml           Sets/gets formula macros
+setFixest_multi         Sets properties of 'fixest_multi' objects
+setFixest_notes         Sets/gets whether to display notes in 'fixest'
+                        estimation functions
+setFixest_nthreads      Sets/gets the number of threads to use in
+                        'fixest' functions
+setFixest_ssc           Sets the default values for the small sample
+                        correction
+setFixest_vcov          Sets the default type of standard errors to be
+                        used
+sigma.fixest            Residual standard deviation of 'fixest'
+                        estimations
+sparse_model_matrix     Design matrix of a 'fixest' object returned in
+                        sparse format
+ssc                     Governs the small sample correction in 'fixest'
+                        VCOVs
+stepwise                Stepwise estimation tools
+style.df                Style of data.frames created by etable
+style.tex               Style definitions for Latex tables
+summary.fixest          Summary of a 'fixest' object. Computes
+                        different types of standard errors.
+summary.fixest.fixef    Summary method for fixed-effects coefficients
+summary.fixest_multi    Summary for fixest_multi objects
+sunab                   Sun and Abraham interactions
+terms.fixest            Extract the terms
+to_integer              Fast transform of any type of vector(s) into an
+                        integer vector
+trade                   Trade data sample
+unpanel                 Dissolves a 'fixest' panel
+update.fixest           Updates a 'fixest' estimation
+vcov.fixest             Computes the variance/covariance of a 'fixest'
+                        object
+vcov_cluster            Clustered VCOV
+vcov_conley             Conley VCOV
+vcov_hac                HAC VCOVs
+vcov_hetero             Heteroskedasticity-Robust VCOV
+wald                    Wald test of nullity of coefficients
+weights.fixest          Extracts the weights from a 'fixest' object
+xpd                     Expands formula macros

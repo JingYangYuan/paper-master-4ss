@@ -1,0 +1,119 @@
+B                       Fast Between (Averaging) and (Quasi-)Within
+                        (Centering) Transformations
+BY                      Split-Apply-Combine Computing
+GGDC10S                 Groningen Growth and Development Centre
+                        10-Sector Database
+GRP                     Fast Grouping / _collapse_ Grouping Objects
+TRA                     Transform Data by (Grouped) Replacing or
+                        Sweeping out Statistics
+across                  Apply Functions Across Multiple Columns
+arithmetic              Fast Row/Column Arithmetic for Matrix-Like
+                        Objects
+collap                  Advanced Data Aggregation
+collapse-documentation
+                        Collapse Documentation & Overview
+collapse-options        _collapse_ Package Options
+collapse-package        Advanced and Fast Data Transformation
+collapse-renamed        Renamed Functions
+colorder                Fast Reordering of Data Frame Columns
+dapply                  Data Apply
+data-transformations    Data Transformations
+descr                   Detailed Statistical Description of Data Frame
+efficient-programming   Small Functions to Make R Programming More
+                        Efficient
+fFtest                  Fast (Weighted) F-test for Linear Models (with
+                        Factors)
+fast-data-manipulation
+                        Fast Data Manipulation
+fast-grouping-ordering
+                        Fast Grouping and Ordering
+fast-statistical-functions
+                        Fast (Grouped, Weighted) Statistical Functions
+                        for Matrix-Like Objects
+fcount                  Efficiently Count Observations by Group
+fcumsum                 Fast (Grouped, Ordered) Cumulative Sum for
+                        Matrix-Like Objects
+fdiff                   Fast (Quasi-, Log-) Differences for Time Series
+                        and Panel Data
+fdist                   Fast and Flexible Distance Computations
+fdroplevels             Fast Removal of Unused Factor Levels
+ffirst                  Fast (Grouped) First and Last Value for
+                        Matrix-Like Objects
+fgrowth                 Fast Growth Rates for Time Series and Panel
+                        Data
+fhdbetween              Higher-Dimensional Centering and Linear
+                        Prediction
+flag                    Fast Lags and Leads for Time Series and Panel
+                        Data
+flm                     Fast (Weighted) Linear Model Fitting
+fmatch                  Fast Matching
+fmax                    Fast (Grouped) Maxima and Minima for
+                        Matrix-Like Objects
+fmean                   Fast (Grouped, Weighted) Mean for Matrix-Like
+                        Objects
+fmode                   Fast (Grouped, Weighted) Statistical Mode for
+                        Matrix-Like Objects
+fndistinct              Fast (Grouped) Distinct Value Count for
+                        Matrix-Like Objects
+fnobs                   Fast (Grouped) Observation Count for
+                        Matrix-Like Objects
+fnth                    Fast (Grouped, Weighted) N'th Element/Quantile
+                        for Matrix-Like Objects
+fprod                   Fast (Grouped, Weighted) Product for
+                        Matrix-Like Objects
+fquantile               Fast (Weighted) Sample Quantiles and Range
+frename                 Fast Renaming and Relabelling Objects
+fscale                  Fast (Grouped, Weighted) Scaling and Centering
+                        of Matrix-like Objects
+fselect                 Fast Select, Replace or Add Data Frame Columns
+fslice                  Fast Slicing of Matrix-Like Objects
+fsubset                 Fast Subsetting Matrix-Like Objects
+fsum                    Fast (Grouped, Weighted) Sum for Matrix-Like
+                        Objects
+fsummarise              Fast Summarise
+ftransform              Fast Transform and Compute Columns on a Data
+                        Frame
+funique                 Fast Unique Elements / Rows
+fvar                    Fast (Grouped, Weighted) Variance and Standard
+                        Deviation for Matrix-Like Objects
+get_elem                Find and Extract / Subset List Elements
+group                   Fast Hash-Based Grouping
+groupid                 Generate Run-Length Type Group-Id
+indexing                Fast Indexed Time Series and Panels
+is_unlistable           Unlistable Lists
+join                    Fast and Verbose Table Joins
+ldepth                  Determine the Depth / Level of Nesting of a
+                        List
+list-processing         List Processing
+pad                     Pad Matrix-Like Objects with a Value
+pivot                   Fast and Easy Data Reshaping
+psacf                   Auto- and Cross- Covariance and Correlation
+                        Function Estimation for Panel Series
+psmat                   Matrix / Array from Panel Series
+pwcor                   (Pairwise, Weighted) Correlations, Covariances
+                        and Observation Counts
+qF                      Fast Factor Generation, Interactions and Vector
+                        Grouping
+qsu                     Fast (Grouped, Weighted) Summary Statistics for
+                        Cross-Sectional and Panel Data
+qtab                    Fast (Weighted) Cross Tabulation
+quick-conversion        Quick Data Conversion
+radixorder              Fast Radix-Based Ordering
+rapply2d                Recursively Apply a Function to a List of Data
+                        Objects
+recode-replace          Recode and Replace Values in Matrix-Like
+                        Objects
+rowbind                 Row-Bind Lists / Data Frame-Like Objects
+roworder                Fast Reordering of Data Frame Rows
+rsplit                  Fast (Recursive) Splitting
+seqid                   Generate Group-Id from Integer Sequences
+small-helpers           Small (Helper) Functions
+summary-statistics      Summary Statistics
+t_list                  Efficient List Transpose
+time-series-panel-series
+                        Time Series and Panel Series
+timeid                  Generate Integer-Id From Time/Date Sequences
+unlist2d                Recursive Row-Binding / Unlisting in 2D - to
+                        Data Frame
+varying                 Fast Check of Variation in Data
+wlddev                  World Development Dataset

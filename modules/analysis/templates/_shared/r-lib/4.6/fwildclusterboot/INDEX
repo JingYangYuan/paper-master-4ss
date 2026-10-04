@@ -1,0 +1,71 @@
+boot_aggregate          Simple tool that aggregates the value of CATT
+                        coefficients in staggered
+                        difference-in-difference setups with inference
+                        based on a wild cluster bootstrap (see details)
+                        - similar to 'fixest::aggregate()'
+boot_ssc                set the small sample correction factor applied
+                        in 'boottest()'
+boottest                Fast wild cluster bootstrap inference
+boottest.felm           Fast wild cluster bootstrap inference for
+                        object of class felm
+boottest.fixest         Fast wild cluster bootstrap inference for
+                        object of class fixest
+boottest.ivreg          Fast wild cluster bootstrap inference for
+                        object of class lm
+boottest.lm             Fast wild cluster bootstrap inference for
+                        object of class lm
+confint.boottest        S3 method to obtain wild cluster bootstrapped
+                        confidence intervals
+find_proglang           Check if julia or python are installed / can be
+                        found on the PATH.
+glance.boottest         S3 method to glance at objects of class
+                        boottest
+glance.mboottest        S3 method to glance at objects of class
+                        boottest
+mboottest               Arbitrary Linear Hypothesis Testing for
+                        Regression Models via Wald-Tests
+mboottest.felm          Fast wild cluster bootstrap inference for joint
+                        hypotheses for object of class felm
+mboottest.fixest        Fast wild cluster bootstrap inference for joint
+                        hypotheses for object of class fixest
+mboottest.lm            Fast wild cluster bootstrap inference of joint
+                        hypotheses for object of class lm
+nobs.boottest           S3 method to obtain the effective number of
+                        observation used in 'boottest()'
+nobs.mboottest          S3 method to obtain the effective number of
+                        observation used in 'mboottest()'
+plot.boottest           Plots bootstrapped p-values as a function of
+                        the hypothesized effect size r for a hypothesis
+                        test of the form R beta = r.The points where
+                        the p-values are 0.05 are the boundaries of the
+                        bootstrapped confidence interval.
+print.boottest          S3 method to print key information for objects
+                        of type 'bboottest'
+print.mboottest         S3 method to print key information for objects
+                        of type 'mboottest'
+pval                    'pval' is a S3 method to collect pvalues for
+                        objects of type 'boottest' and 'mboottest'
+pval.boottest           S3 method to obtain the wild cluster
+                        bootstrapped p-value of an object of type
+                        boottest
+pval.mboottest          S3 method to obtain the wild cluster
+                        bootstrapped p-value of an object of type
+                        mboottest
+setBoottest_engine      Sets the default bootstrap algo for the current
+                        R session to be run via 'boottest()' and
+                        'mboottest()'
+summary.boottest        S3 method to summarize objects of class
+                        boottest
+summary.mboottest       S3 method to summarize objects of class
+                        mboottest
+teststat                'teststat' is a S3 method to collect teststats
+                        for objects of type 'boottest' and 'mboottest'
+teststat.boottest       S3 method to obtain the non-bootstrapped
+                        t-statistic calculated via 'boottest()'
+teststat.mboottest      S3 method to obtain the non-bootstrapped test
+                        statistic calculated via 'mboottest()'
+tidy.boottest           S3 method to summarize objects of class
+                        boottest into tidy data.frame
+tidy.mboottest          S3 method to summarize objects of class
+                        mboottest into tidy data.frame
+voters                  Random example data set

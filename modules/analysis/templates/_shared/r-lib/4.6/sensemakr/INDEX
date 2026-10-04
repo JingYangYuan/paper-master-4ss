@@ -1,0 +1,27 @@
+add_bound_to_contour    Add bounds to contour plot of omitted variable
+                        bias
+adjusted_critical_value
+                        Bias-adjusted critical values
+adjusted_estimate       Bias-adjusted estimates, standard-errors,
+                        t-values and confidence intervals
+colombia                Data from the 2016 referendum for peace with
+                        the FARC in Colombia.
+darfur                  Data from survey of Darfurian refugees in
+                        eastern Chad.
+group_partial_r2        Partial R2 of groups of covariates in a linear
+                        regression model
+ovb_bounds              Bounds on the strength of unobserved
+                        confounders using observed covariates
+ovb_contour_plot        Contour plots of omitted variable bias
+ovb_extreme_plot        Extreme scenarios plots of omitted variable
+                        bias
+partial_r2              Computes the partial R2 and partial (Cohen's)
+                        f2
+plot.sensemakr          Sensitivity analysis plots for 'sensemakr'
+print.sensemakr         Sensitivity analysis print and summary methods
+                        for 'sensemakr'
+robustness_value        Computes the (extreme) robustness value
+sensemakr               Sensitivity analysis to unobserved confounders
+sensemakr-package       Sensemakr: extending omitted variable bias
+sensitivity_stats       Sensitivity statistics for regression
+                        coefficients

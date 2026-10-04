@@ -1,0 +1,159 @@
+THIS IS THE CHANGELOG OF THE "sampleSelection" PACKAGE
+
+Please note that only the most significant changes are reported here.
+A full ChangeLog is available in the log messages of the SVN repository
+on R-Forge.
+
+   CHANGES IN VERSION 1.2-14 (2026-01-19)
+
+* internal changes: a few minor improvements in the code, documentation,
+   and test scripts
+
+
+   CHANGES IN VERSION 1.2-12 (2020-12-14)
+
+* internal change: updated and improved some tests
+
+
+   CHANGES IN VERSION 1.2-10 (2020-11-04)
+
+* fixed a type in the vignette "Using treatReg" (treatReg.pdf)
+
+* internal change: updated and improved some tests
+
+
+   CHANGES IN VERSION 1.2-6 (2019-05-03)
+
+* fixed a problem in the code that did not affect any results but that gave 
+a warning message when it was run with the latest R-devel version
+
+* internal changes to make the sampleSelection package compatible with future 
+versions of the VGAM package
+
+
+   CHANGES IN VERSION 1.2-2 (2019-02-19)
+
+* minor adjustments to make this package compatible with version 1.1-1 of the
+VGAM package
+
+
+   CHANGES IN VERSION 1.2-0 (2017-12-07)
+
+* added function treatReg() for estimating treatment effect models
+with normal disturbances
+
+* added vignette "Treatment Effect with Normal Disturbances: treatReg"
+
+* selection() can now estimate sample-selection (tobit-2) models 
+with interval outcome
+
+* added vignette "Interval Regression with Sample Selection"
+
+
+   CHANGES IN VERSION 1.0-4 (2015-11-03)
+
+* fixed bug in selection( ..., method = "model.frame" ) for Tobit-5 models
+(missing "drop = FALSE") that caused model.frame() to return an incorrect
+variable name if the model is estimated by the ML method and all explanatory
+variables of the second equation of the outcome model are already included in
+the first equation of the outcome model; the incorrect variable name caused
+model.matrix(), residuals(), fitted(), and predict() to fail
+
+* The R packages "mvtnorm" and "VGAM" are now 'imported' rather than 'suggested'
+
+* minor adjustments due to the upgrade of the maxLik package to version 1.3
+
+* several minor improvements that are mostly not visible to users
+
+
+   CHANGES IN VERSION 1.0-2 (2014-06-24)
+
+* changed/simplified a few examples in order to reduce their execution time
+
+
+   CHANGES IN VERSION 1.0-0 (2014-06-24)
+
+* bug fix: selection() did not pass some arguments to other functions, e.g.
+argument "inst" was ignored so that the second step of heckit-2 models was
+estimated by OLS rather than by IV estimation although argument "inst" was
+specified
+
+* fixed bug in residuals.selection( , part = "selection" ) that occured when
+the dependent variable of the selection model was a factor
+
+* fixed bug that made residuals( object, part = "outcome" ) not work if
+"object" was a sample selection model with a constructed variable
+(e.g. "log(wage)") estimated by ML
+
+* residuals.selection( , part = "outcome" ) now works for models with binary
+dependent outcome variables
+
+* probit models, tobit-2 models, and binary selection models can now be
+estimated with observation-specific weights
+
+* in case of a binary dependent variable of the outcome equation,
+fitted( object, part = "outcome" ) now returns the probabilities rather than
+the linear prdictors
+
+* added a predict() method for probit models
+
+* added a logLik() method for probit models
+
+* added nobs() and nObs() methods for probit and selection models
+
+* added argument "maxMethod" to heckit2fit() and heckit5fit() that specifies
+the maximisation method that is used for estimating the probit model (1st stage)
+
+* the default df.residual() method works for probit models
+
+* this package no longer depends on package 'systemfit' but it imports function
+systemfit from package "systemfit"
+
+* minor adjustments in invMillsRatio() so that it works with bivariate
+probit models estimated by the current version of the VGAM package (0.9-4)
+
+* improved documentation
+
+* modified some internal calculations so that they are numerically nore stable 
+
+* removed the deprecated function tobit2()
+
+
+   CHANGES IN VERSION 0.7-2 (2012-08-14)
+
+* fixed a bug in the calculation of the Hessian of the log likelihood function 
+for probit models that only occurred in specific circumstances
+(reported by Jon K. Peck) 
+
+* in Tobit 5 models, argument "outcome" can now be a pre-defined list 
+(bug reported by Jon K. Peck) 
+
+
+	CHANGES IN VERSION 0.7-0 (2012-03-04)
+
+* Binary-outcome selection models
+
+
+            CHANGES IN VERSION 0.6-12 (2011-11-13)
+
+* fixed a bug that occurred in the fitted( ..., part = "outcome" ), 
+model.matrix( ..., part = "outcome" ), and model.frame() methods as well as 
+in selection( ..., method = "model.frame" ) if all regressors of the outcome 
+equation are already included in the selection equation. Thanks to Timothée 
+Carayol for reporting this bug!
+
+* fixed partial argument matching in invMillsRatio() and probit()
+
+
+            CHANGES IN VERSION 0.6-10
+
+* added a NAMESPACE file
+
+* minor modifications so that the sampleSelection package works with the
+versions >= 0.7-3 of the maxLik package 
+
+
+
+            CHANGES IN VERSION 0.6-8 AND BEFORE
+
+* please take a look at the log messages of the SVN repository on R-Forge

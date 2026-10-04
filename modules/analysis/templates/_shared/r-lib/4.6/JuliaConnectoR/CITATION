@@ -1,0 +1,18 @@
+bibentry(bibtype = "Article",
+  title        = "The {JuliaConnectoR}: A Functionally-Oriented Interface for Integrating {Julia} in {R}",
+  author       = c(person(given = "Stefan",
+                          family = "Lenz",
+                          email = "lenz@imbi.uni-freiburg.de"),
+                   person(given = "Maren",
+                          family = "Hackenberg"),
+                   person(given = "Harald",
+                          family = "Binder")),
+  journal      = "Journal of Statistical Software",
+  year         = "2022",
+  volume       = "101",
+  number       = "6",
+  pages        = "1--24",
+  doi          = "10.18637/jss.v101.i06",
+  header       = "To cite JuliaConnectoR in publications use:"
+)
+

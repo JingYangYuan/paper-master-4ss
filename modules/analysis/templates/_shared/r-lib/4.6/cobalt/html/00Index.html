@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head><title>R: Covariate Balance Tables and Plots</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<link rel="stylesheet" type="text/css" href="R.css">
+</head><body><div class="container">
+<h1> Covariate Balance Tables and Plots
+<img class="toplogo" src="figures/logo.png" alt="[R logo]">
+</h1>
+<hr>
+<div style="text-align: center;">
+<a href="../../../doc/html/packages.html"><img class="arrow" src="../../../doc/html/left.jpg" alt="[Up]"></a>
+<a href="../../../doc/html/index.html"><img class="arrow" src="../../../doc/html/up.jpg" alt="[Top]"></a>
+</div><h2>Documentation for package &lsquo;cobalt&rsquo; version 5.0.0</h2>
+
+<ul><li><a href="../DESCRIPTION" type="text/plain; charset=utf-8">DESCRIPTION file</a></li>
+<li><a href="../doc/index.html">User guides, package vignettes and other documentation</a></li>
+<li><a href="../NEWS.md">Package NEWS</a></li>
+<li><a href="../README.md">Package README</a></li>
+</ul>
+
+<h2>Help Pages</h2>
+
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="cens.html">.cens</a></td>
+<td>Mark a Censoring Indicator</td></tr>
+<tr><td style="width: 25%;"><a href="extract.bal.tab.html">as.data.frame.bal.tab</a></td>
+<td>Extract a Balance Table for Further Use</td></tr>
+<tr><td style="width: 25%;"><a href="bal.compute.html">available.stats</a></td>
+<td>Efficiently compute scalar balance statistics</td></tr>
+<tr><td style="width: 25%;"><a href="bal.compute.html">bal.compute</a></td>
+<td>Efficiently compute scalar balance statistics</td></tr>
+<tr><td style="width: 25%;"><a href="bal.compute.html">bal.compute.bal.init</a></td>
+<td>Efficiently compute scalar balance statistics</td></tr>
+<tr><td style="width: 25%;"><a href="bal.compute.html">bal.compute.default</a></td>
+<td>Efficiently compute scalar balance statistics</td></tr>
+<tr><td style="width: 25%;"><a href="bal.compute.html">bal.init</a></td>
+<td>Efficiently compute scalar balance statistics</td></tr>
+<tr><td style="width: 25%;"><a href="bal.plot.html">bal.plot</a></td>
+<td>Visualize Distributional Balance</td></tr>
+<tr><td style="width: 25%;"><a href="bal.tab.html">bal.tab</a></td>
+<td>Display Balance Statistics in a Table</td></tr>
+<tr><td style="width: 25%;"><a href="bal.tab.CBPS.html">bal.tab.CBPS</a></td>
+<td>Balance Statistics for 'CBPS' Objects</td></tr>
+<tr><td style="width: 25%;"><a href="bal.tab.cem.match.html">bal.tab.cem.match</a></td>
+<td>Balance Statistics for 'cem' Objects</td></tr>
+<tr><td style="width: 25%;"><a href="bal.tab.formula.html">bal.tab.data.frame</a></td>
+<td>Balance Statistics for Data Sets</td></tr>
+<tr><td style="width: 25%;"><a href="bal.tab.time.list.html">bal.tab.data.frame.list</a></td>
+<td>Balance Statistics for Longitudinal Datasets</td></tr>
+<tr><td style="width: 25%;"><a href="bal.tab.default.html">bal.tab.default</a></td>
+<td>Balance Statistics for Other Objects</td></tr>
+<tr><td style="width: 25%;"><a href="bal.tab.designmatch.html">bal.tab.designmatch</a></td>
+<td>Balance Statistics for 'designmatch' Objects</td></tr>
+<tr><td style="width: 25%;"><a href="bal.tab.ebalance.html">bal.tab.ebalance</a></td>
+<td>Balance Statistics for 'ebalance' Objects</td></tr>
+<tr><td style="width: 25%;"><a href="bal.tab.formula.html">bal.tab.formula</a></td>
+<td>Balance Statistics for Data Sets</td></tr>
+<tr><td style="width: 25%;"><a href="bal.tab.time.list.html">bal.tab.formula.list</a></td>
+<td>Balance Statistics for Longitudinal Datasets</td></tr>
+<tr><td style="width: 25%;"><a href="bal.tab.Match.html">bal.tab.Match</a></td>
+<td>Balance Statistics for 'Matching' Objects</td></tr>
+<tr><td style="width: 25%;"><a href="bal.tab.matchit.html">bal.tab.matchit</a></td>
+<td>Balance Statistics for 'MatchIt' Objects</td></tr>
+<tr><td style="width: 25%;"><a href="bal.tab.formula.html">bal.tab.matrix</a></td>
+<td>Balance Statistics for Data Sets</td></tr>
+<tr><td style="width: 25%;"><a href="bal.tab.mimids.html">bal.tab.mimids</a></td>
+<td>Balance Statistics for 'MatchThem' Objects</td></tr>
+<tr><td style="width: 25%;"><a href="bal.tab.optmatch.html">bal.tab.optmatch</a></td>
+<td>Balance Statistics for 'optmatch' Objects</td></tr>
+<tr><td style="width: 25%;"><a href="bal.tab.ps.html">bal.tab.ps</a></td>
+<td>Balance Statistics for 'twang' Objects</td></tr>
+<tr><td style="width: 25%;"><a href="bal.tab.sbwcau.html">bal.tab.sbwcau</a></td>
+<td>Balance Statistics for 'sbw' Objects</td></tr>
+<tr><td style="width: 25%;"><a href="bal.tab.time.list.html">bal.tab.time.list</a></td>
+<td>Balance Statistics for Longitudinal Datasets</td></tr>
+<tr><td style="width: 25%;"><a href="bal.tab.weightit.html">bal.tab.weightit</a></td>
+<td>Balance Statistics for 'WeightIt' Objects</td></tr>
+<tr><td style="width: 25%;"><a href="balance-statistics.html">balance-statistics</a></td>
+<td>Balance Statistics in 'bal.tab' and 'love.plot'</td></tr>
+<tr><td style="width: 25%;"><a href="balance-summary.html">balance-summary</a></td>
+<td>Compute Balance and Summary Statistics for Covariates</td></tr>
+<tr><td style="width: 25%;"><a href="class-bal.tab.cens.html">class-bal.tab.cens</a></td>
+<td>Using 'bal.tab()' with a Censoring Indicator</td></tr>
+<tr><td style="width: 25%;"><a href="class-bal.tab.cluster.html">class-bal.tab.cluster</a></td>
+<td>Using 'bal.tab()' with Clustered Data</td></tr>
+<tr><td style="width: 25%;"><a href="class-bal.tab.imp.html">class-bal.tab.imp</a></td>
+<td>Using 'bal.tab()' with Multiply Imputed Data</td></tr>
+<tr><td style="width: 25%;"><a href="class-bal.tab.msm.html">class-bal.tab.msm</a></td>
+<td>Using 'bal.tab()' with Longitudinal Treatments</td></tr>
+<tr><td style="width: 25%;"><a href="class-bal.tab.multi.html">class-bal.tab.multi</a></td>
+<td>Using 'bal.tab()' with Multi-Category Treatments</td></tr>
+<tr><td style="width: 25%;"><a href="class-bal.tab.subclass.html">class-bal.tab.subclass</a></td>
+<td>Using 'bal.tab()' with Subclassified Data</td></tr>
+<tr><td style="width: 25%;"><a href="balance-summary.html">col_w_corr</a></td>
+<td>Compute Balance and Summary Statistics for Covariates</td></tr>
+<tr><td style="width: 25%;"><a href="balance-summary.html">col_w_cov</a></td>
+<td>Compute Balance and Summary Statistics for Covariates</td></tr>
+<tr><td style="width: 25%;"><a href="balance-summary.html">col_w_dcorr</a></td>
+<td>Compute Balance and Summary Statistics for Covariates</td></tr>
+<tr><td style="width: 25%;"><a href="balance-summary.html">col_w_dcov</a></td>
+<td>Compute Balance and Summary Statistics for Covariates</td></tr>
+<tr><td style="width: 25%;"><a href="balance-summary.html">col_w_ks</a></td>
+<td>Compute Balance and Summary Statistics for Covariates</td></tr>
+<tr><td style="width: 25%;"><a href="balance-summary.html">col_w_mean</a></td>
+<td>Compute Balance and Summary Statistics for Covariates</td></tr>
+<tr><td style="width: 25%;"><a href="balance-summary.html">col_w_ovl</a></td>
+<td>Compute Balance and Summary Statistics for Covariates</td></tr>
+<tr><td style="width: 25%;"><a href="balance-summary.html">col_w_sd</a></td>
+<td>Compute Balance and Summary Statistics for Covariates</td></tr>
+<tr><td style="width: 25%;"><a href="balance-summary.html">col_w_smd</a></td>
+<td>Compute Balance and Summary Statistics for Covariates</td></tr>
+<tr><td style="width: 25%;"><a href="balance-summary.html">col_w_vr</a></td>
+<td>Compute Balance and Summary Statistics for Covariates</td></tr>
+<tr><td style="width: 25%;"><a href="display-options.html">display-options</a></td>
+<td>Options for Displaying 'bal.tab()' Output</td></tr>
+<tr><td style="width: 25%;"><a href="extract.bal.tab.html">extract.bal.tab</a></td>
+<td>Extract a Balance Table for Further Use</td></tr>
+<tr><td style="width: 25%;"><a href="f.build.html">f.build</a></td>
+<td>Convenient Formula Generation</td></tr>
+<tr><td style="width: 25%;"><a href="extract.bal.tab.html">format.bal.tab</a></td>
+<td>Extract a Balance Table for Further Use</td></tr>
+<tr><td style="width: 25%;"><a href="set.cobalt.options.html">get.cobalt.options</a></td>
+<td>Set and Get Options in 'cobalt'</td></tr>
+<tr><td style="width: 25%;"><a href="get.w.html">get.w</a></td>
+<td>Extract Weights from Preprocessing Objects</td></tr>
+<tr><td style="width: 25%;"><a href="get.w.html">get.w.CBMSM</a></td>
+<td>Extract Weights from Preprocessing Objects</td></tr>
+<tr><td style="width: 25%;"><a href="get.w.html">get.w.CBPS</a></td>
+<td>Extract Weights from Preprocessing Objects</td></tr>
+<tr><td style="width: 25%;"><a href="get.w.html">get.w.cem.match</a></td>
+<td>Extract Weights from Preprocessing Objects</td></tr>
+<tr><td style="width: 25%;"><a href="get.w.html">get.w.designmatch</a></td>
+<td>Extract Weights from Preprocessing Objects</td></tr>
+<tr><td style="width: 25%;"><a href="get.w.html">get.w.ebalance</a></td>
+<td>Extract Weights from Preprocessing Objects</td></tr>
+<tr><td style="width: 25%;"><a href="get.w.html">get.w.iptw</a></td>
+<td>Extract Weights from Preprocessing Objects</td></tr>
+<tr><td style="width: 25%;"><a href="get.w.html">get.w.Match</a></td>
+<td>Extract Weights from Preprocessing Objects</td></tr>
+<tr><td style="width: 25%;"><a href="get.w.html">get.w.matchit</a></td>
+<td>Extract Weights from Preprocessing Objects</td></tr>
+<tr><td style="width: 25%;"><a href="get.w.html">get.w.mimids</a></td>
+<td>Extract Weights from Preprocessing Objects</td></tr>
+<tr><td style="width: 25%;"><a href="get.w.html">get.w.mnps</a></td>
+<td>Extract Weights from Preprocessing Objects</td></tr>
+<tr><td style="width: 25%;"><a href="get.w.html">get.w.optmatch</a></td>
+<td>Extract Weights from Preprocessing Objects</td></tr>
+<tr><td style="width: 25%;"><a href="get.w.html">get.w.ps</a></td>
+<td>Extract Weights from Preprocessing Objects</td></tr>
+<tr><td style="width: 25%;"><a href="get.w.html">get.w.ps.cont</a></td>
+<td>Extract Weights from Preprocessing Objects</td></tr>
+<tr><td style="width: 25%;"><a href="get.w.html">get.w.sbwcau</a></td>
+<td>Extract Weights from Preprocessing Objects</td></tr>
+<tr><td style="width: 25%;"><a href="get.w.html">get.w.weightit</a></td>
+<td>Extract Weights from Preprocessing Objects</td></tr>
+<tr><td style="width: 25%;"><a href="get.w.html">get.w.wimids</a></td>
+<td>Extract Weights from Preprocessing Objects</td></tr>
+<tr><td style="width: 25%;"><a href="lalonde.html">lalonde</a></td>
+<td>Data from National Supported Work Demonstration and PSID, as analyzed by Dehejia and Wahba (1999).</td></tr>
+<tr><td style="width: 25%;"><a href="lalonde.html">lalonde_mis</a></td>
+<td>Data from National Supported Work Demonstration and PSID, as analyzed by Dehejia and Wahba (1999).</td></tr>
+<tr><td style="width: 25%;"><a href="love.plot.html">love.plot</a></td>
+<td>Display Balance Statistics in a Love Plot</td></tr>
+<tr><td style="width: 25%;"><a href="print.bal.tab.html">print.bal.tab</a></td>
+<td>Print Results of a Call to 'bal.tab()'</td></tr>
+<tr><td style="width: 25%;"><a href="set.cobalt.options.html">set.cobalt.options</a></td>
+<td>Set and Get Options in 'cobalt'</td></tr>
+<tr><td style="width: 25%;"><a href="splitfactor.html">splitfactor</a></td>
+<td>Split and Unsplit Factors into Dummy Variables</td></tr>
+<tr><td style="width: 25%;"><a href="splitfactor.html">unsplitfactor</a></td>
+<td>Split and Unsplit Factors into Dummy Variables</td></tr>
+<tr><td style="width: 25%;"><a href="var.names.html">var.names</a></td>
+<td>Extract Variable Names from 'bal.tab' Objects</td></tr>
+</table>
+</div></body></html>

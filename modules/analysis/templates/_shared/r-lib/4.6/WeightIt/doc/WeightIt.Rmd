@@ -1,0 +1,252 @@
+---
+title: "Using WeightIt to Estimate Balancing Weights"
+author: "Noah Greifer"
+date: "`r Sys.Date()`"
+output: 
+    html_vignette:
+        df_print: kable
+vignette: >
+  %\VignetteIndexEntry{Using WeightIt to Estimate Balancing Weights}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown_notangle}
+bibliography: references.bib
+link-citations: true
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval=TRUE,message=FALSE)
+options(width = 200, digits= 4)
+
+me_ok <- rlang::is_installed("marginaleffects")
+set.seed(1000)
+```
+
+## Introduction
+
+*WeightIt* contains several functions for estimating and assessing balancing weights for observational studies. These weights can be used to estimate the causal parameters of marginal structural models. I will not go into the basics of causal inference methods here. For good introductory articles, see @austinIntroductionPropensityScore2011, @austinMovingBestPractice2015, @robinsMarginalStructuralModels2000, or @thoemmesPrimerInverseProbability2016.
+
+Typically, the analysis of an observational study might proceed as follows: identify the covariates for which balance is required; assess the quality of the data available, including missingness and measurement error; estimate weights that balance the covariates adequately; and estimate a treatment effect and corresponding standard error or confidence interval. This guide will go through these steps for two observational studies: estimating the causal effect of a point treatment on an outcome, and estimating the causal parameters of a marginal structural model with multiple treatment periods. In addition, we will demonstrate the use of *WeightIt* to estimate censoring weights in the case of informative censoring. This is not meant to be a definitive guide, but rather an introduction to the relevant issues and demonstration of *WeightIt*'s capabilities.
+
+## Balancing Weights for a Point Treatment
+
+First we will use the Lalonde data set to estimate the effect of a point treatment. We'll use the version of the data set that comes with the *cobalt* package, which we will use later on as well. Here, we are interested in the average treatment effect on the treated (ATT).
+
+```{r}
+library("cobalt")
+data("lalonde", package = "cobalt")
+head(lalonde)
+```
+
+We have our outcome (`re78`), our treatment (`treat`), and the covariates for which balance is desired (`age`, `educ`, `race`, `married`, `nodegree`, `re74`, and `re75`). Using *cobalt*, we can examine the initial imbalance on the covariates:
+
+```{r}
+bal.tab(treat ~ age + educ + race + married + nodegree +
+          re74 + re75,
+        data = lalonde,
+        estimand = "ATT",
+        thresholds = c(m = .05))
+```
+
+Based on this output, we can see that all variables are imbalanced in the sense that the standardized mean differences (for continuous variables) and differences in proportion (for binary variables) are greater than .05 for all variables. In particular, `re74` and `re75` are quite imbalanced, which is troubling given that they are likely strong predictors of the outcome. We will estimate weights using `weightit()` to try to attain balance on these covariates.
+
+First, we'll start simple, and use inverse probability weights from propensity scores generated through logistic regression. We need to supply `weightit()` with the formula for the model, the data set, the estimand (ATT), and the method of estimation (`"glm"` for generalized linear model propensity score weights).
+
+```{r}
+library("WeightIt")
+W.out <- weightit(treat ~ age + educ + race + married + nodegree +
+                    re74 + re75,
+                  data = lalonde,
+                  estimand = "ATT",
+                  method = "glm")
+W.out #print the output
+```
+
+Printing the output of `weightit()` displays a summary of how the weights were estimated. Let's examine the quality of the weights using `summary()`. Weights with low variability are desirable because they improve the precision of the estimator. This variability is presented in several ways, but the most important is the effective sample size (ESS) computed from the weights, which we hope is as close to the original sample size as possible. What constitutes a "large enough" ESS is mostly relative, though, and must be considered with respect to other constraints, including covariate balance.
+
+```{r}
+summary(W.out)
+```
+
+These weights have quite high variability, and yield an ESS of close to 100 in the control group. Let's see if these weights managed to yield balance on our covariates.
+
+```{r}
+bal.tab(W.out, stats = c("m", "v"),
+        thresholds = c(m = .05))
+```
+
+For nearly all the covariates, these weights yielded very good balance. Only `age` remained imbalanced, with a standardized mean difference greater than .05 and a variance ratio greater than 2. Let's see if we can do better. We'll choose a different method: entropy balancing [@hainmuellerEntropyBalancingCausal2012], which guarantees perfect balance on specified moments of the covariates while minimizing the negative entropy (a measure of dispersion) of the weights.
+
+```{r}
+W.out <- weightit(treat ~ age + educ + race + married + nodegree +
+                    re74 + re75,
+                  data = lalonde,
+                  estimand = "ATT",
+                  method = "ebal")
+summary(W.out)
+```
+
+The variability of the weights has not changed much, but let's see if there are any gains in terms of balance:
+
+```{r}
+bal.tab(W.out, stats = c("m", "v"),
+        thresholds = c(m = .05))
+```
+
+Indeed, we have achieved perfect balance on the means of the covariates. However, the variance ratio of `age` is still quite high. We could continue to try to adjust for this imbalance, but if there is reason to believe it is unlikely to affect the outcome, it may be best to leave it as is. (You can try adding `I(age^2)` to the formula and see what changes this causes.)
+
+Now that we have our weights stored in `W.out`, let's estimate our treatment effect in the weighted sample. The functions `lm_weightit()`, `glm_weightit()`, and friends make it easy to fit (generalized) linear models that account for estimation of the weights in their standard errors. We can then use functions in *marginaleffects* to perform g-computation to extract a treatment effect estimation from the outcome model.
+
+```{r, message=FALSE}
+# Fit outcome model
+fit <- lm_weightit(re78 ~ treat * (age + educ + race + married +
+                                     nodegree + re74 + re75),
+                   data = lalonde, weightit = W.out)
+```
+```{r, message=FALSE, eval = me_ok}
+# G-computation for the treatment effect
+library("marginaleffects")
+
+avg_comparisons(fit, variables = "treat",
+                newdata = subset(treat == 1))
+```
+
+Our confidence interval for `treat` contains 0, so there isn't evidence that `treat` has an effect on `re78`. Several types of standard errors are available in *WeightIt*, including analytical standard errors that account for estimation of the weights using M-estimation, robust standard errors that treat the weights as fixed, and bootstrapping. These are described in detail at `vignette("estimating-effects")`.
+
+## Balancing Weights for a Longitudinal Treatment
+
+*WeightIt* can estimate weights for marginal structural models with longitudinal treatments as well. This time, we'll use the sample data set `msmdata` to estimate our weights. Data must be in "wide" format, with one row per unit.
+
+```{r}
+data("msmdata")
+
+head(msmdata)
+```
+
+We have a binary outcome variable (`Y_B`), pre-treatment time-varying variables (`X1_0` and `X2_0`, measured before the first treatment, `X1_1` and `X2_1` measured between the first and second treatments, and `X1_2` and `X2_2` measured between the second and third treatments), and three time-varying binary treatment variables (`A_1`, `A_2`, and `A_3`). We are interested in the joint, unique, causal effects of each treatment period on the outcome. At each treatment time point, we need to achieve balance on all variables measured prior to that treatment, including previous treatments.
+
+Using *cobalt*, we can examine the initial imbalance at each time point and overall:
+
+```{r}
+library("cobalt") #if not already attached
+
+bal.tab(list(A_1 ~ X1_0 + X2_0,
+             A_2 ~ X1_1 + X2_1 +
+               A_1 + X1_0 + X2_0,
+             A_3 ~ X1_2 + X2_2 +
+               A_2 + X1_1 + X2_1 +
+               A_1 + X1_0 + X2_0),
+        data = msmdata, stats = c("m", "ks"),
+        which.time = .all)
+```
+
+`bal.tab()` indicates significant imbalance on most covariates at most time points, so we need to do some work to eliminate that imbalance in our weighted data set. We'll use the `weightitMSM()` function to specify our weight models. The syntax is similar both to that of `weightit()` for point treatments and to that of `bal.tab()` for longitudinal treatments. We'll use `method = "glm"` and `stabilize = TRUE` for stabilized propensity score weights estimated using logistic regression.
+
+```{r}
+Wmsm.out <- weightitMSM(list(A_1 ~ X1_0 + X2_0,
+                             A_2 ~ X1_1 + X2_1 +
+                               A_1 + X1_0 + X2_0,
+                             A_3 ~ X1_2 + X2_2 +
+                               A_2 + X1_1 + X2_1 +
+                               A_1 + X1_0 + X2_0),
+                        data = msmdata, method = "glm",
+                        stabilize = TRUE)
+
+Wmsm.out
+```
+
+`weightitMSM()` estimates separate weights for each time period and then takes the product of the weights for each individual to arrive at the final estimated weights. Printing the output of `weightitMSM()` provides some details about the function call and the output. We can take a look at the quality of the weights with `summary()`, just as we could for point treatments.
+
+```{r}
+summary(Wmsm.out)
+```
+
+Displayed are summaries of how the weights perform at each time point with respect to variability. Next, we'll examine how well they perform with respect to covariate balance.
+
+```{r}
+bal.tab(Wmsm.out, stats = c("m", "ks"),
+        which.time = .none)
+```
+
+By setting `which.time = .none` in `bal.tab()`, we can focus on the overall balance assessment, which displays the greatest imbalance for each covariate across time points. We can see that our estimated weights balance all covariates at all time points with respect to means and KS statistics. Now we can estimate our treatment effects.
+
+First, we fit a marginal structural model for the outcome using `glm_weightit()` with the `weightit` object supplied:
+
+```{r}
+# Fit outcome model
+fit <- glm_weightit(Y_B ~ A_1 * A_2 * A_3 * (X1_0 + X2_0),
+                    data = msmdata,
+                    weightit = Wmsm.out,
+                    family = binomial)
+```
+
+Then, we compute the average expected potential outcomes under each treatment regime using `marginaleffects::avg_predictions()`:
+
+```{r, eval = me_ok}
+library("marginaleffects")
+
+p <- avg_predictions(fit, variables = c("A_1", "A_2", "A_3"))
+
+p
+```
+
+We can compare the expected potential outcomes under each regime using `marginaleffects::hypotheses()`. To get all pairwise comparisons, supply the `avg_predictions()` output to `hypotheses(., ~ pairwise)`. To compare individual regimes, we can use `hypotheses()`, identifying the rows of the `avg_predictions()` output. For example, to compare the regimes with no treatment for all three time points vs. the regime with treatment for all three time points, we would run
+
+```{r, eval = me_ok}
+hypotheses(p, "b8 - b1 = 0")
+```
+
+These results indicate that receiving treatment at all time points reduces the risk of the outcome relative to not receiving treatment at all.
+
+### Accounting for censoring
+
+Units often drop out of a study before the outcome is measured, and if they do so for reasons related to the covariates, restricting the analysis to those who remain introduces bias in the same way confounding does. *WeightIt* can estimate inverse probability of censoring weights (IPCW) to adjust for this, which can be requested by wrapping a censoring indicator in `.cens()` on the left side of a model formula. The indicator should be 1/`TRUE` for units that are censored and 0/`FALSE` for those still under observation.
+
+Here we simulate loss to follow-up after the second time point, which makes everything measured afterward unavailable for those units:
+
+```{r}
+set.seed(2000)
+
+# Generate censoring probability, to occur between A_2 and X1_2
+cens <- rbinom(nrow(msmdata), 1,
+               prob = with(msmdata, plogis(-2 + .2 * X1_1 + .3 * X1_0)))
+
+# Apply censoring to all variables measured after censoring
+is.na(msmdata[cens == 1, c("X1_2", "X2_2", "A_3", "Y_B")]) <- TRUE
+
+# Post-censoring variables are unobserved for censored units
+msmdata$C_2 <- with(msmdata,
+                    is.na(X1_2) | is.na(X2_2) |
+                      is.na(A_3) | is.na(Y_B))
+```
+
+The censoring model goes into `formula.list` in temporal order, alongside the treatment models:
+
+```{r}
+(Wc <- weightitMSM(list(A_1 ~ X1_0 + X2_0,
+                        A_2 ~ X1_1 + X2_1 + A_1,
+                        .cens(C_2) ~ X1_1 + X2_1 + A_1 + A_2,
+                        A_3 ~ X1_2 + X2_2 + A_2),
+                   data = msmdata, method = "glm"))
+```
+
+Each model is fit only among the units still under observation when it is reached, so the missing values for censored units are not a problem. Censored units receive a weight of exactly 0:
+
+```{r}
+all(Wc$weights[msmdata$C_2] == 0)
+```
+
+Because they have a weight of 0, censored units contribute nothing to a weighted outcome model, and `glm_weightit()` tolerates their missing outcomes. Standard errors that account for estimation of both the treatment and censoring weights are still available:
+
+```{r}
+fitc <- glm_weightit(Y_B ~ A_1 + A_2 + A_3,
+                     data = msmdata, weightit = Wc,
+                     family = binomial)
+
+summary(fitc)
+```
+
+Balance for a censoring model is assessed against the full at-risk sample rather than against another treatment group, and `bal.tab()` does this directly for an object like `Wc`. See `?.cens` for more.
+
+## References

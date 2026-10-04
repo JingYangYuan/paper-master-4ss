@@ -1,0 +1,20 @@
+citHeader("To cite package 'maxLik' in publications use:")
+     
+bibentry(
+   bibtype = "Article",
+   title = "maxLik: A package for maximum likelihood estimation in {R}",
+   author = c(person("Ott", "Toomet",
+                     role=c("aut", "cre"),
+                     email="otoomet@gmail.com"),
+              person("Arne", "Henningsen",
+                     role=c("aut"),
+                     email="arne.henningsen@gmail.com")
+              ),
+   journal = "Computational Statistics",
+   year = "2011",
+   volume = "26",
+   number = "3",
+   pages = "443-458",
+   doi = "10.1007/s00180-010-0217-1",
+   url = "http://dx.doi.org/10.1007/s00180-010-0217-1"
+)

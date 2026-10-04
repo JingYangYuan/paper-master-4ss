@@ -1,0 +1,150 @@
+THIS IS THE CHANGELOG OF THE "systemfit" PACKAGE
+
+Please note that only the most significant changes are reported here.
+A full ChangeLog is available in the log messages of the SVN repository
+on R-Forge.
+
+
+            CHANGES IN VERSION 1.1-30 (2023-03-22)
+
+* adjusted bread.systemfit() and estfun.systemfit() to recent changes of the
+'sandwich' package
+
+
+            CHANGES IN VERSION 1.1-28 (2022-09-04)
+
+* some adjustments to make the 'systemfit' package compatible with future 
+versions (i.e., >= 1.4.2) of the 'Matrix' package
+
+
+            CHANGES IN VERSION 1.1-26 (2022-06-20)
+
+* corrected a typo in the vignette (in the equation for calculating the 
+variance-covariance matrix of the coefficients estimated by the "3SLS-Schmidt" 
+estimator in the presence of restrictions)
+
+* fixed a few minor issues pointed out by 'R CMD check'
+
+
+            CHANGES IN VERSION 1.1-24 (2019-12-08)
+
+* implemented 2SLS and 3SLS (instrumental variable) estimations for panel data
+
+* fixed a bug that occurred in panel data estimations when one variable name 
+was a substring of another variable name
+
+* internal improvements to make this package compatible with R 4.0.0            
+
+
+            CHANGES IN VERSION 1.1-22 (2018-04-04)
+
+* made this package compatible to the latest version of the "Matrix" package
+
+
+            CHANGES IN VERSION 1.1-20 (2017-03-09)
+
+* users can now use pdata.frame() (in addition to plm.data()) to specify the
+panel structure of (panel) data sets (patch provided by Kevin Tappe -- thanks
+a lot!) [note: the use of plm.data() is deprecated]
+
+
+            CHANGES IN VERSION 1.1-18 (2015-08-27)
+
+* added argument 'residCovDiag' to logLik.systemfit()
+
+* improved documentation of logLik.systemfit():
+
+* slightly improved documentation of systemfit():
+
+* imported functions from packages 'methods' and 'stats' (as indicated
+by 'R CMD check --as-cran' when using R-devel)
+
+
+            CHANGES IN VERSION 1.1-16 (2015-06-08)
+
+* fixed a few minor issues pointed out by 'R CMD check' 
+
+
+            CHANGES IN VERSION 1.1-14 (2012-11-17)
+
+* added (incomplete) estfun() method (from the "sandwhich" package) for 
+objects of class "systemfit" (currently, the residual covariance matrix is 
+always assumed to be the identity matrix, although this is only true for 
+OLS estimations!); therefore, the sandwich package is now "imported"
+
+* changed dependency ("Imports") from "stats (>= 2.15.0)" to "stats (>= 2.14.0)" 
+
+
+            CHANGES IN VERSION 1.1-12 (2012-06-02)
+
+* added nobs() method for objects of class "systemfit"
+
+
+            CHANGES IN VERSION 1.1-10 (2011-11-11)
+
+* slightly revised the package vignette so that it works with version 2.0
+of the "sem" package
+
+
+            CHANGES IN VERSION 1.1-8
+
+* the systemfit package now works with version 2.0 of the "car" package
+(linear.hypothesis() has been renamed as linearHypothesis())
+
+
+            CHANGES IN VERSION 1.1-6
+
+* the logLik method now uses the average number of non-NA observations per
+equation (instead of the number of rows of the residual matrix, which might
+include NAs) to calculate the log-likelihood value: hence, the likelihood value
+is correct now even if there are NAs in the data; the calculation of the
+log-likelihood value for unbalanced systems uses the conditional density
+function for the unbalanced observations assuming that the errors of
+not-included observations are zero (the log-likelihood value was incorrect
+before if there were NAs in the data)
+
+* the logLik() method now takes the number of (linearly independent)
+coefficients from element "rank" to calculate the degrees of freedom, because
+this is correct even if there are NAs in the data (it was incorrect before if
+there were NAs in the data)
+
+* the logLik() method now returns (as attribute "nobs") the correct number of
+observations even if there are NAs in the data (it was incorrect before if there
+were NAs in the data)
+
+
+            CHANGES IN VERSION 1.1-4
+
+* model.matrix.systemfit.equation() now returns a matrix (and not a vector)
+  even if the equation has only one regressor (including the constant);
+  this fixes bugs in model.matrix.systemfit() and predict.systemfit()
+  that occured if (at least) one equation has only one regressor
+
+
+            CHANGES IN VERSION 1.1-2
+
+* the subfolder "tests" and the test scripts in this subfolder are no longer
+  included in the R package in order to reduce the time for checking
+  this package on CRAN
+
+
+            CHANGES IN VERSION 1.1-0
+
+* added a NAMESPACE file
+
+* the returned fitted values, residuals, and the model frame include *all*
+  observations now, where fitted values and residuals of observation
+  that were not included in the estimation are NA
+
+* systemfit can estimate systems of equations with unequal numbers
+  of observations now
+
+
+            CHANGES IN VERSION 1.0-4
+
+* added our JSS paper about systemfit as a vignette
+
+
+            CHANGES IN VERSION 1.0-0 AND BEFORE
+
+* please take a look at the log messages of the SVN repository on R-Forge

@@ -1,0 +1,9 @@
+plot.rdrobust           Plot Method for rdrobust Objects
+rdbwselect              Bandwidth Selection Procedures for Local
+                        Polynomial Regression Discontinuity Estimators
+rdplot                  Data-Driven Regression Discontinuity Plots
+rdrobust                Local-Polynomial RD Estimation with Robust
+                        Confidence Intervals
+rdrobust-package        Robust Data-Driven Statistical Inference in RD
+                        Designs
+rdrobust_RDsenate       RD Senate Data

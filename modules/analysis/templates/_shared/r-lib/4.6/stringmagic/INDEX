@@ -1,0 +1,25 @@
+cat_magic_alias         Display messages using interpolated strings
+get_interpolated_expr   Lists the expressions used for interpolation in
+                        a 'string_magic' call
+parse_regex_pattern     'stringmagic"s regular expression parser
+paste_conditional       Paste a string vector conditionally
+string_clean_alias      Cleans a character vector from multiple
+                        patterns
+string_extract          Extracts a pattern from a character vector
+string_fill             Fills a character string up to a size
+string_get              Gets elements of a character vector
+string_is               Detects whether a pattern is in a character
+                        string
+string_magic            String interpolation with operation chaining
+string_magic_alias      Create 'string_magic' aliases with custom
+                        defaults
+string_magic_register_fun
+                        Register custom operations to apply them in
+                        'string_magic'
+string_ops_alias        Chains basic operations to character vectors
+string_split            Splits a character string wrt a pattern
+string_split2df         Splits a character vector into a data frame
+string_vec_alias        Efficient creation of string vectors with
+                        optional interpolation
+timer_magic             Sets up a timer that can be used within _magic
+                        functions

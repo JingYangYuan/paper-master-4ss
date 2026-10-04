@@ -1,0 +1,903 @@
+---
+title: "`string_magic`'s operations: The reference"
+author: "Laurent R. Bergé"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: journal
+    highlight: haddock
+    number_sections: yes
+    toc: yes
+    toc_depth: 3
+    toc_float:
+      collapsed: no
+      smooth_scroll: no
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{operations_reference}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+library(stringmagic)
+```
+
+This document references all regular `string_magic` operations. They can be used within 
+`string_magic` or can be accessed from `string_ops` or `string_clean`. 
+
+The operations are divided into four groups:
+
+- [basic string operations](#sec_basic)
+- [operations changing the length or order](#sec_op_length)
+- [formatting operations](#sec_format)
+- [other operations](#sec_other)
+
+By default the function `string_magic` returns a plain character vector. In this 
+vignette it is sometimes nicer to apply the function `base::cat` to display 
+`string_magic` results containing newlines. Ths function `cat_magic` does exactly 
+that and we will use it from time to time.
+
+
+# Basic string operations {#sec_basic}
+
+This section describes some of the most common string operations: extracting, 
+replacing, collapsing, splitting, etc. Because they are so common, many of these 
+operations have a one letter alias.
+These functions accept regex flags in their patterns. For more information on regex flags, 
+see the [dedicated section](https://lrberge.github.io/stringmagic/articles/guide_string_tools.html).
+
+## `s`, `S`, `split`, `Split`: Split strings
+
+Splits the string according to a pattern. The four operations have different defaults: `' '` 
+for `s` and `split`, and `',[ \t\n]*'` for `S` and `Split` (i.e. comma separation). 
+
+When character strings are split, their identity is kept in memory 
+so that group-wise operations can be applied. See the [section on group-wise operations](https://lrberge.github.io/stringmagic/articles/ref_string_magic_special_operations.html#sec_group_wise).
+```{r}
+# 'Split' with its default (comma separation)
+string_magic("{Split ! romeo, juliet}")
+
+# result with 's' is different
+string_magic("{split ! romeo, juliet}")
+
+# with argument: 's' and 'S' are identical
+# note the flag 'fixed' (`f/`) to remove regex interpretation
+string_magic("{'f/+'split, '-'collapse ! 5 + 2} = 3")
+
+# group wise operations (here `~(sort, collapse)`, see dedicated section)
+prince_talk = c("O that this too too solid flesh would melt",
+                "Thaw, and resolve itself into a dew!",
+                "Or that the Everlasting had not fix'd",
+                "His canon 'gainst self-slaughter!")
+cat_magic("Order matters:\n{split, ~(sort, collapse), align.center, lower, upper.sentence,
+                            Q, '\n'collapse ? prince_talk}")
+```
+
+## `c`, `C`, `collapse`, `Collapse`: Collapse strings
+
+To collapse (or concatenate) multiple strings into a single one. The four operations are 
+identical, only their defaults change. The default is `' '` for `c` and `collapse`, 
+and `', | and '` for `C` and `Collapse`.
+The syntax of the argument is `'s1'` or `'s1|s2'`. `s1` is the string used to concatenate 
+(think `paste(x, collapse = s1)`). In arguments of the form `'s1|s2'`, `s2` will be 
+used to concatenate the last two elements. 
+
+```{r}
+# regular way
+x = 1:4
+string_magic("And {' and 'collapse ? x}!")
+
+# with s2
+string_magic("Choose: {', | or 'collapse ? 2:4}?")
+
+# default of Collapse: enumeration (similar to operation enum)
+wines = c("Saint-Estephe", "Margaux")
+string_magic("I like {Collapse ? wines}.")
+
+# default of collapse: space concatenation
+string_magic("{split, '.{5,}'get, collapse ! I don't like short words}")
+```
+
+## `extract`, `x`, `X`: Extract patterns
+
+Extracts the first or multiple patterns from a string. Default argument is `'[[:alnum:]]+'`.
+Command `"extract"` accepts the option `"first"`, and 
+`"x"` and `"X"` accept no option. `x` is an alias for `extract.first` and `X` for `extract`.
+Use the option `"first"` to extract only the first match for each string.
+
+When patterns are extracted, the identity of each original character string is kept in memory 
+so that group-wise operations can be applied. See the [section on group-wise operations](https://lrberge.github.io/stringmagic/articles/ref_string_magic_special_operations.html#sec_group_wise).
+```{r}
+x = c("margo: 32, 1m75", "luke doe: 27, 1m71")
+string_magic("{'^\\w+'extract ? x} is {'\\d+'extract.first ? x}")
+
+# illustrating multiple extractions
+# group-wise operation (~()) is detailed in its own section
+x = c("Combien de marins, combien de capitaines.",
+      "Qui sont partis joyeux pour des courses lointaines,",
+      "Dans ce morne horizon se sont évanouis !")
+string_magic("Endings with i: {'i\\w*'extract, ~(', 'collapse), enum.1 ? x}.")
+
+
+x = c("6 feet under", "mahogany")
+# single extraction
+string_magic("{'\\w{3}'x ? x}")
+
+# multiple extraction
+string_magic("{'\\w{3}'X ? x}")
+```
+
+## `r`, `R`, `replace`: Replace patterns
+
+Replaces a pattern with a string. The three operators `r`, `R` and `replace` are identical and have no default.
+The syntax is `'flags/old'` or `'old => new'` with `'old'` the pattern to find and `new` the 
+replacement. `flags/` are optional regex flags. The default for `new` is 
+the empty string. On top of regular regex flags, this operation also accepts 
+the flags `"total"` and `single`. `total` instructs to replace the fulll string in case 
+the pattern is found.
+
+The flag `"single"` leads to only a single substitution per string (the first pattern is replaced). 
+That is, the function `base::sub` is used instead of `base::gsub`.
+```{r}
+# regex without replacement (ie removing)
+string_magic("{'e'replace ! Where is the letter e?}")
+
+# regex with replacement
+string_magic("{'(?<!\\b)e => a'replace ! Where is the letter e?}")
+
+# with option "single"
+string_magic("{'single/(?<!\\b)e => a'replace ! Where is the letter e?}")
+
+# we replace the full string with the flag total (`t/`)
+x = c("Where is the letter e?", "Not this way!")
+string_magic("{'total/e => here!'r ? x}")
+```
+
+## `clean`: Clean string patterns {#op_clean}
+
+Replaces a pattern with a string. Similar to the operation `r`, except that here the comma is
+a pattern separator. The argument is of the form `"flags/pattern1, pattern2 => replacement"`. 
+See detailed explanations in [`string_clean()`](https://lrberge.github.io/stringmagic/articles/guide_string_tools.html#sec_clean). 
+
+```{r}
+# we use the fixed pattern to remove the regex meaning
+string_magic("{'f/[, ]'clean ! x[a]}")
+```
+
+## `get`: Get selected strings
+
+Restricts the string vector to only the values respecting a pattern. This operation has no default.
+Accepts the options `"equal"` and `"in"`.
+By default it uses the same syntax as [`string_get()`](https://lrberge.github.io/stringmagic/articles/guide_string_tools.html#detect_funs) 
+so that you can use regex flags and 
+include logical operations between regex patterns with `' & '` and `' | '`.
+If the option `"equal"` is used, a simple string equality with the argument is tested (hence
+no flags are accepted). If the option `"in"` is used, the argument is first split with respect to commas
+and then set inclusion is tested. 
+
+```{r}
+x = row.names(mtcars)
+#  we only keep models containing "Merc" and ending with a letter ([[:alpha:]]$)
+string_magic("Mercedes models: {'Merc & [[:alpha:]]$'get, '^.+ 'r, enum ? x}.")
+
+models = c("Merc 230", "Merc 450SE", "Merc 480")
+# we only ekep the ones in the set
+string_magic("Mercedes models: {`models`get.in, enum ? x}.")
+```
+
+## `is`: Detect patterns in strings
+
+Detects if a pattern is present in a string, returns a logical vector. This operation has no default.
+Mostly useful as the final operation in a [`string_ops()`](https://lrberge.github.io/stringmagic/articles/guide_string_tools.html#sec_ops) call.
+By default it uses the same syntax as [`string_is()`](https://lrberge.github.io/stringmagic/articles/guide_string_tools.html#detect_funs) 
+so that you can use regex flags and 
+include logical operations between regex patterns with `' & '` and `' | '`.
+If the option `"equal"` is used, a simple string equality with the argument is tested (hence
+no flags are accepted). If the option `"in"` is used, the argument is first split with respect to commas
+and then set inclusion is tested. 
+```{r}
+x = c("Mark", "Lucas")
+# note that we use the flag `i/` to ignore the case
+string_magic("Mark? {'i/mark'is, enum ? x}")
+```
+
+## `which`: Get the index of the strings containing a pattern
+
+Returns the index of string containing a specified pattern. With no default, can be applied
+to a logical vector directly. 
+By default it uses the same syntax as [`string_which()`](https://lrberge.github.io/stringmagic/articles/guide_string_tools.html#detect_funs) 
+so that you can use regex flags and 
+include logical operations between regex patterns with `' & '` and `' | '`.
+If the option `"equal"` is used, a simple string equality with the argument is tested (hence
+no flags are accepted). If the option `"in"` is used, the argument is first split with respect to commas
+and then set inclusion is tested. 
+Mostly useful as the final operation in a [`string_ops()`](https://lrberge.github.io/stringmagic/articles/guide_string_tools.html#sec_ops) call.
+```{r}
+x = c("Mark", "Lucas", "Markus")
+# note that we use the flag `i` to ignore the case and `w` to add word boundaries
+string_magic("Mark is number {'iw/mark'which ? x}.")
+```
+
+# Operations changing the length or the order {#sec_op_length}
+
+## `first`: Keep only the first elements
+
+Keeps only the first `n` elements. 
+
+```{r}
+string_magic("First 3 mpg values: {3 first, enum ? mtcars$mpg}.")
+
+# you could have done the same with regular R in the expression...
+string_magic("First 3 mpg values: {enum ? head(mtcars$mpg, 3)}.")
+
+# ...but not in the middle of an operations chain
+string_magic("First 3 integer mpg values: {'f/!.'get, 3 first, enum ? mtcars$mpg}.")
+```
+
+Negative numbers as argument remove the enum
+first `n` values. You can add a second argument in the form `'n1|n2'first` in which case the first `n1` and last
+`n2` values are kept; `n1` and `n2` must be positive numbers.
+
+```{r}
+string_magic("Letters in the middle: {13 first, 5 last, enum ? letters}.")
+
+string_magic("First and last letters: {'3|3'first, enum ? letters}.")
+
+string_magic("Last letters: {-21 first, enum ? letters}.")
+```
+
+## `K`: Keep only the first elements (alternative)
+
+Keeps only the first `n` elements; has more options than `first`. The syntax is `'n'K`, 
+`'n|s'K`, `'n||s'K`. `n` provides the number of elements to keep. If `s` is provided and the number of 
+elements are greater than `n`, then in `'n|s'` the string `s` is added at the end, and
+if `'n||s'` the string `s` replaces the nth element.
+The string `s` accepts specials values:
+  + `:n:` or `:N:` which gives the total number of items in digits or letters (N)
+  + `:rest:` or `:REST:` which gives the number of elements that have been truncated in digits or letters (REST)
+
+```{r}
+# basic use
+string_magic("First 3 letters: {'3'K, q, enum ? letters}.")
+
+# advanced use: using the extra argument
+string_magic("The letters are: {q, '3|:rest: others'K, enum ? letters}.")
+```
+
+## `last`: Keep only the last elements
+
+Keeps only the last `n` elements. Negative numbers as argument remove the 
+last `n` values.
+```{r}
+string_magic("Last 3 mpg values: {3 last, enum ? mtcars$mpg}.")
+
+string_magic("Removing the 3 last elements leads to {-3 last, enum ! x{1:5}}.")
+```
+
+## `sort`: Sort the vector
+
+Sorts the vector in increasing order. Accepts an optional argument and the option `"num"`. 
+```{r}
+x = c("sort", "me")
+# basic use
+string_magic("{sort, collapse ? x}")
+```
+If an argument is provided, it must be a regex pattern that will be applied to
+the vector using [`string_clean()`](https://lrberge.github.io/stringmagic/articles/guide_string_tools.html#sec_clean). 
+The sorting will be applied to the modified version of the vector
+and the original vector will be ordered according to this sorting. 
+```{r}
+# first modifying the string before sorting
+# here the regex first removes the first word, meaning that we sort on the last names
+x = c("Jon Snow", "Khal Drogo")
+string_magic("{'.+ 'sort, enum?x}")
+```
+
+The option `"num"` sorts over a numeric version 
+(with silent conversion) of the vector and reorders the original vector accordingly. 
+Values which could not be converted are last.
+```{r}
+x = "Mark is 34, Bianca is 55, Odette is 101, Julie is 21 and Frank is 5"
+# sort on the "character string" number
+string_magic("{', | and 'split, '\\D'sort, enum ? x}")
+
+# we extract the numbers, then convert to numeric, then sort
+string_magic("{', | and 'split, '\\D'sort.num, enum ? x}")
+```
+**Important note**: the sorting operation is applied before any character conversion.
+If previous operations were applied, it is likely that numeric data were transformed to character.
+```{r}
+# note the difference
+x = c(20, 100, 10)
+
+# sorting on numeric
+string_magic("{sort, ' + 'collapse ? x}")
+
+# sorting on character since 'n' operation transformed the vector to character
+string_magic("{n, sort, ' + 'collapse ? x}")
+```
+
+## `dsort`: Sort the vector in decreasing order
+
+Sorts the vector in decreasing order. It accepts an optional argument and 
+the option `"num"`. See the operation `"sort"` for a description of the argument and the option.
+```{r}
+string_magic("5 = {dsort, ' + 'collapse ? 2:3}")
+```
+
+## `rev`: Reverse the vector
+
+Reverses the vector.
+```{r}
+string_magic("{rev, ''collapse ? 1:3}")
+```
+
+## `unik`: Keep only unique elements
+
+Makes the string vector unique. 
+```{r}
+string_magic("Iris species: {unik, upper.first, enum ? iris$Species}.")
+```
+
+## `table`: Attach unique elements to their frequencies
+
+Computes the frequency of each element and attaches each element to its frequency. Accepts an argument which must be a character string representing a `string_magic` interpolation
+with the following variables: `x` (the element), `n` (its count) and `s` (its share). The default argument is `'{x} ({n ? n})'`. 
+
+By default the resulting string vector is sorted by decreasing frequency. You can change how the vector is sorted with five options: `sort` (sorts on the elements), `dsort` (decreasing sort), `fsort` (sorts on frequency), `dfsort` (decreasing sort on freq. -- default), `nosort` (keeps the order of the first elements). Note that you can combine several sorts (to resolve the ties of elements with same frequencies).
+
+```{r}
+dna = string_split("atagggagctacctgcgcgtcgcccaaaagcaggg", "")
+cat_magic("Letters in the DNA seq. {''c, Q? dna}: ",
+          "  -      default: {table, enum ? dna}",
+          "  - value sorted: {table.sort, enum ? dna}",
+          "  -       shares: {'{x} [{round(s * 100)}%]' table, enum ? dna}",
+          # `fsort` sorts by **increasing** frequency
+          "  - freq. sorted: {'{q ? x}' table.fsort, enum ? dna}",
+          .sep = "\n")
+```
+
+## `each`: Repeat each elements of the vector
+
+Repeats each element of the vector `n` times. Option `"c"` then collapses the full vector 
+with the empty string as a separator. 
+```{r}
+# note: operation `S` splits splits wrt to commas (default behavior)
+string_magic("{S!x, y}{2 each ? 1:2}")
+
+# illustrating collapsing
+string_magic("Large number: 1{5 each.c ! 0}")
+```
+
+## `times`: Repeats the vector
+
+Repeats the vector sequence `n` times. Option `"c"` then collapses the full vector 
+with the empty string as a separator. 
+```{r}
+string_magic("What{6 times.c ! ?}")
+```
+
+## `rm`: Remove specific values
+
+Removes elements from the vector. Options: `"empty"`, `"blank"`, `"noalpha"`, `"noalnum"`, `"all"`.
+The *optional* argument represents the pattern used to detect strings to be deleted. 
+```{r}
+x = c("Luke", "Charles")
+string_magic("{'i/lu'rm ? x}")
+```
+
+By default it removes empty strings. 
+Option `"blank"` removes strings containing only blank characters (spaces, tab, newline).
+Option `"noalpha"` removes strings not containing letters. Option `"noalnum"` removes strings not 
+containing alpha numeric characters. Option `"all"` removes all strings (useful in conditions, see 
+the dedicated section). If an argument is provided, only the options `"empty"` and `"blank"` are available.
+
+```{r}
+x = c("I want to enter.", "Age?", "21.")
+string_magic("Nightclub conversation: {rm.noalpha, c ! - {x}}")
+```
+
+## `nuke`: Remove all value
+
+Removes all elements, equivalent to `rm.all` but possibly more explicit. 
+Useful in conditions, see the dedicated section.
+```{r}
+x = c(5, 7, 453, 647)
+# here we use a condition: see the dedicated section for more information
+string_magic("Small numbers only: {if(.>20 ; nuke), enum ? x}.")
+```
+
+## `insert`: Insert a character string
+
+Inserts a new element to the vector. Options: `"right"` and `"both"`. Option `"right"` adds
+the new element to the right. Option `"both"` inserts the new element on the two sides of the vector.
+
+```{r}
+string_magic("{'3'insert.right, ' + 'collapse ? 1:2}")
+```
+
+## `dp`, `deparse`: Deparse an object
+
+It deparses an R object and collapses it into a single string using newlines. 
+By default it keeps only the first 50 lines of the deparsed object.
+The number of lines kept can be modified by using a *numeric argument*.
+
+It accepts the options: `short` and `vec`. If `short`, multiline deparsed elements
+are collapsed with `\\\\n` and the number of characters cannot exceed the value of the
+argument, which by default is 50.
+
+If `vec`, then the deparsed element is not collapsed into a single string, and only 
+the first 50 (default) elements of the vector are kept. You can increase/reduce the 
+number of elements kept with the argument.
+
+```{r}
+fml = y ~ x1 + x2
+# the full formula
+string_magic("The estimated model is {dp ? fml}.")
+# only the beginning of the formula
+string_magic("The estimated model is {10 dp.short ? fml}.")
+
+# deparsing a long function, we keep only the first 5 lines:
+cat_magic("The function lm:\n{5 dp ? lm}.")
+
+# using vec to keep the deparsed vector, we add line numbers, then 
+# collapse it with newlines
+cat_magic("The function lm:\n{'\n'c ! {1:5}: {5 dp.vec ? lm}}")
+```
+
+# Formatting operations {#sec_format}
+ 
+## `lower`: Change the case
+
+Lower cases the full string.
+```{r}
+x = "MesSeD uP CaSe"
+string_magic("from a {x} to {lower?x}")
+```
+
+## `upper`: Change the case
+
+Upper cases the full string. Options: `"first"` and `"sentence"`.
+Option `"first"` upper cases only the first character. Option `"sentence"`
+upper cases the first letter after punctuation. 
+
+```{r}
+x = "hi. how are you? fine."
+string_magic("{upper.sentence ? x}")
+```
+
+## `title`: Change the case
+
+Applies a title case to the string. Options: `"force"` and `"ignore"`.
+Option `"force"` first puts everything to lowercase before applying the title case. 
+Option `"ignore"` ignores a few small prepositions ("a", "the", "of", etc).
+
+```{r}
+x = "bryan is in the KITCHEN"
+
+# default: respects upper cases
+string_magic("{title ? x}")
+
+# force: force to title case
+string_magic("{title.force ? x}")
+
+# ignore: ignores small prepositions
+string_magic("{title.force.ignore ? x}")
+```
+
+## `ws`: Normalize white spaces
+
+Normalizes whitespaces (WS). It trims the whitespaces on the edges and transforms any succession 
+of whitespaces into a single one. Can also be used to further clean the string with its options. 
+Options: `"punct"`, `"digit"`, `"isolated"`. Option `"punct"` cleans the punctuation. Option `"digit"` cleans digits.
+Option `"isolated"` cleans isolated letters. WS normalization always come after any of these options.
+**Important note:** punctuation (or digits) are replaced with WS and **not** 
+the empty string. This means that `string_magic("ws.punct ! Meg's car")` will become `"Meg s car"`.
+
+```{r}
+x = "   I    should? review 85 4 this text!!"
+cat_magic("v0: {x}", 
+          "v1: {ws ? x}",
+          "v2: {ws.punct ? x}",
+          "v3: {ws.punct.digit ? x}",
+          "v4: {ws.punct.digit.isolated ? x}", .sep = "\n")
+```
+
+## `tws`: Trim white spaces
+
+Trims the white spaces on both ends of the strings.
+```{r}
+x = "  too much space \t\n"
+string_magic("With trim: {tws, Q ? x}")
+```
+
+## `q`, `Q`, `bq`: Add various type of quotes
+
+To add quotes to the strings. q: single quotes, Q: double quotes, bq: 
+back quotes.
+```{r}
+x = c("Mark", "Pam")
+string_magic("Hello {q, enum ? x}!")
+```
+
+## `format`, `Format`: Format the values with `base::format`
+
+Applies the base R's function `base::format()` to the string. 
+By default, the values are left aligned, *even numbers* (differently from `base::format()`'s behavior).
+The upper case command (`Format`) applies right alignment. Options: `"0"`, `"left"`, `"zero"`, `"right"`, `"center"`.
+Options `"0"` or `"zero"` fills the blanks with 0s: useful to format numbers. Option `"right"` right aligns,
+and `"center"` centers the strings.
+```{r}
+x = c(1, 12345) 
+cat_magic("left  : {format, q, enum ? x}", 
+          "right : {Format, q, enum ? x}",
+          "center: {format.center, q, enum ? x}",
+          "zero  : {format.0, q, enum ? x}", .sep = "\n")
+```
+
+## `%:` Apply `sprintf` formatting
+
+Applies `base::sprintf()` formatting. The syntax is `'arg'%` with arg an sprintf formatting,
+or directly the sprint formatting.
+```{r}
+string_magic("pi = {%.3f ? pi}")
+```
+
+## `stopwords`: Remove stop words
+
+Removes basic English stopwords (the snowball list is used). 
+The stopwords are replaced with an empty space but the left and right WS are 
+untouched. So WS normalization may be needed (see operation `ws`).
+```{r}
+x = c("He is tall", "He isn't young")
+string_magic("Is he {stop, ws, enum ? x}?")
+```
+
+## `ascii`: Turn the string to ASCII
+
+Turns all letters into ASCII with transliteration. Failed translations are transformed 
+into question marks. Options: `"silent"`, `"utf8"`. By default, if some conversion fails
+a warning is prompted. Option `"silent"` disables the warning in case of failed conversion. The conversion 
+is done with `base::iconv()`, option `"utf8"` indicates that the source endocing is UTF-8, can be useful 
+in some cases.
+```{r}
+author = "Laurent Bergé"
+string_magic("This package has been developped by {ascii ? author}.")
+```
+
+## `round`, `signif`, `r0`-`r6`, `s0`-`s6`: Formatting numbers
+
+Formats numbers by rounding at a given level or displaying a certain number of significant digits.
+
+Arguments:
+- `'suffix'`: adds a suffix
+- `'prefix|suffix'`: adds a prefix and a suffix, the two are separated with a pipe.
+
+Options:
+- `0`-`9`: the number of digits to round at (`round`) or the number of significant digits (`signif`)
+- `int`: whether to preserve integers from formattting. By default decimals are appended to integers (unless rounding at 0 digits is requested)
+- `nocomma`: whether to drop the comma separating the thousands
+- `s0`-`s9` (options for `round`): additionnaly the number of significant digits to preserve
+- `r0`-`r9` (options for `signif`): additionnaly the number of digits to round at
+
+Algorithm:
+`signif` displays `d` significant digits (default is `1`). If the `d`th significant digit is not a decimal, the digits up to the first decimal are displayed. Example if `d = 2`, `153.12` will be displayed as `153.1`; `0.0153` will be displayed as `0.015`; `153` as `153.0`.
+
+`round` displays up to the `d`th decimal (default is `0`). Example if `d = 2`: `153.154` will be displayed as `153.15`; `153`  as `153.00`.
+
+When `signif` and `round` are combined, round provides the *minimum* number of decimals displayed.
+
+Note that non-numeric vectors are converted to numeric beforehand, non-numeric values that could not be converted are preserved. To have more control on the conversion, you can apply the [`num` operation](#subsec_num) beforehand.
+
+
+```{r}
+# rounding at 2 digits
+cat_magic("pi = {r2 ? pi}\n",
+          # same as above with a different syntax
+          "pi = {round.2 ? pi}")
+
+x = c(153, 207.256, 0.00254, 15231312.2)
+# keeping one significant digit
+cat_magic("v1: {s1, align ? x} ",
+          # removing the comma for large numbers and preserving ints
+          "v2: {s1.int.nocomma ? x}", .collapse = "\n")
+          
+# combining signif with round
+y = c(pi, 0.00125)
+cat_magic("raw: {align ? y} ",
+          "s1: {s1, align ? y} ", 
+          "r2: {r2, align ? y} ",
+          "s1.r2: {s1.r2 ? y}", .collapse = "\n")
+
+# prefix and prefix: use and argument
+z = c(55, 22.5, 21)
+cat_magic("Costs in euros  : {' €'r1, enum ? z}.",
+          "\nCosts in dollars: {'USD |'r1, enum ? z}.")
+
+# non numeric values are preserved
+xraw = c("55", "five")
+string_magic("Valuess {r1, enum ? xraw}.")
+# use the `num` command for more control
+string_magic("Values: {num.rm, r1, enum ? xraw}.")
+```
+
+## `n`, `N`: Formatting integers
+
+Formats integers by adding a comma to separate thousands. 
+
+Options: 
+- `"letter"`: writes the number in letters (large numbers keep their numeric format)
+- `"upper"`: like the option `"letter"` but uppercases the first letter
+- `"0"`, `"zero"`: left pads numeric vectors with 0s
+- `"roman"`, `"Roman"`: write the integer in Roman with `utils::as.roman`. The lower case version writes them in lower case
+
+Variants:
+- the upper case command `N` adds the option `"letter"` (i.e. is equiv. to `n.letter`)
+
+
+```{r}
+x = c(5, 12, 52123)
+string_magic("She owes {n, '$'paste, enum ? x}.")
+
+# option 0: all same width, no ',' for thousands
+cat_magic("|---|\n{n.0, '\n'collapse ? x}")
+
+# option "upper"
+n = 5
+string_magic("{n.upper ? n} is my favourite number.")
+
+# N: like "n.letter"
+x = 5
+string_magic("He's {N ? x} years old.")
+
+# roman
+string_magic("What's nicer? {collapse?11:13}, {n.roman, c?11:13} or {n.Roman, c?11:13}?")
+```
+
+## `nth`, `Nth`: Numbered position
+
+When applied to a number, this operator writes them as a rank. Options: `"letter"`, 
+`"upper"`, `"compact"`. 
+```{r}
+n = c(3, 7)
+string_magic("They finished {nth, enum ? n}!")
+```
+Option `"letter"` tries to write the numbers in letters, but note that it stops at 20. Option `"upper"`
+is the same as `"letter"` but uppercases the first letter. Option `"compact"` aggregates
+consecutive sequences in the form `"start_n_th to end_n_th"`. 
+```{r}
+string_magic("They arrived {nth.compact ? 5:20}.")
+```
+The upper case command (`Nth`) adds the option `"letter"`.
+```{r}
+n = c(3, 7)
+string_magic("They finished {Nth, enum ? n}!")
+```
+
+## `ntimes`, `Ntimes`: Number of times
+
+Write numbers in the form `n` times. Options: `"letter"`, `"upper"`. Option 
+`"letter"` writes the number in letters (up to 100). Option `"upper"` does the same as `"letter"` 
+and uppercases the first letter. 
+```{r}
+string_magic("They lost {enum ! {ntimes ? c(1, 12)} against {S!Real, Barcelona}}.")
+```
+The upper case command (`Ntimes`) adds the option `"letter"`.
+```{r}
+x = 5
+string_magic("This paper was rejected {Ntimes ? x}...")
+```
+
+## `firstchar`, `lastchar`: Keep only the first, last characters
+
+To select the first/last characters of each element. 
+Negative numbers remove the first/last characters.
+```{r}
+string_magic("{19 firstchar, 9 lastchar ! This is a very long sentence}")
+
+string_magic("delete 3 = {-3 firstchar ! delete 3}")
+```
+
+## `k`, `shorten`, `Shorten`: Shortens character strings
+
+To keep only the first `n` characters (like `firstchar` but with more options). 
+(Note that `k` stands for "keep" and exists for historical reasons.)
+Available options: `"include"`, `"dots"`. The argument can be of the form `'n'` or `'n|s'` 
+with `n` a number and `s` a string. `n` provides the number of characters to keep. 
+Optionnaly, only for strings *whose length is greater than `n`*, 
+after truncation, the string `s` is appended at the end.
+
+By default, if argument `s` is provided, strings longer than `n` end up at size `n + nchar(s)`.
+If option `"include"` is provided, the strings are guaranteed to be of maximum size `n`,
+even after the string `s` has been appended. Example: if `n=4` and `s=".."`, then "hello"
+becomes "hell.." without `"include"`, and "he.." with it.
+
+Option `"dots"`: if strings are longer than `n+1`, they are truncated at `n-1` and two dots are 
+appended. For example if `n = 3`, then "hello" becomes "he..". Disregards the argument `s`.
+The operation `"Shorten"` (upper case), is with the option `"dots"`.
+
+Note that another way to add the option `"include"` is to use a double pipe
+for the argument `s`, like in `'n||s'`.
+
+```{r}
+x = "long sentence"
+cat_magic("v0: {x}", 
+          "v1: {4 shorten ? x}", 
+          "v2: {'4|..'shorten ? x}", 
+          "v3: {'4|..'shorten.include ? x}", 
+          "v4: {4 shorten.dots ? x}", .sep = "\n")
+```
+
+## `fill`, `align`, `width`: Fill character strings
+
+Fills the character strings up to a size in order to fit a given width. `align` and `width` are aliases to `fill`. 
+Options: `"right"` or `"center"`. Default is left-alignment of the strings. 
+
+The argument is optional and can be of the form `'n'` or `'n|s'`. By default if no argument
+is provided, of if `n=0`,`n` is equal to the maximum character length of the vector. The optional
+argument `s` is a symbol used to fill the blanks. By default `s` is equal to a white space.
+
+Option `"right"` right aligns and `"center"` centers the strings.
+
+See help for [`string_fill()`](https://lrberge.github.io/stringmagic/reference/string_fill.html) 
+for more information.
+```{r}
+life = "full of sound and fury, Signifying nothing"
+cat_magic("{'[ ,]+'split, upper.first, fill.center, q, '\n'collapse ? life}")
+
+# fixing the length and filling with 0s
+string_magic("{'5|0'fill.right, enum ? c(1, 55)}")
+```
+
+## `paste`, `append`: Append text
+
+Pastes a custom character string to all elements of the string. The operations `paste` and `append` are equivalent.
+This operation has no default. 
+Options: `"left"`, `"both"`, `"right"`, `"front"`, `"back"`, `"delete"`. By default, a string is pasted on the left.
+Option `"right"` pastes on the right and `"both"` pastes on both sides. Option `"front"` only 
+pastes on the first element while option `"back"` only pastes on the last element. Option `"delete"`
+first replaces all elements with the empty string.
+```{r}
+string_magic("y = {'x'paste, ' + 'collapse ? 1:3}")
+```
+
+The argument can be of the form `s1` or `s1|s2`. If of the second form, this is equivalent 
+to chaining two `paste` operations, once on the left and once on the right: `'s1'paste, 's2'paste.right`.
+
+```{r}
+string_magic("y = {'x|0'paste, ' + 'collapse ? 1:3}")
+```
+
+## `join`: Join lines
+
+Joins lines ending with a double backslash. 
+
+```{r}
+sun = "The sun \\
+is shining."
+string_magic("How is the sun? {join ? sun}")
+```
+
+## `escape`: Escape special characters
+
+Adds backslashes in front of specific characters. Options `"nl"`, `"tab"`. 
+Option `"nl"` escapes the newlines (`\n`), leading them to be displayed as `"\\\\n"`.
+Option `"tab"` does the same for tabs (`"\t"`). This is useful to make the value free
+of space formatters. 
+The default behavior is to escape both newlines and tabs.
+
+```{r}
+input = "yes \n\n no"
+msg = string_magic("Your input, equal to {escape, bq ? input} is incorrect.")
+cat(msg, sep = "\n")
+```
+
+
+# Other operations {#sec_other}
+
+## `num`: Convert to numeric {#subsec_num}
+
+Converts to numeric. Options: `"warn"`, `"soft"`, `"rm"`, `"clear"`. By default, the conversion
+is performed silently and elements that fail to convert are turned into NA. 
+Option `"warn"` displays a warning if the conversion to numeric fails. 
+Option `"soft"` does not convert if the conversion of at least one element fails, leading to 
+a character vector. 
+Option `"rm"` converts and removes the elements that could not be converted. 
+Option `"clear"` turns failed conversions into the empty string, and hence lead to a character vector.
+```{r}
+x = c(5, "six")
+cat_magic("   origin: {enum, q ? x}", 
+          "      num: {num, enum, q ? x}", 
+          "   num.rm: {num.rm, enum, q ? x}", 
+          " num.soft: {num.soft, enum, q ? x}", 
+          "num.clear: {num.clear, enum, q ? x}", .sep = "\n")
+```
+
+## `enum`: Create an enumeration
+
+Enumerates the elements. It creates a single string containing the comma 
+separated list of elements.
+If there are more than 7 elements, only the first 6 are shown and the number of
+items left is written.
+```{r}
+string_magic("{enum ? 1:5}")
+```
+You can add the following options:
+
+  + `q`, `Q`, or `bq`: to quote the elements
+  + `or`, `nor`: to finish with an 'or' (or 'nor') instead of an 'and'
+  + `comma`: to finish the enumeration with ", " instead of ", and".
+  + `i`, `I`, `a`, `A`, `1`: to enumerate with this prefix, like in: i) one, and ii) two
+  + a number: to tell the number of items to display
+```{r}
+x = c("Marv", "Nancy")
+string_magic("The murderer must be {enum.or ? x}.")
+
+x = c("oranges", "milk", "rice")
+string_magic("Shopping list: {enum.i.q ? x}.")
+
+# enum is made for display: when vectors are too long, they are truncated
+# default is at 7
+x = string_magic("x{sample(100, 30)}")
+string_magic("The problematic variables are {'x'sort.num, enum ? x}.")
+
+# you can augment or reduce the numbers to display with an option
+string_magic("The problematic variables are {'x'sort.num, enum.3 ? x}.")
+```
+
+
+## `len`, `Len`: Formatted length
+
+Gives the length of the vector. Options `"letter"`, `"upper"`, `"num"`.
+Option `"letter"` writes the length in words (up to 100). Option `"upper"` is the same 
+as letter but uppercases the first letter. By default, the number is formatted:
+commas are inserted to separate thousands.
+```{r}
+cat_magic("The length of 1:5000:", 
+          " - len     = {len ? 1:5000}", 
+          " - len.num = {len.num ? 1:5000}", .sep = " \n")
+```
+The upper case command (`Len`) adds the option `"letter"` (only for small numbers).
+```{r}
+string_magic("Its size is {Len ? 1:8}")
+```
+
+## `swidth`: Add newlines to force the string to fit a given width
+
+Thie operation stands for "screen width". It formats the string to fit a given width by cutting at word boundaries and adding newlines appropriately. 
+Accepts arguments of the form `'n'` or `'n|s'`, with `n` a number and `s` a string. 
+An argument of the form `'n|s'` will add `s` at the beginning of each line. Further,
+by default a trailing white space is added to `s`; to remove this 
+behavior, add an underscore at the end of it. 
+The argument `n` is either 
+an integer giving the target character width (minimum is 15), or it can be a fraction expressing the 
+target size as a fraction of the current screen. Finally it can be an expression that 
+uses the variable `.sw` which will capture the value of the current screen width.
+```{r}
+x = "this is a long sentence"
+cat_magic("------ version 0 ------\n{x}", 
+          "------ version 1 ------\n{15 swidth ? x}", 
+          "------ version 2 ------\n{'15|#>'swidth ? x}",
+          "------ version 3 ------\n{'15|#>_'swidth ? x}", .sep = "\n")
+```
+
+## `difftime`: Formatted time difference
+
+Displays a formatted time difference. Option `"silent"` does not report a warning if the
+operation fails. It accepts either objects of class `POSIXt` or `difftime`.
+```{r}
+x = Sys.time()
+Sys.sleep(0.15) 
+string_magic("Time: {difftime ? x}")
+```
+
+
+

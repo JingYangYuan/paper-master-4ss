@@ -1,0 +1,406 @@
+---
+title: "String tools: magic edition"
+author: "Laurent R. Bergé"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: journal
+    highlight: haddock
+    number_sections: yes
+    toc: yes
+    toc_depth: 2
+    toc_float:
+      collapsed: no
+      smooth_scroll: no
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{string_tools}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+# we preload it to avoid ugly (was comiled with R.x.x) warnings in the doc
+library(stringmagic)
+
+# Option to allow caching in non interactive mode
+options("string_magic_string_get_forced_caching" = TRUE)
+```
+
+This vignette describes `stringmagic` tools for handling character vectors. 
+It details:
+
+- how to [detect complex regex (=regular expression) patterns](#sec_detect)
+- how to easily, and clearly, [chain multiple string operations](#sec_ops)
+- how to efficiently, and clearly, [clean character strings](#sec_clean)
+- how to quickly [create character vectors](#sec_vec)
+- how to [split a vector and turn the result into a data frame, and vice versa](#sec_split)
+
+# Detection of regex patterns {#sec_detect}
+
+Detecting a single regex pattern is pretty straightforward with regular tools
+like `base::grepl` or `stringr::string_detect`. Things become more complicated
+when we want to detect the presence of multiple patterns. 
+
+`stringmagic` offers three functions with an intuitive syntax to deal with 
+complex pattern detection:
+
+
+# Pattern detection with `string_is`, `string_which` and `string_get` {#detect_funs}
+
+Use `string_is`, `string_which` and `string_get` to detect patterns in character vectors and obtain either 
+a logical vector, an integer vector, or the values.
+
+In this section we give examples for `string_get` which hopefully will be explicit 
+enough to illustrate how it works. For the record, `string_get` uses `string_is` internally so
+these examples are equivalent with `string_is` or `string_which`. 
+
+Ex.1: series of examples using the *recommended syntax*.
+```{r}
+cars = row.names(mtcars)
+cat_magic("All cars from mtcars:\n{C, 60 swidth ? cars}")
+
+# cars with an 'a', an 'e', an 'i', and an 'o', all in lower case
+string_get(cars, "a & e & i & o")
+
+# cars with no 'e' and at least one digit
+string_get(cars, "!e & \\d")
+
+# flags apply to all
+# contains the 'words' 2, 9 or l
+# alternative syntax for flags: "wi/2 | 9 | l"
+string_get(cars, "word, ignore/2 | 9 | l")
+```
+
+The default syntax is `string_get(x, ...)` (same for `string_is` and `string_which`), 
+where `...` contains any number of patterns
+to detect. By default the results of these pattern detections are combined with 
+a logical AND. To combine them with a logical OR, you need to use the argument
+`or = TRUE`. You can also pass the flags as regular function arguments. They then
+apply to all patterns.
+
+Ex.2: replication of Ex.1 using an alternative syntax.
+```{r}
+# string_get(cars, "a & e & i & o")
+# cars with an 'a', an 'e', an 'i', and an 'o', all in lower case
+string_get(cars, "a", "e", "i", "o")
+
+# string_get(cars, "!e & \\d")
+# cars with no 'e' and at least one digit
+string_get(cars, "!e", "\\d")
+
+# string_get(cars, "!/e & \\d")
+# This example cannot be replicated directly, we need to apply logical equivalence
+string_get(cars, "!e", "!\\d", or = TRUE)
+
+# string_get(cars, "wi/2 | 9 | l")
+# contains the 'words' 2, 9 or l
+string_get(cars, "2", "9", "l", or = TRUE, word = TRUE, ignore.case = TRUE)
+```
+
+### Specificities of `srt_get` {#detect_get}
+
+On top of the detection previously described, the function `srt_get` changes its 
+behavior with the arguments `seq` or `seq.unik`. It also supports [automatic caching](#get_caching).
+
+#### Sequentially appending results
+
+As seen previously, patterns in `...` are combined with a logical AND. If you set
+`seq = TRUE`, this behavior changes. The results of each pattern becomes stacked 
+sequentially. Schematically, you obtain the vector `c(x_that_contains_pat1, x_that_contains_pat2, etc)`
+with `pat1` the first pattern in `...`, `pat2` the second pattern, etc.
+
+Using `seq.unik = TRUE` is like `seq` but applies the function `unique()` at the end.
+
+Ex: sequentially combining results.
+```{r}
+# cars without digits, then cars with 2 'a's or 2 'e's and a digit
+string_get(cars, "!\\d", "i/a.+a | e.+e & \\d", seq = TRUE)
+
+# let's get the first word of each car name
+car_first = string_ops(cars, "extract.first")
+# we select car brands ending with 'a', then ending with 'i'
+string_get(car_first, "a$", "i$", seq = TRUE)
+# seq.unik is similar to seq but applies unique()
+string_get(car_first, "a$", "i$", seq.unik = TRUE)
+```
+
+#### Caching {#get_caching}
+
+At the exploration stage, we often run the same command with a few
+variations on the same data set. Acknowledging this, `string_get` supports the caching
+of the data argument in interactive use. This means that the user can concentrate in
+the pattern to find and need not bother to write the data from where to fectch the
+values. Note that `string_get` is the only `stringmagic` function to have this
+ability.
+
+Caching is always enabled, you don't need to do anything.
+
+Ex: caching of the data.
+```{r}
+# Since we used `car_first` in the previous example, we don't need to provide
+# it explicitly now
+# => brands containing 'M' and ending with 'a' or 'i'; brands containing 'M'
+string_get("M & [ai]$", "M", seq.unik = TRUE)
+```
+
+# Chaining string operations with `string_ops` {#sec_ops}
+
+Formatting text data often requires applying many functions
+(be it for parsing, text analysis, etc). 
+Even for simple tasks, the number of operations can quickly balloon, adding many
+lines of code, reducing readability, and all this for basic processing.
+
+The function `string_ops` tries to solve this problem. 
+It has access to all (50+) [`string_magic` operations](https://lrberge.github.io/stringmagic/articles/ref_operations.html), allowing for
+a compact and readable way to chain basic operations on character strings.
+
+Below are a few motivating examples.
+
+Ex.1: Parsing data.
+```{r}
+# parsing an input: extracting the numbers
+input = "8.5in, 5.5, .5 cm"
+string_ops(input, "','split, tws, '^\\. => 0.'replace, '^\\D+|\\D+$'replace, num")
+
+
+# Explanation------------------------------------------------------------------|
+# ','split: splitting w.r.t. ','                                               |
+# tws: trimming the whitespaces                                                |
+# '^\\. => 0.'replace: adds a 0 to strings starting with '.'                   |
+# '^\\D+|\\D+$'replace: removes non-digits on both ends of the string          |
+# num: converts to numeric                                                     |
+
+
+# now extracting the units
+string_ops(input, "','split, '^[ \\d.]+'replace, tws")
+
+
+# Explanation------------------------------------------------------------------|
+# ','split: splitting w.r.t. ','                                               |
+# '^[ \\d.]+'replace: removes the ' ', digit                                   |
+#                     and '.' at the beginning of the string                   |
+# tws: trimming the whitespaces                                                |
+```
+
+Ex.2: extracing information from text.
+```{r}
+# Now using the car data
+cars = row.names(mtcars)
+
+# let's get the brands starting with an "m"
+string_ops(cars, "'i/^m'get, x, unik")
+
+
+# Explanation------------------------------------------------------------------|
+# 'i/^m'get: keeps only the elements starting with an m,                       |
+#            i/ is the 'regex-flag' "ignore" to ignore the case                |
+#            ^m means "starts with an m" in regex language                     |
+# x: extracts the first pattern. The default pattern is "[[:alnum:]]+"         |
+#    which means an alpha-numeric word                                         |
+# unik: applies unique() to the vector                                         |
+
+
+# let's get the 3 largest numbers appearing in the car models
+string_ops(cars, "'\\d+'x, rm, unik, num, dsort, 3 first")
+
+
+# Explanation------------------------------------------------------------------|
+# '\\d+'x: extracts the first pattern, the pattern meaning "a succession"      |
+#          of digits in regex language                                         |
+# rm: removes elements equal to the empty string (default behavior)            |
+# unik: applies unique() to the vector                                         |
+# num: converts to numeric                                                     |
+# dsort: sorts in decreasing order                                             |
+# 3 first: keeps only the first three element                                  |
+```
+
+As you can see, an operation that would take multiple lines to read and understand
+now can be read from left to right in a single line.
+
+# `string_clean`: One function to clean them all {#sec_clean}
+
+The function `string_clean` streamlines the cleaning of character vectors by providing:
+
+- i) a specialized syntax to replace multiple regex patterns, 
+- ii) a direct access to many low level string operations, and 
+- iii) the ability to chain these two operations. 
+
+## Cleaning syntax
+
+This function is of the form `string_clean(x, ...)` with `x` the vector to clean and
+`...` any number of cleaning operations which can be of two types:
+
+1. use `"pat1, pat2 => replacement"` to replace the regex patterns `pat1` and `pat2` 
+with the value `replacement`.
+1. use `"@op1, op2"` to perform any arbitrary sequence of [`string_magic` operation](https://lrberge.github.io/stringmagic/articles/ref_operations.html)
+
+In the operation `"pat1, pat2 => replacement"`, the pattern is first split with respect
+to the pipe, `" => "` (change it with argument `pipe`), to get `replacement`. 
+Then the pattern is split with respect to commas (i.e. `",[ \t\n]+"`, change it with argument `sep`) 
+to get `pat1` and `pat2`. A sequence of `base::gsub` calls is performed to replace each
+`patx` with `replacement`. 
+
+By default the replacement is the empty string. This means that writting `"pat1, pat2"`
+will lead to erasing these two patterns.
+
+If a pattern starts with an `"@"`, the subsequent character string is sent to `string_ops`.
+For example `"@ascii, lower"` is equivalent to `string_ops(x, "ascii, lower")` which 
+turns `x` to ASCII and lowers the case. 
+
+## Example of text cleaning {#clean_example}
+
+```{r}
+monologue = c("For who would bear the whips and scorns of time",
+              "Th' oppressor's wrong, the proud man's contumely,",
+              "The pangs of despis'd love, the law's delay,",
+              "The insolence of office, and the spurns",
+              "That patient merit of th' unworthy takes,",
+              "When he himself might his quietus make",
+              "With a bare bodkin? Who would these fardels bear,",
+              "To grunt and sweat under a weary life,",
+              "But that the dread of something after death-",
+              "The undiscover'd country, from whose bourn",
+              "No traveller returns- puzzles the will,",
+              "And makes us rather bear those ills we have",
+              "Than fly to others that we know not of?")
+
+# Cleaning a text
+string_clean(monologue, 
+          # use string_magic to: lower the case and remove basic stopwords
+          "@lower, stopword",
+          # remove a few extra stopwords(we use the flag word 'w/')
+          "w/th, 's",
+          # manually stem some verbs
+          "despis'd => despise", "undiscover'd => undiscover", "(m|t)akes => \\1ake",
+          # still stemming: dropping the ending 's' for words of 4+ letters, except for quietus
+          "(\\w{3,}[^u])s\\b => \\1",
+          # normalizing the whitespaces + removing punctuation
+          "@ws.punct")
+
+```
+
+
+# Create simple character vectors with `string_vec` {#sec_vec}
+
+
+The function `string_vec` is dedicated to the creation of small character vectors.
+You feed it a comma separated list of values in a string and it will turn it 
+into a vector. 
+
+Ex.1: creating a simple vector.
+```{r}
+fruits = string_vec("orange, apple, pineapple, strawberry")
+fruits
+```
+
+Within the enumeration, you can use interpolation, with curly brackets (`{}`), to 
+insert the elements from a vector into the current string. 
+
+Ex.2: adding a vector into an enumeration.
+```{r}
+more_fruits = string_vec("lemon, {fruits}, peach")
+more_fruits
+```
+
+The interpolation is performed with [`string_magic`](https://lrberge.github.io/stringmagic/articles/guide_string_magic.html). This means that any [`string_magic` operation](https://lrberge.github.io/stringmagic/articles/ref_operations.html)
+can be applied on-the-fly.
+
+Ex.3: replicating Ex.2 but shortening long fruit names.
+```{r}
+more_fruits = string_vec("lemon, {6 Shorten ? fruits}, peach")
+more_fruits
+```
+
+Since interpolations are resolved with `string_magic`, you can add any text before/after the 
+interpolation:
+
+Ex.4: adding text before the interpolation.
+```{r}
+pkgs = string_vec("pandas, os, time, re")
+imports = string_vec("import numpy as np, import {pkgs}")
+imports
+```
+
+### Creating small matrices or data frames
+
+You can transform the returned vector into a matrix or a data frame using the 
+arguments `.cmat`, `.nmat` (**c**haracter or **n**umeric matrix) or `.df`.
+
+Ex.5: returning a matrix.
+```{r}
+string_vec("1, 5,
+            3, 2,
+            5, 12", .nmat = TRUE)
+```
+
+The number of rows is guessed from the number of newlines in the string. You can avoid using
+character strings, but in that case you need to explicitly give the number of rows.
+
+Ex.5-bis: returning a numeric matrix, giving `.nmat` the number of rows.
+```{r}
+string_vec(1, 5,
+           3, 2,
+           5, 12, .nmat = 3)
+```
+
+If you want to return a data.frame, you can add the column names in the .df argument: either
+in a regular vector, either in a comma separated list. Note that columns looking like
+numeric values are always converted.
+
+Ex.6: returning a data frame.
+```{r}
+# you can add the column names directly in the argument .df
+df = string_vec("1, john,
+                 3, marie,
+                 5, harry", .df = "id, name")
+df
+
+# automatic conversion of numeric values
+df$id * 5
+```
+
+# Split vectors and turn the result into a data frame, and vice versa {#sec_split}
+
+The function `string_split2df` (and `string_split2dt`) splits a vector using a 
+regular expression pattern and turns it into a data frame, remembering the 
+original identifiers. You can get the original vectors back (almost) with the 
+function `paste_conditional`.
+
+Ex.1: breaking up two sentences with respect to punctuation and spaces; then merging them back.
+```{r}
+x = c("Nor rain, wind, thunder, fire are my daughters.",
+      "When my information changes, I alter my conclusions.")
+
+# we split at each word
+sentences_split = string_split2df(x, "[[:punct:] ]+")
+sentences_split
+
+# recovering the original vectors (we only lose the punctuation)
+paste_conditional(sentences_split$x, sentences_split$obs)
+```
+
+If identifiers are associated to the elements of the vector, you can provide them
+so that the data frame returned contains them.
+
+Ex.2: splitting with identifiers and merging back with a formula.
+```{r}
+id = c("ws", "jmk")
+# we add the identifier
+base_words = string_split2df(x, "[[:punct:] ]+", id = list(author = id))
+
+# merging back using a formula
+paste_conditional(x ~ author, base_words)
+```
+
+
+
+

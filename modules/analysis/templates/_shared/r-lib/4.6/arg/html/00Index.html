@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head><title>R: Clean and Simple Argument Checking</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<link rel="stylesheet" type="text/css" href="R.css">
+</head><body><div class="container">
+<h1> Clean and Simple Argument Checking
+<img class="toplogo" src="figures/logo.png" alt="[R logo]">
+</h1>
+<hr>
+<div style="text-align: center;">
+<a href="../../../doc/html/packages.html"><img class="arrow" src="../../../doc/html/left.jpg" alt="[Up]"></a>
+<a href="../../../doc/html/index.html"><img class="arrow" src="../../../doc/html/up.jpg" alt="[Top]"></a>
+</div><h2>Documentation for package &lsquo;arg&rsquo; version 0.2.1</h2>
+
+<ul><li><a href="../DESCRIPTION" type="text/plain; charset=utf-8">DESCRIPTION file</a></li>
+<li><a href="../NEWS.md">Package NEWS</a></li>
+<li><a href="../README.md">Package README</a></li>
+</ul>
+
+<h2>Help Pages</h2>
+
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="arg_no_NA.html">arg_all_NA</a></td>
+<td>Check NA in Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_or.html">arg_and</a></td>
+<td>Check That Arguments Meet Some or All Criteria</td></tr>
+<tr><td style="width: 25%;"><a href="arg_data.html">arg_array</a></td>
+<td>Check Common Argument Types</td></tr>
+<tr><td style="width: 25%;"><a href="arg_data.html">arg_atomic</a></td>
+<td>Check Common Argument Types</td></tr>
+<tr><td style="width: 25%;"><a href="arg_between.html">arg_between</a></td>
+<td>Check Values in Range</td></tr>
+<tr><td style="width: 25%;"><a href="arg_character.html">arg_character</a></td>
+<td>Check Character Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_named.html">arg_colnamed</a></td>
+<td>Check Named Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_color.html">arg_color</a></td>
+<td>Check Color Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_color.html">arg_colors</a></td>
+<td>Check Color Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_color.html">arg_colour</a></td>
+<td>Check Color Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_color.html">arg_colours</a></td>
+<td>Check Color Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_symmetric.html">arg_cor</a></td>
+<td>Check Symmetric Matrix Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_numeric.html">arg_count</a></td>
+<td>Check Numeric Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_numeric.html">arg_counts</a></td>
+<td>Check Numeric Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_symmetric.html">arg_cov</a></td>
+<td>Check Symmetric Matrix Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_data.html">arg_data</a></td>
+<td>Check Common Argument Types</td></tr>
+<tr><td style="width: 25%;"><a href="arg_data.html">arg_data.frame</a></td>
+<td>Check Common Argument Types</td></tr>
+<tr><td style="width: 25%;"><a href="arg_symmetric.html">arg_distance</a></td>
+<td>Check Symmetric Matrix Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_dots_supplied.html">arg_dots_not_supplied</a></td>
+<td>Check Supplied Dots Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_dots_supplied.html">arg_dots_supplied</a></td>
+<td>Check Supplied Dots Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_element.html">arg_element</a></td>
+<td>Check Element</td></tr>
+<tr><td style="width: 25%;"><a href="arg_data.html">arg_env</a></td>
+<td>Check Common Argument Types</td></tr>
+<tr><td style="width: 25%;"><a href="arg_equal.html">arg_equal</a></td>
+<td>Check Equal Arguments</td></tr>
+<tr><td style="width: 25%;"><a href="arg_character.html">arg_factor</a></td>
+<td>Check Character Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_logical.html">arg_flag</a></td>
+<td>Check Logical Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_formula.html">arg_formula</a></td>
+<td>Check Formula Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_function.html">arg_function</a></td>
+<td>Check Function Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_between.html">arg_gt</a></td>
+<td>Check Values in Range</td></tr>
+<tr><td style="width: 25%;"><a href="arg_between.html">arg_gte</a></td>
+<td>Check Values in Range</td></tr>
+<tr><td style="width: 25%;"><a href="arg_index.html">arg_index</a></td>
+<td>Check Index Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_index.html">arg_indices</a></td>
+<td>Check Index Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_is.html">arg_is</a></td>
+<td>Check Argument Class</td></tr>
+<tr><td style="width: 25%;"><a href="arg_no_NA.html">arg_is_NA</a></td>
+<td>Check NA in Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_is.html">arg_is_not</a></td>
+<td>Check Argument Class</td></tr>
+<tr><td style="width: 25%;"><a href="arg_length.html">arg_length</a></td>
+<td>Check Argument Length</td></tr>
+<tr><td style="width: 25%;"><a href="arg_data.html">arg_list</a></td>
+<td>Check Common Argument Types</td></tr>
+<tr><td style="width: 25%;"><a href="arg_logical.html">arg_logical</a></td>
+<td>Check Logical Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_between.html">arg_lt</a></td>
+<td>Check Values in Range</td></tr>
+<tr><td style="width: 25%;"><a href="arg_between.html">arg_lte</a></td>
+<td>Check Values in Range</td></tr>
+<tr><td style="width: 25%;"><a href="arg_data.html">arg_matrix</a></td>
+<td>Check Common Argument Types</td></tr>
+<tr><td style="width: 25%;"><a href="arg_index.html">arg_name</a></td>
+<td>Check Index Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_named.html">arg_named</a></td>
+<td>Check Named Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_index.html">arg_names</a></td>
+<td>Check Index Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_non_null.html">arg_non_null</a></td>
+<td>Check NULL Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_element.html">arg_not_element</a></td>
+<td>Check Element</td></tr>
+<tr><td style="width: 25%;"><a href="arg_equal.html">arg_not_equal</a></td>
+<td>Check Equal Arguments</td></tr>
+<tr><td style="width: 25%;"><a href="arg_no_NA.html">arg_no_NA</a></td>
+<td>Check NA in Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_non_null.html">arg_null</a></td>
+<td>Check NULL Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_numeric.html">arg_number</a></td>
+<td>Check Numeric Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_numeric.html">arg_numeric</a></td>
+<td>Check Numeric Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_or.html">arg_or</a></td>
+<td>Check That Arguments Meet Some or All Criteria</td></tr>
+<tr><td style="width: 25%;"><a href="arg_character.html">arg_ordered</a></td>
+<td>Check Character Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_character.html">arg_string</a></td>
+<td>Check Character Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_supplied.html">arg_supplied</a></td>
+<td>Check Supplied Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_symmetric.html">arg_symmetric</a></td>
+<td>Check Symmetric Matrix Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_unique.html">arg_unique</a></td>
+<td>Check Unique Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_data.html">arg_vector</a></td>
+<td>Check Common Argument Types</td></tr>
+<tr><td style="width: 25%;"><a href="arg_numeric.html">arg_whole_number</a></td>
+<td>Check Numeric Argument</td></tr>
+<tr><td style="width: 25%;"><a href="arg_numeric.html">arg_whole_numeric</a></td>
+<td>Check Numeric Argument</td></tr>
+<tr><td style="width: 25%;"><a href="err.html">err</a></td>
+<td>Throw an Error, Warning, or Message</td></tr>
+<tr><td style="width: 25%;"><a href="match_arg.html">match_arg</a></td>
+<td>Argument Verification</td></tr>
+<tr><td style="width: 25%;"><a href="err.html">msg</a></td>
+<td>Throw an Error, Warning, or Message</td></tr>
+<tr><td style="width: 25%;"><a href="when_supplied.html">when_not_null</a></td>
+<td>Check Arguments When Supplied</td></tr>
+<tr><td style="width: 25%;"><a href="when_supplied.html">when_supplied</a></td>
+<td>Check Arguments When Supplied</td></tr>
+<tr><td style="width: 25%;"><a href="err.html">wrn</a></td>
+<td>Throw an Error, Warning, or Message</td></tr>
+</table>
+</div></body></html>

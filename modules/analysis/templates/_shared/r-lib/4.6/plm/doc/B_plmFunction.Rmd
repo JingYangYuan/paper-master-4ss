@@ -1,0 +1,423 @@
+---
+title: "Estimation of error components models with the plm function"
+author:
+  - name: Yves Croissant
+date: '`r Sys.Date()`'
+output: rmarkdown::html_vignette
+bibliography: ../inst/REFERENCES.bib
+vignette: >
+  %\VignetteIndexEntry{Estimation of error components models with the plm function}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, echo=FALSE}
+library("knitr")
+opts_chunk$set(message = FALSE, warning = FALSE)
+```
+
+```{r texreg, echo = FALSE, results = "hide"}
+library("texreg")
+extract.plm <- function(model, include.rsquared = TRUE, include.adjrs = TRUE, 
+    include.nobs = TRUE, include.ercomp = TRUE, ...) {
+  s <- summary(model, ...)
+  coefficient.names <- rownames(coef(s))
+  coefficients <- coef(s)[ , 1L]
+  standard.errors <- coef(s)[ , 2L]
+  significance <- coef(s)[ , 4L]
+  
+  rs <- s$r.squared[1L]
+  adj <- s$r.squared[2L]
+  n <- length(model$residuals)
+  
+  gof <- numeric()
+  gof.names <- character()
+  gof.decimal <- logical()
+
+  if (include.ercomp == TRUE){
+      if (model$args$model == "random"){
+          se <- sqrt(ercomp(model)$sigma)
+          gof <- c(gof, se)
+          gof.names <- c(gof.names, paste0("s_", names(se)))
+          gof.decimal <- c(gof.decimal, rep(TRUE, length(se)))
+      }
+  }  
+  if (include.rsquared == TRUE) {
+    gof <- c(gof, rs)
+    gof.names <- c(gof.names, "R$^2$")
+    gof.decimal <- c(gof.decimal, TRUE)
+  }
+  if (include.adjrs == TRUE) {
+    gof <- c(gof, adj)
+    gof.names <- c(gof.names, "Adj.\ R$^2$")
+    gof.decimal <- c(gof.decimal, TRUE)
+  }
+  if (include.nobs == TRUE) {
+    gof <- c(gof, n)
+    gof.names <- c(gof.names, "Num.\ obs.")
+    gof.decimal <- c(gof.decimal, FALSE)
+  }  
+  tr <- createTexreg(
+      coef.names = coefficient.names, 
+      coef = coefficients, 
+      se = standard.errors, 
+      pvalues = significance, 
+      gof.names = gof.names, 
+      gof = gof, 
+      gof.decimal = gof.decimal
+  )
+  return(tr)
+}
+
+setMethod("extract", signature = className("plm", "plm"), 
+    definition = extract.plm)
+
+```
+
+`plm` is a very versatile function which enable the estimation of a
+wide range of error component models. Those models can be written as
+follows :
+
+$$
+y_{nt}=\alpha + \beta^\top x_{nt} + \epsilon_{nt} = \alpha + \beta^\top x_{nt} + \eta_n + \mu_t + \nu_{nt}
+$$
+
+where $n$ and $t$ are the individual and time indexes, $y$ the
+response, $x$ a vector of covariates, $\alpha$ the overall intercept
+and $\beta$ the vector of parameters of interest that we are willing
+to estimate. The error term $\epsilon_{nt}$ is composed of three elements 
+(in the two-way case):
+
+- $\eta_n$ is the individual effect,
+- $\mu_t$ is the time effect, 
+- $\nu_{nt}$ is the idiosyncratic error.
+
+
+# Basic use of `plm`
+
+The first two arguments of `plm` are, like for most of the estimation
+functions of `R` a `formula` which describes the model to be estimated
+and a `data.frame`. `subset`, `weights`, and `na.action` are also
+available and have the same behavior as in the `lm` function. Three
+more main arguments can be set :
+
+- `index` helps `plm` to understand the structure of the data : if
+  `NULL`, the first two columns of the data are assumed to contain the
+  individual or the time index. Otherwise, supply the column names of 
+  the individual and time index as a character, e.g., use something like
+  `c("firm", "year")` or just `"firm"` if there is no explicit time
+  index.
+- `effect` indicates the effects that should be taken into account ;
+  this is one of `"individual"`, `"time"`, and `"twoways"`.
+- `model` indicates the model to be estimated :
+    + `"pooling"` is the OLS estimation (equivalent to a call to `lm`),
+    + `"between"` performs the estimation on the individual or time means, 
+    + `"within"` (fixed-effects model) on the deviations from the individual 
+                  or/and time mean, 
+    + `"fd"` on the first differences, and 
+    + `"random"` (random-effects model) perform a feasible generalized least 
+    squares estimation which takes into account the correlation induced by the 
+    presence of individual and/or time effects.
+
+The estimation of all but the last model is straightforward, as it
+requires only the estimation by *OLS* of obvious transformations of
+the data. The *GLS* model requires more explanation. In most of the
+cases, the estimation is obtained by quasi-differencing the data from
+the individual and/or the time means. The coefficients used to perform
+this quasi-difference depends on estimators of the variance of the
+components of the error, namely $\sigma^2_\nu$, $\sigma^2_\eta$ in
+case of individual effects and $\sigma^2_\mu$ in case of time effects.
+
+The most common technique used to estimate these variance is to use
+the following result :
+
+$$
+\frac{\mbox{E}(\epsilon^\top W \epsilon)}{N(T-1)} = \sigma_\nu^2
+$$
+
+and
+
+$$
+\frac{\mbox{E}(\epsilon^\top B \epsilon)}{N} = T \sigma_\eta^2 + \sigma_\nu^2
+$$
+
+where $B$ and $W$ are respectively the matrices that performs the
+individual (or time) means and the deviations from these
+means. Consistent estimators can be obtained by replacing the unknown
+errors by the residuals of a consistent preliminary estimation and by
+dropping the expecting value operator. Some degree of freedom
+correction can also be introduced. `plm` calls the general function
+`ercomp` to estimate the variances. Important arguments to `ercomp`
+are:
+
+- `models` indicates which models are estimated in order to calculate
+  the two quadratic forms ; for example `c("within", "Between")`. Note that
+  when only one model is provided in `models`, this means that the same
+  residuals are used to compute the two quadratic forms.
+- `dfcor` indicates what kind of degrees of freedom correction is
+  used : if `0`, the quadratic forms are divided by the number of
+  observations, respectively $N\times T$ and $N$ ; if `1`, the
+  numerators of the previous expressions are used ($N\times (T-1)$ and
+  $N$) ; if `2`, the number of estimated parameters in the preliminary
+  estimate $K$ is deducted. Finally, if `3`, the unbiased version is
+  computed, which is based on much more complex computations, which
+  relies on the calculus of the trace of different cross-products
+  which depends on the preliminary models used.
+- `method` is an alternative to the `models` argument; it is one of :
+    * `"walhus"` (equivalent to setting `models = c("pooling")`),
+      @WALL:HUSS:69,
+    * `"swar"` (equivalent to `models = c("within", "Between")`), @SWAM:AROR:72,
+    * `"amemiya"` (equivalent to `models = c("within")`), @AMEM:71,
+    * `"nerlove"`, which is a specific method which doesn't fit to the
+      quadratic form methodology described above (@NERLO:71) and uses an
+      within model for the variance estimation as well,
+    * `"ht"` is an slightly modified version of `"amemiya"`: when there
+      are time-invariant covariates, the @AMEM:71 estimator of the
+      individual component of the variance under-estimates as the
+      time-invariant covariates disappear in the within regression. In
+      this case, @HAUS:TAYL:81 proposed to regress the estimation of
+      the individual effects on the time-invariant covariates and use
+      the residuals in order to estimate the components of the
+      variance.
+
+Note that for `plm`, the arguments are `random.models`, `random.dfcor`, and 
+`random.method` and correspond to arguments `models`, `method`, and
+`random.dfcor` of function `ercomp` with the same values as above, respectively.
+
+To illustrate the use of `plm`, we use examples reproduced in @BALT:13, p. 21; 
+@BALT:21, p. 31, table 2.1 presents EViews' results of the estimation on the
+`Grunfeld` data set :
+
+```{r grunfeld}
+library("plm")
+data("Grunfeld", package = "plm")
+ols <- plm(inv ~ value + capital, Grunfeld, model = "pooling")
+between <- update(ols, model = "between")
+within <- update(ols, model = "within")
+walhus <- update(ols, model = "random", random.method = "walhus", random.dfcor = 3)
+amemiya <- update(walhus, random.method = "amemiya")
+swar <- update(amemiya, random.method = "swar")
+```
+
+Note that the `random.dfcor` argument is set to `3`, which means that
+the unbiased version of the estimation of the error components is
+used. We use the `texreg` package to present the results :
+
+```{r grunfeldresults, echo = TRUE}
+library("texreg")
+screenreg(list(ols = ols, between = between, within = within, 
+            walhus = walhus, amemiya = amemiya, swar = swar),
+        digits = 5, omit.coef = "(Intercept)")
+```
+
+The estimated variance can be extracted using the `ercomp` function. For
+example, for the `amemiya` model :
+
+```{r ercompamemiya}
+ercomp(amemiya)
+```
+
+@BALT:13, p. 27; @BALT:21, p. 31 presents the Stata estimation of the Swamy-Arora
+estimator ; the Swamy-Arora estimator is the same if `random.dfcor` is
+set to `3` or `2` (the quadratic forms are divided by $\sum_n T_n - K - N$
+and by $N - K - 1$), so I don't know what is the behaviour of Stata for the
+other estimators for which the unbiased estimators differs from the
+simple one.
+
+```{r produc}
+data("Produc", package = "plm")
+PrSwar <- plm(log(gsp) ~ log(pcap) + log(pc) + log(emp) + unemp, Produc, 
+           model = "random", random.method = "swar", random.dfcor = 3)
+summary(PrSwar)
+```
+
+
+# The twoways effect model
+
+The two-ways effect model is obtained by setting the `effect` argument
+to `"twoways"`. @BALT:13 pp. 51-53; @BALT:21, pp. 61-62, tables 3.1-3.3, presents
+EViews' output for the Grunfeld data set.
+
+```{r grunfeld2ways}
+Grw <- plm(inv ~ value + capital, Grunfeld, model = "random", effect = "twoways", 
+           random.method = "walhus", random.dfcor = 3)
+Grs <- update(Grw, random.method = "swar")
+Gra <- update(Grw, random.method = "amemiya")
+screenreg(list("Wallace-Hussain" = Grw, "Swamy-Arora" = Grs, "Amemiya" = Gra), digits = 5)
+```
+
+The estimated variance of the time component is negative for the 
+Wallace-Hussain as well as the Swamy-Arora models and `plm` sets it to 0.
+
+@BALT:09 pp. 60-62, presents EViews' output for the `Produc` data.
+
+```{r produc2ways}
+data("Produc", package = "plm")
+Prw <- plm(log(gsp) ~ log(pcap) + log(pc) + log(emp) + unemp, Produc, 
+           model = "random", random.method = "walhus", 
+           effect = "twoways", random.dfcor = 3)
+Prs <- update(Prw, random.method = "swar")
+Pra <- update(Prw, random.method = "amemiya")
+screenreg(list("Wallace-Hussain" = Prw, "Swamy-Arora" = Prs, "Amemiya" = Pra), digits = 5)
+```
+
+
+# Unbalanced panels
+
+Two difficulties arise with unbalanced panels :
+
+- There are no obvious denominators for the quadratic forms of the
+  residuals that are used to estimate the components of the
+  variance. The strategy is then to compute the expected value and
+  equate it to the actual quadratic forms. Detailed formula are
+  omitted here, they depend on the preliminary estimator.
+- For the one-way effect model, the estimator is still obtained by
+  applying *OLS* on demeaned data (the individual **and** the time
+  means are now deducted) for the within model and on quasi-demeaned
+  data for the random effects model ; this is not the case for the
+  two-ways effects model.
+
+@BALT:21, @BALT:13, and @BALT:09 present results of the estimation of the
+@SWAM:AROR:72 model with the `Hedonic` data set. @BALT:13, p. 195;
+@BALT:21, p. 237, table 9.1, presents the Stata output and @BALT:09,
+p. 211 presents EViews' output. EViews' Wallace-Hussain estimator is
+reported in @BALT:09, p. 210.
+
+```{r hedonic}
+data("Hedonic", package = "plm")
+form <- mv ~ crim + zn + indus + chas + nox + rm + 
+    age + dis + rad + tax + ptratio + blacks + lstat
+HedStata <- plm(form, Hedonic, model = "random", index = "townid", 
+                random.models = c("within", "between"))
+HedEviews <- plm(form, Hedonic, model = "random", index = "townid", 
+                 random.models = c("within", "Between"))
+HedEviewsWH <- update(HedEviews, random.models = "pooling")
+screenreg(list(EViews = HedEviews, Stata = HedStata, "Wallace-Hussain" = HedEviewsWH), 
+          digits = 5, single.row = TRUE)
+```
+
+The difference is due to the fact that Stata uses a between regression
+on $N$ observations while EViews uses a between regression on $\sum_n
+T_n$ observations, which are not the same on unbalanced panels. Note
+the use of between with or without the B capitalized (`"Between"` and
+`"between"`) in the `random.models` argument. `plm`'s default is to use
+the between regression with $\sum_n T_n$ observations when setting
+`model = "random", random.method = "swar"`.  The default employed is what the
+original paper for the unbalanced one-way Swamy-Arora estimator
+defined (in @BALT:CHAN:94, p. 73). A more detailed analysis of Stata's
+Swamy-Arora estimation procedure is given by @COTT:2017.
+
+
+# Instrumental variable estimators
+
+All of the models presented above may be estimated using instrumental
+variables (IV). The instruments are specified using two- or three-part
+formulas, each part being separated by a `|` sign :
+
+- the first part contains the covariates,
+- the second part contains the "double-exogenous" instruments, *i.e.*,
+  variables that can be used twice as instruments, using their within
+  and the between transformation,
+- the third part contains the "single-exogenous" instruments, *i.e.*,
+  variables for which only the within transformation can be used as
+  instruments, those variables being correlated with the individual
+  effects.
+
+The instrumental variables estimator used is indicated with the
+`inst.method` argument:
+
+- `"bvk"`, from @BALE:VARA:87, the default value : in this case, all the
+  instruments are introduced in quasi-differences, using the same
+  transformation as for the response and the covariates,
+- `"baltagi"`, from @BALT:81, the instruments of the *second* part are
+  introduced twice by using the between and the within transformation and
+  instruments of the *third* part are introduced with only the within
+  transformation,
+- `"am"`, from @AMEM:MACU:86, in addition to the instrument set of `"baltagi"`,
+  the within transformation of the variables of the *second* part for each period
+  are also included as instruments,
+- `"bms"`, from @BREU:MIZO:SCHM:89, in addition to the instrument set of
+  `"baltagi"`, the within transformation of the variables of the *second*
+  and the *third* part for each period are included as instruments.
+
+The various possible values of the `inst.method` argument are not relevant
+for fixed effect IV models as there is only one method for this type of IV
+models but many for random effect IV models.
+
+The instrumental variable estimators are illustrated in the following example
+from @BALT:05, pp. 117/120; @BALT:13, pp. 133/137; @BALT:21, pp. 162/165, tables 
+7.1, 7.3.
+  
+```{r IV}
+data("Crime", package = "plm")
+crbalt <- plm(lcrmrte ~ lprbarr + lpolpc + lprbconv + lprbpris + lavgsen +
+              ldensity + lwcon + lwtuc + lwtrd + lwfir + lwser + lwmfg + lwfed +
+              lwsta + lwloc + lpctymle + lpctmin + region + smsa + factor(year)
+              | . - lprbarr - lpolpc + ltaxpc + lmix,
+              data = Crime, model = "random", inst.method = "baltagi")
+crbvk <- update(crbalt, inst.method = "bvk")
+crwth <- update(crbalt, model = "within")
+crbe  <- update(crbalt, model = "between")
+screenreg(list(FE2SLS = crwth, BE2SLS = crbe, EC2SLS = crbalt, G2SLS = crbvk), 
+          single.row = FALSE, digits = 5, omit.coef = "(region)|(year)",
+          reorder.coef = c(1:16, 19, 18, 17))
+```
+
+The Hausman-Taylor model (@HAUS:TAYL:81) may be estimated
+with the `plm` function by setting argument `random.method = "ht"` and
+`inst.method = "baltagi"`.
+The following example is from @BALT:05, p. 130; @BALT:13, pp. 145-7,
+tables 7.4-7.6; @BALT:21, pp. 174-6 , tables 7.5-7.7.
+
+```{r IV-HT}
+data("Wages", package = "plm")
+ht <- plm(lwage ~ wks + south + smsa + married + exp + I(exp^2) + 
+            bluecol + ind + union + sex + black + ed | 
+            bluecol + south + smsa + ind + sex + black | 
+            wks + married + exp + I(exp^2) + union, 
+          data = Wages, index = 595, 
+          inst.method = "baltagi", model = "random", 
+          random.method = "ht")
+
+am  <- update(ht, inst.method = "am")
+bms <- update(ht, inst.method = "bms")
+screenreg(list("Hausman-Taylor" = ht, "Amemiya-MaCurdy" = am,
+               "Breusch-Mizon-Schmidt" = bms),
+          digits = 5, single.row = FALSE)
+```
+
+
+# Nested error component model
+
+This section shows how the nested error component model as per
+@BALT:SONG:JUNG:01 can be estimated. The model is given by :
+
+$$
+y_{nt}=\alpha + \beta^\top x_{jnt} + u_{jnt} = \alpha + \beta^\top x_{jnt} + \mu_{j} + \nu_{jn} + \epsilon_{jnt}
+$$
+where $n$ and $t$ are the individual and time indexes and $j$ is the group index in
+which the individuals are nested. The error $u_{jnt}$ consists of three components :
+
+- $\mu_j$ is the group effect,
+- $\nu_{jn}$ the nested effect of the individual nested in group $j$
+- $\epsilon_{jnt}$ is the idiosyncratic error.
+
+In the estimated examples below (replication of @BALT:SONG:JUNG:01, p. 378,
+table 6; @BALT:21, p. 248, table 9.1), states are nested within regions.
+The group index is given in the 3rd position of the `index` argument to
+`pdata.frame` or to `plm` directly and `plm`'s argument `effect` is set to
+`"nested"`:
+
+```{r nestedRE}
+data("Produc", package = "plm")
+swar <- plm(form <- log(gsp) ~ log(pc) + log(emp) + log(hwy) + log(water) + log(util) + unemp, 
+            Produc, index = c("state", "year", "region"), model = "random", effect = "nested", random.method = "swar")
+walhus <- update(swar, random.method = "walhus")
+amem <- update(swar, random.method = "amemiya")
+screenreg(list("Swamy-Arora" = swar, "Wallace-Hussain" = walhus, "Amemiya" = amem), digits = 5)
+```
+
+
+
+# Bibliography
+

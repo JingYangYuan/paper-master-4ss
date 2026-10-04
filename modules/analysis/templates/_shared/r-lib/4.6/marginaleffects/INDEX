@@ -1,0 +1,27 @@
+comparisons             Comparisons Between Predictions Made With
+                        Different Regressor Values
+components.marginaleffects
+                        Extract components from marginaleffects objects
+datagrid                Data grids
+get_dataset             Download and Read Datasets from
+                        'marginaleffects' or Rdatasets
+get_draws               Extract Posterior Draws or Bootstrap Resamples
+                        from 'marginaleffects' Objects
+get_modeldata           Get or set the dataset used to fit a model
+hypotheses              (Non-)Linear Tests for Null Hypotheses, Joint
+                        Hypotheses, Equivalence, Non Superiority, and
+                        Non Inferiority
+inferences              (EXPERIMENTAL) Bootstrap, Conformal, and
+                        Simulation-Based Inference
+plot_comparisons        Plot Conditional or Marginal Comparisons
+plot_predictions        Plot Conditional or Marginal Predictions
+plot_slopes             Plot Conditional or Marginal Slopes
+predictions             Predictions
+print.marginaleffects   Print 'marginaleffects' objects
+prune.marginaleffects   Prune marginaleffects objects to reduce memory
+                        usage
+refit                   Refit a marginaleffects object with new data
+slopes                  Slopes (aka Partial derivatives, Marginal
+                        Effects, or Trends)
+vcovUnconditional       EXPERIMENTAL: Request unconditional variance in
+                        marginaleffects calls

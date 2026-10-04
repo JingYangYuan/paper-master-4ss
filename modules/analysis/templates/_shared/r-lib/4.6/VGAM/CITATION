@@ -1,0 +1,222 @@
+citHeader("To cite VGAM in publications please use:")
+
+## R >= 2.8.0 passes package metadata to citation().
+if(!exists("meta") || is.null(meta)) meta <- packageDescription("VGAM")
+year <- sub("-.*", "", meta$Date)
+note <- sprintf("R package version %s", meta$Version)
+
+
+bibentry(bibtype = "Book",
+  title        = "Vector Generalized Linear and Additive Models: With an Implementation in R",
+  author       = person(c("T.", "W."), "Yee"),
+  year         = "2015",
+  publisher    = "Springer",
+  address      = "New York, USA",
+  textVersion  =
+  paste("Thomas W. Yee (2015).",
+        "Vector Generalized Linear and Additive Models:",
+        "With an Implementation in R. New York, USA: Springer.")
+)
+
+
+
+bibentry(bibtype = "Article",
+  title        = "Vector Generalized Additive Models",
+  author       = c(person(c("T.", "W."), "Yee"),
+                   person(c("C.", "J."), "Wild")),
+  journal      = "Journal of Royal Statistical Society, Series B",
+  year         = "1996",
+  volume       = "58",
+  number       = "3",
+  pages        = "481--493",
+
+  textVersion  =
+  paste("Thomas W. Yee and C. J. Wild (1996).",
+        "Vector Generalized Additive Models.",
+        "Journal of Royal Statistical Society, Series B, 58(3), 481--493.")
+)
+
+
+
+bibentry(bibtype = "Article",
+  title        = "The {VGAM} Package for Categorical Data Analysis",
+  author       = person(c("T.", "W."), "Yee"),
+  journal      = "Journal of Statistical Software",
+  year         = "2010",
+  volume       = "32",
+  number       = "10",
+  pages        = "1--34",
+  doi          = "10.18637/jss.v032.i10",
+
+  textVersion  =
+  paste("Thomas W. Yee (2010).",
+        "The VGAM Package for Categorical Data Analysis.",
+        "Journal of Statistical Software, 32(10), 1-34.",
+        "DOI: 10.18637/jss.v032.i10.",
+        "URL https://www.jstatsoft.org/article/view/v032i10/."),
+  header = "and/or"
+)
+
+
+
+bibentry(bibtype = "Article",
+  title        = "Row-column interaction models, with an {R} implementation",
+  author       = c(person(c("T.", "W."), "Yee"),
+                   person(c("A.", "F."), "Hadi")),
+  journal      = "Computational Statistics",
+  year         = "2014",
+  volume       = "29",
+  number       = "6",
+  pages        = "1427--1445",
+
+  textVersion  =
+  paste("Thomas W. Yee, Alfian F. Hadi (2014).",
+        "Row-column interaction models, with an R implementation.",
+        "Computational Statistics, 29(6), 1427--1445."),
+  header = "and/or"
+)
+
+
+
+bibentry(bibtype = "Manual",
+         title = "{VGAM}: Vector Generalized Linear and Additive Models",
+         author = person(c("T.", "W."), "Yee"),
+         year = year,
+         note = note,
+         url = "https://CRAN.R-project.org/package=VGAM",
+
+         textVersion =
+         paste("Thomas W. Yee",
+               sprintf("(%s).", year),   
+               "VGAM: Vector Generalized Linear and Additive Models.",
+               paste(note, ".", sep = ""),
+               "URL https://CRAN.R-project.org/package=VGAM"),
+         header = "and/or"
+)
+
+
+
+bibentry(bibtype = "Article",
+  title        = "Two-parameter reduced-rank vector generalized linear models",
+  author       = person(c("T.", "W."), "Yee"),
+  journal      = "Computational Statistics and Data Analysis",
+  year         = "2013",
+  volume       = "71",
+# number       = "",    # None
+  pages        = "889--902",
+  textVersion  =
+  paste("Thomas W. Yee (2013).",
+        "Two-parameter reduced-rank vector generalized linear models.",
+        "Computational Statistics and Data Analysis, 71, 889--902."),
+  header = "and/or"
+)
+
+
+
+bibentry(bibtype = "Article",
+  title        = c("The {VGAM} Package for Capture-Recapture Data ",
+                   "Using the Conditional Likelihood"),
+  author       = c(person(c("T.", "W."), "Yee"),
+                   person(c("J."), "Stoklosa"),
+                   person(c("R.", "M."), "Huggins")),
+  journal      = "Journal of Statistical Software",
+  year         = "2015",
+  volume       = "65",
+  number       = "5",
+  pages        = "1--33",
+  doi          = "10.18637/jss.v065.i05",
+
+  textVersion  =
+  paste("Thomas W. Yee, Jakub Stoklosa, Richard M. Huggins (2015).",
+        "The VGAM Package for Capture-Recapture Data Using the Conditional Likelihood.",
+        "Journal of Statistical Software, 65(5), 1--33.",
+        "DOI: 10.18637/jss.v065.i05.",
+        "URL https://www.jstatsoft.org/article/view/v065i05/."),
+  header = "and/or"
+)
+
+
+bibentry(bibtype = "Article",
+  title        = "The {VGAM} package for negative binomial regression",
+  author       = person(c("T.", "W."), "Yee"),
+  journal      = "Australian and New Zealand Journal of Statistics",
+  year         = "2020",
+  volume       = "62",
+  number       = "1",
+  pages        = "116--131",
+
+  textVersion  =
+  paste("Thomas W. Yee (2020).",
+        "The VGAM package for negative binomial regression.",
+        "Australian and New Zealand Journal of Statistics,",
+        "62(1), 116--131."),
+  header = "and/or"
+)
+
+
+bibentry(bibtype = "Article",
+  title        = c("On the {H}auck-{D}onner effect in {W}ald tests: ",
+                   "{D}etection, tipping points and parameter space characterization"),
+  author       = person(c("T.", "W."), "Yee"),
+  journal      = "Journal of the American Statistical Association",
+  year         = "2022",
+  volume       = "117",
+  number       = "540",
+  pages        = "1763--1774",
+
+  textVersion  =
+  paste("Thomas W. Yee (2022).",
+        "On the Hauck-Donner effect in Wald tests: ",
+        "Detection, tipping points and parameter space characterization.",
+        "Journal of the American Statistical Association,",
+        "117(540), 1763--1774."),
+  header = "and/or"
+)
+
+
+
+bibentry(bibtype = "Article",
+  title        = "Generally altered, inflated, truncated and deflated regression",
+  author       = c(person(c("T.", "W."), "Yee"),
+                   person(c("C."), "Ma")),
+  journal      = "Statistical Science",
+  year         = "2024",
+  volume       = "39",
+  number       = "4",
+  pages        = "568--588",
+
+  textVersion  =
+  paste("Thomas W. Yee and Chenchen Ma (2024).",
+        "Generally altered, inflated, truncated and deflated regression.",
+        "Statistical Science, 39(4), 568--588."),
+  header = "and/or"
+)
+
+
+
+
+
+bibentry(bibtype = "Article",
+  title        =
+  paste("Heaping and seeping, GAITD regression and",
+        "doubly constrained reduced-rank vector ",
+        "generalized linear models."),
+  author       = c(person(c("T.", "W."), "Yee"),
+                   person(c("L."), "Frigau"),
+                   person(c("C."), "Ma")),
+  journal      = "Annals of Applied Statistics",
+  year         = "2025",
+  volume       = "(in press)",
+  number       = "",
+  pages        = "1--25",
+  textVersion  =
+  paste("Thomas W. Yee and Luca Frigau and Chenchen Ma (2025).",
+        "Heaping and seeping, GAITD regression and",
+        "doubly constrained reduced-rank vector generalized linear models.", 
+        "Annals of Applied Statistics, (in press)."),
+  header = "and/or"
+)
+
+
+
+

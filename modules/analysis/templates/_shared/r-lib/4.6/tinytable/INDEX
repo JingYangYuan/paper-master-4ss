@@ -1,0 +1,33 @@
+format_tt               Format columns of a data frame
+format_vector           Format a Vector
+group_tt                Spanning labels to identify groups of rows or
+                        columns
+plot_tt                 Insert images and inline plots into tinytable
+                        objects
+plot_vector             Create Plot Vector
+print.tinytable         Print, display, or convert a tinytable object
+rbind2,tinytable,tinytable-method
+                        Combine 'tinytable' objects by rows
+                        (vertically)
+save_tt                 Save a Tiny Table to File
+style_tt                Style a Tiny Table
+style_vector            Style a Vector with Text Formatting
+subset.tinytable        Subsetting a 'tinytable' object
+theme_default           Deprecated: Use theme_tinytable() instead
+theme_empty             Theme for a void table
+theme_grid              Grid theme with borders around all cells
+theme_html              HTML-specific styles and options
+theme_latex             LaTeX-Specific Theme for 'tinytable'
+theme_markdown          Markdown theme with optional ANSI color support
+                        and grid customization
+theme_revealjs          RevealJS presentation theme
+theme_rotate            Rotate table theme (LaTeX, Typst, and HTML)
+theme_striped           Striped theme with alternating row colors
+theme_tinytable         Default theme for TinyTable
+theme_tt                Deprecated: Use format-specific theme functions
+                        instead
+theme_typst             Typst-specific styles and options
+tinytable-package       Simple and Configurable Tables in 'HTML',
+                        'LaTeX', 'Markdown', 'Word', 'PNG', 'PDF', and
+                        'Typst' Formats
+tt                      Draw a Tiny Table

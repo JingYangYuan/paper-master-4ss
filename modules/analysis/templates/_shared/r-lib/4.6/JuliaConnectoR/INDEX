@@ -1,0 +1,26 @@
+AccessMutate.JuliaProxy
+                        Access or mutate Julia objects via proxy
+                        objects
+EnvVars-JuliaConnectoR
+                        Environment variables used by the
+                        'JuliaConnectoR'
+Julia-Setup             Julia setup
+JuliaConnectoR-package
+                        A Functionally Oriented Interface for
+                        Integrating Julia with R
+as.data.frame.JuliaProxy
+                        Coerce a Julia Table to a Data Frame
+juliaCall               Call a Julia function by name
+juliaEval               Evaluate a Julia expression
+juliaExpr               Mark a string as Julia expression
+juliaFun                Wrap a Julia function in an R function
+juliaGet                Translate a Julia proxy object to an R object
+juliaImport             Load and import a Julia package via 'import'
+                        statement
+juliaLet                Evaluate Julia code in a 'let' block using
+                        values of R variables
+juliaPut                Create a Julia proxy object from an R object
+juliaSetupOk            Check Julia setup
+startJuliaServer        Start a Julia server that may serve multiple
+                        clients (R processes)
+stopJulia               Stop the connection to Julia

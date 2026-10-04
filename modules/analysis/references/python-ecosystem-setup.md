@@ -96,6 +96,20 @@ pip install pandas numpy scipy statsmodels linearmodels pyfixest differences \\
 
 多重检验校正用 `statsmodels.stats.multitest`（Holm/BH），**不**等价于 Stata 的 `rwolf`/`wyoung`（Romano-Wolf / Westfall-Young），表注必须写明所用方法。
 
+### 随包分发的依赖锁文件（免手工选版本）
+
+本 skill 在 `templates/_shared/python-env/` 下提供**锁文件 + 安装脚本**（Python 侧不分发 venv，
+因为 venv 含绝对路径、平台锁定，且完整快照 1.2 GB 中有两个文件超过 GitHub 单文件 100 MB 上限）：
+
+```bash
+bash templates/_shared/python-env/install_python_env.sh                 # 装到 python-env/venv/
+bash templates/_shared/python-env/install_python_env.sh /tmp/pm4ss-venv # 指定目标目录
+```
+
+- 锁文件 `requirements-lock.txt` 锁定 99 个包的精确版本；脚本建 venv → 安装 → 自动验收（输出 `PY-ENV-OK`）。
+- 基线：Python 3.11.15 / macOS arm64；要求 **Python >= 3.11**。
+- 详见 `templates/_shared/python-env/README.md`。
+
 ---
 
 ## 4. 验收命令

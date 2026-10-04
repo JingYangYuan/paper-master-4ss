@@ -1,0 +1,16 @@
+bibentry(
+  "Article",
+  title = "{MatchIt}: Nonparametric Preprocessing for Parametric Causal Inference",
+  author = c(
+  person("Daniel E.", "Ho"),
+  person("Kosuke", "Imai"),
+  person("Gary", "King"),
+  person("Elizabeth A.", "Stuart")
+  ),
+  year = 2011,
+  journal = "Journal of Statistical Software",
+  volume = 42,
+  number = 8,
+  pages = "1--28",
+  doi = "10.18637/jss.v042.i08",
+)

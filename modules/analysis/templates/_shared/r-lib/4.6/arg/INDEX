@@ -1,0 +1,24 @@
+arg_between             Check Values in Range
+arg_character           Check Character Argument
+arg_color               Check Color Argument
+arg_data                Check Common Argument Types
+arg_dots_supplied       Check Supplied Dots Argument
+arg_element             Check Element
+arg_equal               Check Equal Arguments
+arg_formula             Check Formula Argument
+arg_function            Check Function Argument
+arg_index               Check Index Argument
+arg_is                  Check Argument Class
+arg_length              Check Argument Length
+arg_logical             Check Logical Argument
+arg_named               Check Named Argument
+arg_no_NA               Check NA in Argument
+arg_non_null            Check NULL Argument
+arg_numeric             Check Numeric Argument
+arg_or                  Check That Arguments Meet Some or All Criteria
+arg_supplied            Check Supplied Argument
+arg_symmetric           Check Symmetric Matrix Argument
+arg_unique              Check Unique Argument
+err                     Throw an Error, Warning, or Message
+match_arg               Argument Verification
+when_supplied           Check Arguments When Supplied

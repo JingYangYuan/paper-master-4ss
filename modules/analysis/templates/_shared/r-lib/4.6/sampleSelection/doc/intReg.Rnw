@@ -1,0 +1,1081 @@
+\documentclass[a4paper]{scrartcl}
+\usepackage[T1]{fontenc}
+\usepackage[bookmarks=TRUE,
+            colorlinks,
+            pdfpagemode=none,
+            pdfstartview=FitH,
+            citecolor=black,
+            filecolor=black,
+            linkcolor=black,
+            urlcolor=black,
+            ]{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage{natbib}
+\usepackage{amsmath}
+
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\loglik}{\ell}% log likelihood
+\newcommand{\var}{\mathrm{Var}\,}
+\renewcommand*{\vec}[1]{\boldsymbol{#1}}% vector
+\allowdisplaybreaks
+
+\DeclareMathOperator{\artanh}{arctanh}
+
+\title{Interval Regression with Sample Selection}
+\author{Arne Henningsen, Sebastian Petersen, G\'eraldine Henningsen}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+%\VignetteIndexEntry{Interval Regression with Sample Selection}
+%\VignetteKeyword{models}
+%\VignetteKeyword{regression}
+
+\maketitle
+
+This `vignette' is largely based on \citet*{petersen17}. 
+
+\section{Model Specification}
+
+The general specification
+of an interval regression model with sample selection is:
+\begin{align}
+   y_i^{S*} &= {\vec{\beta}^S}' \vec{x}_i^S + \varepsilon_i^S
+   \label{eq:selection*}
+   \\
+   y_i^S & = 
+   \begin{cases}
+      0 & \quad \text{if } y_i^{S*} \leq 0
+      \label{eq:selection}
+      \\
+      1 & \quad \text{otherwise}
+   \end{cases}
+   \\
+   y_i^{O*} &= {\vec{\beta}^O}' \vec{x}_i^O + \varepsilon_i^O
+   \label{eq:outcome*}
+   \\
+   y_i^O &= 
+   \begin{cases}
+      \text{unknown} & \quad \text{if } y_i^{S} = 0\\
+      1 & \quad \text{if } \alpha_1 < y_i^{O*} \leq \alpha_2
+         \text{ and } y_i^{S} = 1\\
+      2 & \quad \text{if } \alpha_2 < y_i^{O*} \leq \alpha_3
+         \text{ and } y_i^{S} = 1\\
+      \vdots & \\
+      M & \quad \text{if } \alpha_{M} < y_i^{O*} \leq \alpha_{M+1}
+         \text{ and } y_i^{S} = 1
+   \end{cases}
+   \\
+   \left(
+      \begin{array}{c} \varepsilon_i^S \\ \varepsilon_i^O \end{array}
+   \right)
+   &\sim N_2 \left( \left( \begin{array}{c} 0 \\ 0 \end{array} \right),
+      \left[ \begin{matrix}
+         1 & \rho \sigma \\ 
+         \rho \sigma & \sigma^2
+      \end{matrix} \right]
+   \right),
+\end{align}
+where subscript~$i$ indicates the observation,
+$y_i^{O*}$~is a latent outcome variable,
+$y_i^O$~is a partially observed categorical variable
+that indicates in which interval $y_i^{O*}$ lies,
+$M$~is the number of intervals,
+$\alpha_1 , \ldots , \alpha_{M+1}$~are the boundaries of the intervals
+(whereas frequently but not necessarily
+$\alpha_1 = - \infty$ and $\alpha_{M+1} = \infty$),
+$y_i^S$~is a binary variable
+that indicates whether $y_i^O$ is observed,
+$y_i^{S*}$ is a latent variable
+that indicates the ``tendency'' that $y_i^S$ is one,
+$\vec{x}_i^S$ and $\vec{x}_i^O$ are (column) vectors of explanatory variables
+for the selection equation and outcome equation, respectively,
+$\varepsilon_i^S$ and $\varepsilon_i^O$
+are random disturbance terms
+that have a joint bivariate normal distribution,
+and $\vec{\beta}^S$ and $\vec{\beta}^O$ are (column) vectors
+and $\rho$ and $\sigma$ are scalars of unknown model parameters.
+
+
+\section{Log-Likelihood Function}
+
+The probability that $y_i^O$ is unobserved is:
+\begin{align}
+P \left( y_i^S = 0 \right)
+& = P \left( y_i^{S*} \leq 0 \right)\\
+& = P \left( {\vec{\beta}^S}' \vec{x}_i^S + \varepsilon_i^S \leq 0 \right)\\
+& = P \left( \varepsilon_i^S \leq - {\vec{\beta}^S}' \vec{x}_i^S \right)
+\end{align}
+
+The probability that $y_i^O$ is observed and indicates
+that $y_i^{O*}$ lies in the $m$th interval is:
+\begin{align}
+P \left( y_i^S = 1 \wedge y_i^O = m \right)
+& = P \left( y_i^{S*} > 0 \wedge
+   \alpha_{m} < y_i^{O*} \leq \alpha_{m+1} \right)\\
+& = P \left( {\vec{\beta}^S}' \vec{x}_i^S + \varepsilon_i^S > 0 \wedge
+   \alpha_{m} < {\vec{\beta}^O}' \vec{x}_i^O + \varepsilon_i^O
+   \leq \alpha_{m+1} \right)\\
+& = P \left( \varepsilon_i^S > - {\vec{\beta}^S}' \vec{x}_i^S \wedge
+   \alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O < \varepsilon_i^O
+   \leq \alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O \right)
+\end{align}
+
+The log-likelihood contribution of the $i$th observation is:
+\begin{align}
+\ell_i = & ( 1 - y_i^S )
+   \ln \left[ \Phi \left( - {\vec{\beta}^S}' \vec{x}_i^S \right) \right]\\
+   & + \sum_{m=1}^M y_i^S ( y_i^O = m ) \ln \left[
+      \Phi_2 \left(
+         \frac{\alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) \right.\nonumber \\
+      & \qquad \left. - \Phi_2 \left(
+         \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) \nonumber
+   \right],
+\end{align}
+where $\Phi(.)$ indicates the cumulative distribution function
+of the univariate standard normal distribution
+and $\Phi_2(.)$ indicates the cumulative distribution function
+of the bivariate standard normal distribution.
+
+
+\section{Restricting coefficients $\rho$ and $\sigma^2$}
+
+The parameter $\rho$ needs to be in the interval $(-1,1)$.
+In order to restrict $\rho$ to be in this interval,
+we estimate $\arctan( \rho )$ instead of $\rho$
+so that the derived parameter $\rho = \tan ( \arctan( \rho ) )$
+is always in the interval $(-1,1)$.
+We use the delta method to calculate approximate standard errors
+of the derived parameter~$\rho$,
+whereas the corresponding element of the Jacobian matrix is:
+\begin{align}
+\frac{\partial \tan ( \arctan( \rho ) )}{\partial \arctan( \rho )}
+= \frac{\partial \rho }{\partial \arctan( \rho )}
+= ( 1 + \rho^2 )
+\end{align}
+
+The parameter $\sigma$ needs to be strictly positive, i.e.~$\sigma > 0$.
+In order to restrict $\sigma$ to be strictly positive,
+we estimate $\log( \sigma )$ instead of $\sigma$ or $\sigma^2$
+so that the derived parameters
+$\sigma = \exp( \log( \sigma ) )$
+and $\sigma^2 = \exp( 2 \; \log( \sigma ) )$
+are always strictly positive.
+We use the delta method to calculate approximate standard errors
+of the derived parameters~$\sigma$ and $\sigma^2$,
+whereas the corresponding elements of the Jacobian matrix are:
+\begin{align}
+\frac{\partial \exp( \log( \sigma ) ) }{
+   \partial \log( \sigma )}
+& = \exp( \log( \sigma ) ) = \sigma \\[3ex]
+\frac{\partial \exp( 2 \; \log( \sigma ) )}{\partial \log( \sigma )}
+& = 2 \; \exp( 2 \; \log( \sigma ) )
+= 2 \; \sigma^2
+\end{align}
+
+
+\section{Gradients of the CDF of the bivariate standard normal distribution}
+\label{sec:gradBiv}
+
+In order to facilitate the calculation of the gradients
+of the log-likelihood function,
+we calculate the partial derivatives
+of the cumulative distribution function~(CDF)
+of the bivariate standard normal distribution:
+\begin{align}
+\Phi_2 ( x_1, x_2 , \rho ) 
+& = \int_{- \infty}^{x_2} \int_{- \infty}^{x_1}
+   \phi_2 ( a_1 , a_2 , \rho ) \; d a_1 \; d a_2
+   \label{eq:biv},
+\end{align}
+where $\phi_2 ( . )$ is the probability density function~(PDF)
+of the bivariate standard normal distribution:
+\begin{align}
+\phi_2 ( x_1 , x_2 , \rho )
+& = \frac{1}{2 \pi \sqrt{ 1 - \rho^2 }} \cdot
+   \exp \left( - \frac{x_1^2 - 2 \rho x_1 x_2 + x_2^2}{2 (1-\rho^2)} \right)
+\label{eq:bivPdf}
+\end{align}
+
+In the following, we check equation~(\ref{eq:bivPdf})
+by a simple numerical example:
+<<>>=
+library( "mvtnorm" )
+library( "maxLik" )
+x1 <- 0.4
+x2 <- -0.3
+rho <- -0.6
+sigma <-  matrix( c( 1, rho, rho, 1 ), nrow = 2 )
+
+dens <- dmvnorm( c( x1, x2 ), sigma = sigma )
+print( dens )
+all.equal( dens, ( 2 * pi * sqrt( 1 - rho^2 ) )^(-1) *
+   exp( - ( x1^2 - 2 * rho * x1 * x2 + x2^2 ) / ( 2 * ( 1 - rho^2 ) ) ) )
+@
+
+
+\subsection{Gradients with respect to the limits~($x_1$ and~$x_2$)}
+
+\begin{align}
+\frac{\partial \Phi_2 ( x_1, x_2 , \rho )}{\partial x_2} 
+& = \int_{- \infty}^{x_1} \phi_2( a_1 , x_2 , \rho ) \; d a_1
+   \label{eq:derivBivFirst}\\
+& = \int_{- \infty}^{x_1} \phi( a_1 | x_2, \rho ) \phi( x_2 ) \; d a_1
+   \label{eq:derivBivCondFirst}\\
+& = \int_{- \infty}^{x_1}
+   \tilde{\phi} \left( a_1, \rho x_2, 1 - \rho^2 \right) \phi( x_2 ) \; d a_1
+   \label{eq:derivBivCondNonNormal}\\
+& = \int_{- \infty}^{x_1}
+   \phi \left( \frac{a_1 - \rho x_2}{\sqrt{1 - \rho^2}} \right)
+   \left( \sqrt{1 - \rho^2} \right)^{-1} \phi( x_2 ) \; d a_1
+   \label{eq:derivBivCondFinal}\\
+& = \int_{- \infty}^{x_1}
+      \phi \left( \frac{a_1 - \rho x_2}{\sqrt{1 - \rho^2}} \right)
+      \left( \sqrt{1 - \rho^2} \right)^{-1} d a_1 \; \phi( x_2 )
+   \label{eq:derivBivCondX2out}\\
+& = \int_{- \infty}^{\frac{x_1 - \rho x_2}{\sqrt{1 - \rho^2}}}
+      \phi ( a_1 ) \; d a_1 \; \phi( x_2 )
+   \label{eq:derivBivBorders}\\
+& = \Phi \left( \frac{x_1 - \rho x_2}{\sqrt{1 - \rho^2}} \right)
+   \phi( x_2 ),
+   \label{eq:derivBivFinal}
+\end{align}
+where $\tilde{\phi}( \; , \mu , \sigma^2 )$
+indicates the density function of a normal distribution
+with mean~$\mu$ and variance~$\sigma^2$.
+
+In the following, we use the same simple numerical example
+as in the beginning of section~\ref{sec:gradBiv}
+to check the above derivations.
+First, we check whether the PDF
+of the bivariate standard normal distribution,
+i.e.\ $\phi_2 ( x_1 , x_2 , \rho )$
+(part of equation~\ref{eq:derivBivFirst}),
+is equal to $\tilde{\phi} \left( x_1, \rho x_2, 1 - \rho^2 \right) \phi( x_2 )$
+(part of equation~\ref{eq:derivBivCondNonNormal})
+and equal to $\phi \left( ( x_1 - \rho x_2 ) / ( \sqrt{1 - \rho^2} ) \right)$
+   $\left( \sqrt{1 - \rho^2} \right)^{-1} \phi( x_2 )$
+(part of equations~\ref{eq:derivBivCondFinal} and~\ref{eq:derivBivCondX2out}):
+<<>>=
+all.equal( dens, dnorm( x1, rho * x2, sqrt( 1 - rho^2 ) ) * dnorm(x2) )
+all.equal( dens, ( dnorm( ( x1 - rho * x2 ) / sqrt( 1 - rho^2 ) ) /
+   sqrt( 1 - rho^2 ) ) * dnorm(x2) )
+@
+
+In the following, we will numerically calculate the derivative
+of the cumulative distribution function of the bivaraite normal distribution
+(equation~\ref{eq:biv}) with respect to~$x_2$
+and check wehther this partial derivative
+is equal to the right-hand sides of equations~(\ref{eq:derivBivFirst}),
+(\ref{eq:derivBivCondFinal}), (\ref{eq:derivBivCondX2out}), 
+and~(\ref{eq:derivBivFinal}):
+<<>>=
+funX2 <- function( a2 ) {
+   prob <- pmvnorm( upper = c( x1, a2 ), sigma = sigma )
+   return( prob )
+}
+grad <- c( numericGradient( funX2, x2 ) )
+print( grad )
+
+funX1 <- function( a1 ) {
+   dens <- rep( NA, length( a1 ) )
+   for( i in 1:length( a1 ) ) {
+      dens[i] <- dmvnorm( c( a1[i], x2 ), sigma = sigma )
+   }
+   return( dens )
+}
+all.equal( grad, integrate( funX1, lower = -Inf, upper = x1 )$value )
+
+
+funX1a <- function( a1 ) {
+   dens <- rep( NA, length( a1 ) )
+   for( i in 1:length( a1 ) ) {
+      dens[i] <- ( dnorm( ( a1[i] - rho * x2 ) / sqrt( 1 - rho^2 ) ) /
+            sqrt(1-rho^2) ) * dnorm(x2)
+   }
+   return( dens )
+}
+all.equal( grad, integrate( funX1a, lower = -Inf, upper = x1 )$value )
+
+funX1b <- function( a1 ) {
+   dens <- rep( NA, length( a1 ) )
+   for( i in 1:length( a1 ) ) {
+      dens[i] <- dnorm( ( a1[i] - rho * x2 ) / sqrt( 1 - rho^2 ) ) /
+         sqrt(1-rho^2)
+   }
+   return( dens )
+}
+all.equal( grad,
+   integrate( funX1b, lower = -Inf, upper = x1 )$value * dnorm(x2) )
+
+all.equal( grad,
+   pnorm( ( x1 - rho * x2 ) / sqrt( 1 - rho^2 ) ) * dnorm( x2 ) )
+@
+
+
+\subsection{Gradients with respect to the coefficient of correlation~($\rho$)}
+
+\begin{align}
+& \frac{\partial \Phi_2 ( x_1, x_2 , \rho )}{\partial \rho} \\
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+= & \frac{\partial \left[ \int_{- \infty}^{x_1} \int_{- \infty}^{x_2}
+   \phi_2 ( a_1, a_2, \rho ) \; d a_2 \; d a_1 \right]}{\partial \rho}
+   \label{eq:derivBivrho_start} \\[3ex]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   
+= & \int_{- \infty}^{x_1} \int_{- \infty}^{x_2} 
+   \frac{\partial \phi_2 (a_1, a_2, \rho)}{\partial \rho}
+   \; d a_2 \; d a_1  \\[3ex]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+= & \int_{- \infty}^{x_1} \int_{- \infty}^{x_2}
+  \frac{\partial}{\partial \rho} \left(
+  \frac{\exp \left( -\dfrac{a_1^2 - 2 \rho a_1 a_2 + a_2^2}{2(1-\rho^2)}
+  \right)}{2 \pi \sqrt{ 1 - \rho^2 }} \right)
+  \; d a_2 \; d a_1  \\[3ex]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+= & \int_{- \infty}^{x_1} \int_{- \infty}^{x_2}
+   \frac{1}{2\pi}
+   \frac{\partial}{\partial \rho} \left(
+   \frac{\exp \left( -\dfrac{a_1^2 - 2 \rho a_1 a_2 + a_2^2}{2(1-\rho^2)}
+   \right)}{\sqrt{ 1 - \rho^2 }} \right)
+   \; d a_2 \; d a_1  \\[3ex]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+= & \int_{- \infty}^{x_1} \int_{- \infty}^{x_2}
+   \frac{1}{2\pi}
+   \left( \dfrac{
+   \dfrac{\partial}{\partial \rho}
+   \left( \exp \left( -\dfrac{a_1^2 - 2 \rho a_1 a_2 + a_2^2}{2(1-\rho^2)}
+   \right)\right) \cdot \sqrt{1-\rho^2}}{ 1 - \rho^2 }  \right. \\
+  & \left. \qquad - \dfrac{ 
+   \dfrac{\partial}{\partial \rho} (\sqrt{1-\rho^2}) \cdot 
+   \exp \left( -\dfrac{a_1^2 - 2 \rho a_1 a_2 + a_2^2}{2(1-\rho^2)}\right)}
+   { 1 - \rho^2 } \right)
+   \; d a_2 \; d a_1 \nonumber \\[3ex] 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   
+= & \int_{- \infty}^{x_1} \int_{- \infty}^{x_2}
+   \frac{1}{2\pi}
+   \left( \dfrac{
+   \dfrac{\partial}{\partial \rho} \left( -\dfrac{a_1^2 - 2
+   \rho a_1 a_2 + a_2^2}{2(1-\rho^2)} \right) \cdot       
+    \exp \left( -\dfrac{a_1^2 - 2 \rho a_1 a_2 + a_2^2}{2(1-\rho^2)} \right) 
+    \cdot \sqrt{1-\rho^2}} { 1 - \rho^2 } \right. \\
+  & \left. \qquad - \dfrac {
+    \left(-\dfrac{\rho}{\sqrt{1-\rho^2}}\right)  \cdot \exp \left( -\dfrac{a_1^2 - 
+    2\rho a_1 a_2 + a_2^2}{2(1-\rho^2)}\right)}
+    { 1 - \rho^2 } \right)
+    \; d a_2 \; d a_1 \nonumber \\[3ex]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+= & \int_{- \infty}^{x_1} \int_{- \infty}^{x_2}
+   \frac{1}{2\pi}
+   \left( \dfrac{
+   \dfrac{ \left( -4\rho (a_1^2 - 2 \rho a_1 a_2 + a_2^2 ) 
+   - 2( 1 - \rho^2 ) ( -2 a_1 a_2 ) \right)}{4(1-\rho^2)^2} \cdot       
+   \exp \left( -\dfrac{a_1^2 - 2 \rho a_1 a_2 + a_2^2}{2(1-\rho^2)} \right) \cdot 
+   \sqrt{1-\rho^2}}
+   { 1 - \rho^2 } \right. \\
+  & \left. \qquad -\dfrac{
+   \left(-\dfrac{\rho}{ \sqrt{1-\rho^2}} \right) \cdot 
+    \exp \left( -\dfrac{a_1^2 - 2 \rho a_1 a_2 + a_2^2}{2(1-\rho^2)}\right)}
+    { 1 - \rho^2 } \right)
+   \; d a_2 \; d a_1 \nonumber \\[3ex] 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+= & \int_{- \infty}^{x_1} \int_{- \infty}^{x_2}
+   \frac{1}{2\pi}
+   \left( \dfrac{
+   \dfrac{ \left( -4\rho (a_1^2 - 2 \rho a_1 a_2 + a_2^2 ) 
+   - 2( 1 - \rho^2 ) ( -2 a_1 a_2 ) \right)}{4(1-\rho^2)^2} \cdot 
+   \sqrt{1-\rho^2}}
+   { 1 - \rho^2 } 
+   -\dfrac{
+   \left(-\dfrac{\rho}{ \sqrt{1-\rho^2}} \right)}
+   { 1 - \rho^2 } \right) \\
+  &\qquad \cdot       
+   \exp \left( -\dfrac{a_1^2 - 2 \rho a_1 a_2 + a_2^2}{2(1-\rho^2)} \right)
+   \; d a_2 \; d a_1 \nonumber \\[3ex] 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+= & \int_{- \infty}^{x_1} \int_{- \infty}^{x_2}
+   \frac{1}{2\pi}
+   \left( \dfrac{
+   \left( -4\rho (a_1^2 - 2 \rho a_1 a_2 + a_2^2 ) 
+   - 2( 1 - \rho^2 ) ( -2 a_1 a_2 ) \right)}
+   {4(1-\rho^2)^{\frac{5}{3}}}
+   +\dfrac{\rho}{ (1-\rho^2)^{\frac{3}{2}}}
+   \right) \\
+  &\qquad \cdot       
+   \exp \left( -\dfrac{a_1^2 - 2 \rho a_1 a_2 + a_2^2}{2(1-\rho^2)} \right)
+   \; d a_2 \; d a_1 \nonumber \\[3ex] 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+= & \int_{- \infty}^{x_1} \int_{- \infty}^{x_2}
+   \frac{1}{2\pi}
+   \left( \dfrac{
+   \left( -4\rho (a_1^2 - 2 \rho a_1 a_2 + a_2^2 ) 
+   - 2( 1 - \rho^2 ) ( -2 a_1 a_2 ) \right)}{4(1-\rho^2)^{\frac{5}{2}}}
+   +\dfrac{\rho}{ (1-\rho^2)^{\frac{3}{2}}}
+   \right) \\
+  &\qquad \cdot       
+   \exp \left( -\dfrac{a_1^2 - 2 \rho a_1 a_2 + a_2^2}{2(1-\rho^2)} \right)
+   \; d a_2 \; d a_1 \nonumber \\[3ex] 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   
+= & \int_{- \infty}^{x_1} \int_{- \infty}^{x_2}
+  \frac{1}{2\pi}
+  \left( \dfrac{\rho}
+  {( 1 - \rho^2)^{\frac{3}{2}}}  
+  - \frac{ \rho( a_1^2 - \rho a_1 a_2  + a_2^2 ) - a_1 a_2 }
+  { ( 1 - \rho^2 )^{\frac{5}{2}}} \right) \\
+  & \qquad \cdot \exp \left( -\frac{a_1^2 - 2 \rho a_1 a_2 + a_2^2}{2(1-\rho^2)}
+  \right) \; d a_2 \; d a_1 \nonumber \\[3ex] 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+=& \frac{1}{2 \pi \sqrt{( 1 - \rho^2)}} 
+ \int_{- \infty}^{x_1} \int_{- \infty}^{x_2} 
+ \left( \frac{ \rho}{ 1 - \rho^2 } 
+ - \frac{ \rho( a_1^2 - \rho a_1 a_2 + a_2^2 ) - a_1 a_2 }{ (1 - \rho^2)^2 } 
+ \right) \\
+ & \qquad \cdot \exp \left( -\frac{a_1^2 - 2 \rho a_1 a_2 + a_2^2}{2(1-\rho^2)}
+    \right)
+    \; d a_2 \; d a_1 \nonumber \\[3ex] 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+=& \frac{1}{2 \pi \sqrt{( 1 - \rho^2)}} 
+ \int_{- \infty}^{x_1} 
+ \left| \left( - \frac{ 2 a_1 - 2 \rho a_2 }{ 2( 1 - \rho^2 )} \right) 
+ \cdot \exp \left( -\frac{a_1^2 - 2 \rho a_1 a_2 + a_2^2}{2(1-\rho^2)} \right) 
+ \right|_{-\infty}^{x_2}
+ \; d a_1  \\[3ex] 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+=& \frac{1}{2 \pi \sqrt{( 1 - \rho^2)}} 
+ \int_{- \infty}^{x_1} 
+ \left( \left( - \frac{ 2 a_1 - 2 \rho x_2 }{ 2( 1 - \rho^2 )} \right) 
+ \cdot \exp \left( -\frac{a_1^2 - 2 \rho a_1 x_2 + x_2^2}{2(1-\rho^2)} \right) \right.\\
+ & \left. - \displaystyle{\lim_{a_2 \rightarrow -\infty}} 
+ \frac{1}{2( 1 - \rho^2 )} \frac{ - 2 a_1 + 2 \rho a_2} 
+ {\exp \left( \dfrac{a_1^2 - 2 \rho a_1 a_2 + a_2^2}{2(1-\rho^2)} \right)} \right)
+ \; d a_1 \nonumber 
+ \end{align}
+ Applying L'Hospital on the last term leads to
+\begin{align} 
+=& \frac{1}{2 \pi \sqrt{( 1 - \rho^2)}} 
+ \int_{- \infty}^{x_1} 
+ \left( \left( - \frac{ 2 a_1 - 2 \rho x_2 }{ 2( 1 - \rho^2 )} \right) 
+ \cdot \exp \left( -\frac{a_1^2 - 2 \rho a_1 x_2 + x_2^2}{2(1-\rho^2)} \right) 
+ - 0 \right)
+ \; d a_1 \\[3ex] 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+=& \frac{1}{2 \pi \sqrt{( 1 - \rho^2)}} 
+ \int_{- \infty}^{x_1} 
+ \left( - \frac{ 2 a_1 - 2 \rho x_2 }{ 2( 1 - \rho^2 )} \right) 
+ \cdot \exp \left( -\frac{a_1^2 - 2 \rho a_1 x_2 + x_2^2}{2(1-\rho^2)} \right) 
+ \; d a_1 \label{eq:x22} \\[3ex] 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+=& \frac{1}{2 \pi \sqrt{( 1 - \rho^2)}} 
+ \left|
+ \exp \left( -\frac{a_1^2 - 2 \rho a_1 x_2 + x_2^2}{2(1-\rho^2)} \right) 
+ \right|_{-\infty}^{x_1} \label{eq:x11} \\[3ex] 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+=& \frac{1}{2 \pi \sqrt{( 1 - \rho^2)}} \cdot
+ \exp \left( -\frac{x_1^2 - 2 \rho x_1 x_2 + x_2^2}{2(1-\rho^2)} \right) \label{eq:x12} \\[3ex]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+=& \phi_2 ( x_1, x_2, \rho ) \label{eq:derivBivrho_final}
+\end{align}
+This result is in line with \citet{Sibuya1960} and \citet{Sungur1990}.
+
+In the following, we will numerically calculate the derivative
+of the cumulative distribution function of the bivariate normal distribution
+(equation~\ref{eq:derivBivrho_start}) with respect to~$\rho$
+and check whether this partial derivative
+is equal to the right-hand sides of equation~(\ref{eq:derivBivrho_final}):
+<<>>=
+# Numerical gradient of the PDF w.r.t. rho
+funrho <- function( p ) {
+   prob <- dmvnorm( x = c( x1, x2 ),
+      sigma = matrix( c( 1, p, p, 1 ), nrow = 2 ) )
+   return( prob )
+}
+grad <- c( numericGradient( funrho, rho ) )
+print( grad )
+
+# Comparison with analytical gradient for rho
+efun <- exp(-(x1^2 - 2 * rho * x1 * x2 + x2^2)/(2*(1 - rho^2)))
+
+all.equal( grad, 
+( (-((2*rho*(-2*rho*x1*x2+x1^2+x2^2) - 2*x1*x2*(1-rho^2)) * efun)/
+    (2*(1-rho^2)^(3/2) )) +
+    ((rho*efun)/(sqrt(1-rho^2))) ) /
+    (2*pi*(1-rho^2)) )
+@
+<<echo=FALSE>>=
+#Eq??
+all.equal(grad,
+    (1/(2*pi)) * (
+    ((((-4*rho*(x1^2-2*rho*x1*x2+x2^2)-2*(1-rho^2)*(-2*x1*x2))/(4*(1-rho^2)^2)) * 
+            efun * sqrt(1-rho^2))/(1-rho^2)) - 
+            ((-(rho/(sqrt(1-rho^2)))*efun)/(1-rho^2))
+    ))
+#Eq??
+all.equal(grad,
+    (1/(2*pi)) * 
+    ((rho/((1-rho^2)^(3/2))) - ((rho*(x1^2-rho*x1*x2+x2^2)-x1*x2)/
+            ((1-rho^2)^(5/2)))) * efun
+    )
+
+#Eq??
+all.equal(grad,
+    (1/(2*pi*sqrt(1-rho^2))) * 
+    (((rho/(1-rho^2)) - ((rho*(x1^2-rho*x1*x2+x2^2)-x1*x2)/
+            ((1-rho^2)^2))) * efun)
+    )
+@
+
+<<>>=
+# Numerical gradient of the CDF w.r.t. rho
+cdfRho <- function( p, xa = x1, xb = x2 ) {
+   prob <- pmvnorm( upper = c( xa, xb ),
+      sigma = matrix( c( 1, p, p, 1 ), nrow = 2 ) )
+   return( prob )
+}
+grad <- c( numericGradient( cdfRho, rho ) )
+print( grad )
+
+# comparison with analytical gradient
+all.equal( grad, dmvnorm( x = c( x1, x2 ),
+      sigma = matrix( c( 1, rho, rho, 1 ), nrow = 2 ) ) )
+
+# comparisons with other values
+compDerivRho <- function( xa, xb, p ) {
+   dn <- c( numericGradient( cdfRho, p, xa = xa, xb = xb ) )
+   da <- dmvnorm( x = c( xa, xb ),
+      sigma = matrix( c( 1, p, p, 1 ), nrow = 2 ) )
+   return( all.equal( dn, da ) )
+}
+compDerivRho( x1, x2, rho )
+compDerivRho( 0.5, x2, rho )
+compDerivRho( 2.5, x2, rho )
+compDerivRho( x1, -2, rho )
+compDerivRho( x1, x2, 0.2 )
+compDerivRho( x1, x2, 0.98 ) 
+@
+
+\pagebreak
+\section{Gradients of the Log-Likelihood Function}
+\subsection{Gradients with respect to the parameters of the selection 
+equation~($\vec{\beta}^S$)}
+
+First, we use equation~(\ref{eq:derivBivFinal}), to determine the derivative of 
+the bivariate standard normal distribution with respect to the parameter 
+$\vec{\beta}^S$ as part of the loglikelihood function:
+
+\begin{align}
+& \frac{\partial \Phi_2 \left( \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}
+    {\sigma}, {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right)}{\partial \beta^S} 
+   = \Phi \left( \frac{\frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma} 
+      - \rho {\vec{\beta}^S}' \vec{x}_i^S}{\sqrt{1 - \rho^2}} \right)
+      \phi( {\vec{\beta}^S}' \vec{x}_i^S ) \cdot 
+      \frac{\partial{\vec{\beta}^S}' \vec{x}_i^S}{\partial \vec{\beta}^S} \\
+      & = \Phi \left( \frac{\frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}
+      {\sigma} + \rho {\vec{\beta}^S}' \vec{x}_i^S}{\sqrt{1 - \rho^2}} \right)
+      \phi( {\vec{\beta}^S}' \vec{x}_i^S ) \cdot \vec{x}_i^S
+\end{align}
+
+Using this result we can now derive the gradient for $\vec{\beta}^S$ in the 
+log-likelihood function:
+
+\begin{align}
+& \frac{\partial \ell_i}{\partial \beta^S} = \frac{\partial}{\partial \beta^S} 
+    \Bigg( ( 1 - y_i^S )
+    \ln \left[ \Phi \left( - {\vec{\beta}^S}' \vec{x}_i^S \right) \right] \\
+    & \quad + \sum_{m=1}^M y_i^S ( y_i^O = m ) \ln \left[
+      \Phi_2 \left(
+         \frac{\alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) \right.\nonumber \\
+      & \qquad \left. - \Phi_2 \left(
+         \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) 
+   \right] \Bigg) \nonumber \\
+& = ( 1 - y_i^S )
+    \frac{\partial}{\partial \beta^S} \Bigg( \ln \left[ \Phi 
+    \left( - {\vec{\beta}^S}' \vec{x}_i^S \right) \right] \Bigg) \\
+    & \quad + \sum_{m=1}^M y_i^S ( y_i^O = m ) \frac{\partial}{\partial \beta^S} 
+    \Bigg( \ln \left[\Phi_2 \left(
+        \frac{\alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) \right. \nonumber \\
+      & \qquad \left. - \Phi_2 \left(
+         \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) 
+   \right] \Bigg) \nonumber \\
+& = ( 1 - y_i^S )
+   \frac{\phi \left( - {\vec{\beta}^S}' \vec{x}_i^S \right)
+         \cdot \left( - \vec{x}_i^S \right) }{
+      \Phi \left( - {\vec{\beta}^S}' \vec{x}_i^S \right)}  \\
+    & \quad + \sum_{m=1}^M y_i^S ( y_i^O = m )
+      \frac{\frac{\partial \Phi_2 \left(
+         \frac{\alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) }{\partial \beta^S}
+         - \frac{\partial \Phi_2 \left(
+         \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) }{\partial \beta^S}}
+         {\Phi_2 \left(
+         \frac{\alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) - \Phi_2 \left(
+         \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) } \nonumber \\
+& = ( 1 - y_i^S )
+    \frac{ \phi \left( - {\vec{\beta}^S}' \vec{x}_i^S \right)
+         \cdot \left( - \vec{x}_i^S \right) }{
+      \Phi \left( - {\vec{\beta}^S}' \vec{x}_i^S \right) } \\
+   & \quad + \sum_{m=1}^M y_i^S ( y_i^O = m ) 
+   \frac{ 1 }{
+      \Phi_2 \left(
+         \frac{ \alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O }{ \sigma },
+            {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right)
+      -\Phi_2 \left(
+         \frac{ \alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O }{ \sigma },
+            {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) } \nonumber \\
+   & \qquad \left(
+      \Phi \left( \frac{
+         \frac{ \alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O }{ \sigma } 
+            + \rho {\vec{\beta}^S}' \vec{x}_i^S }{ \sqrt{1 - \rho^2} } \right)
+      \phi \left( {\vec{\beta}^S}' \vec{x}_i^S \right)
+      \cdot \vec{x}_i^S \right. \nonumber \\
+   & \qquad \qquad - \left. \Phi \left( \frac{
+         \frac{ \alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O }{ \sigma } 
+            + \rho {\vec{\beta}^S}' \vec{x}_i^S) }{ \sqrt{1 - \rho^2} } \right)
+      \phi \left( {\vec{\beta}^S}' \vec{x}_i^S \right)
+      \cdot \vec{x}_i^S \right) \nonumber \\
+& = ( 1 - y_i^S )
+    \frac{ \phi \left( - {\vec{\beta}^S}' \vec{x}_i^S \right)
+         \cdot \left( - \vec{x}_i^S \right) }{
+      \Phi \left( - {\vec{\beta}^S}' \vec{x}_i^S \right) } 
+    \\
+   & \quad + \sum_{m=1}^M y_i^S ( y_i^O = m ) 
+   \frac{ \left(
+      \Phi \left( \frac{
+         \frac{ \alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O }{ \sigma } 
+            + \rho {\vec{\beta}^S}' \vec{x}_i^S }{ \sqrt{1 - \rho^2} } \right)
+      - \Phi \left( \frac{
+         \frac{ \alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O }{ \sigma } 
+            + \rho {\vec{\beta}^S}' \vec{x}_i^S }{ \sqrt{1 - \rho^2} } \right)
+      \right)
+      \phi \left( {\vec{\beta}^S}' \vec{x}_i^S \right)
+      \cdot \vec{x}_i^S \nonumber
+   }{
+      \Phi_2 \left(
+         \frac{ \alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O }{ \sigma },
+            {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right)
+      -\Phi_2 \left(
+         \frac{ \alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O }{ \sigma },
+            {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) } \nonumber
+\end{align}
+
+
+\pagebreak
+
+\subsection{Gradients with respect to the parameters in the outcome equation~%
+($\vec{\beta}^O$)}
+
+%\frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma}
+%{\vec{\beta}^S}' \vec{x}_i^S
+Analogous to $\vec{\beta}^S$ and by using equation~(\ref{eq:derivBivFinal}) we 
+derive the gradient of $\vec{\beta}^O$:
+\begin{align}
+& \frac{\partial \Phi_2 \left( \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}
+    {\sigma}, {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right)}{\partial \beta^O} 
+    = \Phi \left( \frac{{\vec{\beta}^S}' \vec{x}_i^S 
+      + \rho \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma}}
+      {\sqrt{1 - \rho^2}} \right) \phi \left( \frac{\alpha_{m} - {\vec{\beta}^O}' 
+      \vec{x}_i^O}{\sigma} \right) \cdot \left(-\frac{\vec{x}_i^O}{\sigma} \right)
+\end{align}
+
+Using this result we derive the gradient for the outcome parameter 
+$\vec{\beta}^O$ for the log-likelihood function:
+
+\begin{align}
+\frac{\partial \ell_i}{\partial \beta^O} & = \frac{\partial}{\partial \beta^O} 
+    \Bigg( ( 1 - y_i^S )
+    \ln \left[ \Phi \left( - {\vec{\beta}^S}' \vec{x}_i^S \right) \right] \\
+   & \quad + \sum_{m=1}^M y_i^S ( y_i^O = m ) \ln \left[
+      \Phi_2 \left(
+         \frac{\alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) \right.\nonumber \\
+      & \qquad \left. - \Phi_2 \left(
+         \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) 
+   \right] \Bigg) \nonumber \\
+& = \sum_{m=1}^M y_i^S ( y_i^O = m ) \frac{\partial}{\partial \beta^O} 
+        \Bigg( \ln \left[\Phi_2 \left(
+         \frac{\alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) \right. \\
+      & \qquad \left. - \Phi_2 \left(
+         \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) 
+   \right] \Bigg) \nonumber \\
+& = \sum_{m=1}^M y_i^S ( y_i^O = m )
+      \frac{
+         \frac{ \partial \Phi_2 \left(
+            \frac{ \alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O }{ \sigma },
+               {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right)
+         }{ \partial \beta^O }
+         - \frac{ \partial \Phi_2 \left(
+            \frac{ \alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O }{ \sigma },
+               {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right)
+         }{ \partial \beta^O }
+      }{ \Phi_2 \left(
+            \frac{ \alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O }{ \sigma },
+               {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right)
+         - \Phi_2 \left(
+            \frac{ \alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O }{ \sigma },
+               {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) } \\
+& = \sum_{m=1}^M y_i^S ( y_i^O = m ) \cdot
+        \frac{ 1 }{
+        \Phi_2 \left(
+            \frac{\alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+            {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right)
+         - \Phi_2 \left(
+            \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+            {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) } \\
+   & \quad \left(
+      \Phi \left( \frac{{\vec{\beta}^S}' \vec{x}_i^S
+            + \rho \frac{\alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma}
+         }{ \sqrt{1 - \rho^2} } \right)
+      \phi \left( \frac{ \alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma}
+         \right) \cdot
+      \left( -\frac{ \vec{x}_i^O }{ \sigma } \right) \right. \nonumber \\
+   & \qquad \left. - \Phi \left( \frac{{\vec{\beta}^S}' \vec{x}_i^S 
+            + \rho \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma}
+         }{ \sqrt{1 - \rho^2} } \right)
+      \phi \left( \frac{ \alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma}
+         \right) \cdot
+      \left(-\frac{ \vec{x}_i^O }{ \sigma} \right) \right) \nonumber \\
+& = \sum_{m=1}^M y_i^S ( y_i^O = m ) \cdot
+        \frac{ 1 }{
+        \Phi_2 \left(
+            \frac{\alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+            {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right)
+         - \Phi_2 \left(
+            \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+            {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) } \\
+   & \quad \left(
+      \Phi \left( \frac{{\vec{\beta}^S}' \vec{x}_i^S
+            + \rho \frac{\alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma}
+         }{ \sqrt{1 - \rho^2} } \right)
+      \phi \left( \frac{ \alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma}
+         \right) \right. \nonumber \\
+   & \qquad \left. - \Phi \left( \frac{{\vec{\beta}^S}' \vec{x}_i^S 
+            + \rho \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma}
+         }{ \sqrt{1 - \rho^2} } \right)
+      \phi \left( \frac{ \alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma}
+         \right)
+      \right) \cdot
+      \left( - \frac{ \vec{x}_i^O }{ \sigma} \right) \nonumber
+\end{align}
+
+\subsection{Gradients with respect to the coefficient of correlation~($\rho$)}
+
+Given the result that the derivative of the CDF with respect to $\rho$ is equal 
+to the PDF (see equation \ref{eq:derivBivrho_final}), we can also derive the 
+gradient of the correlation parameter ($\rho$):
+
+\begin{align}
+& \frac{\partial \ell_i}{\partial \rho} = \frac{\partial}{\partial \rho} 
+    \Bigg( ( 1 - y_i^S ) \ln \left[ \Phi \left( - {\vec{\beta}^S}' 
+    \vec{x}_i^S \right) \right] \\
+   & \quad + \sum_{m=1}^M y_i^S ( y_i^O = m ) \ln \left[
+      \Phi_2 \left(
+         \frac{\alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) \right.\nonumber \\
+      & \qquad \left. - \Phi_2 \left(
+         \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) 
+   \right] \Bigg) \nonumber \\
+& = \sum_{m=1}^M y_i^S ( y_i^O = m ) \frac{\partial}{\partial \rho} 
+        \Bigg( \ln \left[\Phi_2 \left(
+         \frac{\alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) \right. \\
+      & \qquad \left. - \Phi_2 \left(
+         \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) 
+   \right] \Bigg) \nonumber \\
+& = \sum_{m=1}^M y_i^S ( y_i^O = m )
+      \frac{ \phi_2 \left(
+         \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right)
+         - \phi_2 \left(
+         \frac{\alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right)}
+         {\Phi_2 \left(
+         \frac{\alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) - \Phi_2 \left(
+         \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) }
+\end{align}
+
+
+\begin{align}
+\frac{\partial \ell_i}{\partial \artanh(\rho)}
+& = \frac{\partial \ell_i}{\partial \rho}
+   \frac{\partial \rho}{\partial \artanh(\rho)}
+= \frac{\partial \ell_i}{\partial \rho}
+   \; (1 - \rho^2)
+\end{align}
+
+\subsection{Gradients with respect to the standard deviation used for 
+normalisation~($\sigma$)}
+
+Finally, we derive the gradient for $\sigma$ in the same way as we did for
+$\beta^S$ and $\beta^O$:
+
+\begin{align}
+& \frac{\partial \Phi_2 \left( \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}
+    {\sigma}, {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right)}{\partial \sigma} \nonumber \\
+& = \Phi \left( \frac{{\vec{\beta}^S}' \vec{x}_i^S 
+      + \rho \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma}}
+      {\sqrt{1 - \rho^2}} \right) \phi \left( \frac{\alpha_{m} - {\vec{\beta}^O}' 
+      \vec{x}_i^O}{\sigma} \right) \cdot \frac{{\vec{\beta}^O}' \vec{x}_i^O - 
+      \alpha_{m}}{\sigma^2}
+\end{align}
+
+\begin{align}
+& \lim_{\alpha_m \rightarrow \infty}
+\frac{\partial \Phi_2 \left( \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}
+    {\sigma}, {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right)}{\partial \sigma}
+    \nonumber \\
+& = \lim_{\alpha_m \rightarrow \infty}
+   \Phi \left( \frac{{\vec{\beta}^S}' \vec{x}_i^S 
+      + \rho \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma}}
+      {\sqrt{1 - \rho^2}} \right) \phi \left( \frac{\alpha_{m} - {\vec{\beta}^O}' 
+      \vec{x}_i^O}{\sigma} \right) \cdot \frac{{\vec{\beta}^O}' \vec{x}_i^O - 
+      \alpha_{m}}{\sigma^2}\\
+& = \Phi \left( \frac{{\vec{\beta}^S}' \vec{x}_i^S 
+      + \rho \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma}}
+      {\sqrt{1 - \rho^2}} \right)
+      \lim_{\alpha_m \rightarrow \infty}
+      \phi \left( \frac{\alpha_{m} - {\vec{\beta}^O}' 
+      \vec{x}_i^O}{\sigma} \right) \cdot \frac{{\vec{\beta}^O}' \vec{x}_i^O - 
+      \alpha_{m}}{\sigma^2}\\
+& = \Phi \left( \frac{{\vec{\beta}^S}' \vec{x}_i^S 
+      + \rho \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma}}
+      {\sqrt{1 - \rho^2}} \right)
+      \lim_{\alpha_m \rightarrow \infty}
+      \frac{ \frac{{\vec{\beta}^O}' \vec{x}_i^O - \alpha_{m}}{\sigma^2} }{ 
+         \left( \phi \left( \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{
+            \sigma} \right) \right)^{-1} } \\
+& = \Phi \left( \frac{{\vec{\beta}^S}' \vec{x}_i^S 
+      + \rho \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma}}
+      {\sqrt{1 - \rho^2}} \right) \\
+& \qquad \lim_{\alpha_m \rightarrow \infty}
+      \frac{ - \frac{1}{\sigma^2} }{ 
+         - \left( \phi \left(
+               \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma}
+            \right) \right)^{-2} 
+         \left( - \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma}
+         \right)
+         \phi \left(
+               \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma}
+            \right)
+         \frac{1}{\sigma}
+      } \nonumber \\
+& = \Phi \left( \frac{{\vec{\beta}^S}' \vec{x}_i^S 
+      + \rho \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma}}
+      {\sqrt{1 - \rho^2}} \right)
+   \lim_{\alpha_m \rightarrow \infty}
+      \frac{ - \frac{1}{\sigma} }{ 
+         \left( \phi \left(
+               \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma}
+            \right) \right)^{-1} 
+         \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma}
+      } \\
+& = \Phi \left( \frac{{\vec{\beta}^S}' \vec{x}_i^S 
+      + \rho \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma}}
+      {\sqrt{1 - \rho^2}} \right)
+   \lim_{\alpha_m \rightarrow \infty}
+      \frac{ - \frac{1}{\sigma} 
+         \phi \left( \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma}
+            \right) }{ 
+         \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma}
+      } \\
+& = 0
+\end{align}
+
+Similarly:
+\begin{align}
+\lim_{\alpha_m \rightarrow - \infty}
+\frac{\partial \Phi_2 \left( \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}
+    {\sigma}, {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right)}{\partial \sigma}
+= 0
+\end{align}
+
+\begin{align}
+\frac{\partial \ell_i}{\partial \sigma} & = \frac{\partial}{\partial \sigma} 
+    \Bigg( ( 1 - y_i^S ) \ln \left[ \Phi \left( - {\vec{\beta}^S}' 
+    \vec{x}_i^S \right) \right] \\
+   & \quad + \sum_{m=1}^M y_i^S ( y_i^O = m ) \ln \left[
+      \Phi_2 \left(
+         \frac{\alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) \right.\nonumber \\
+      & \qquad \left. - \Phi_2 \left(
+         \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) 
+   \right] \Bigg) \nonumber \\
+& = \sum_{m=1}^M y_i^S ( y_i^O = m ) \frac{\partial}{\partial \sigma} 
+        \Bigg( \ln \left[\Phi_2 \left(
+        \frac{\alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+        {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) \right. \\
+      & \qquad \left. - \Phi_2 \left(
+         \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) 
+   \right] \Bigg) \nonumber \\
+& = \sum_{m=1}^M y_i^S ( y_i^O = m )
+      \frac{\frac{\partial \Phi_2 \left(
+         \frac{\alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) }{\partial \sigma}
+         - \frac{\partial \Phi_2 \left(
+         \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) \Bigg)}{\partial \sigma}}
+         {\Phi_2 \left(
+         \frac{\alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) - \Phi_2 \left(
+         \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) } \\
+& = \sum_{m=1}^M \frac{y_i^S ( y_i^O = m )}{\Phi_2 \left(
+         \frac{\alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) - \Phi_2 \left(
+         \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma},
+         {\vec{\beta}^S}' \vec{x}_i^S, - \rho \right) } \\
+   & \quad \left( 
+    \Phi \left( \frac{{\vec{\beta}^S}' \vec{x}_i^S 
+      + \rho \frac{\alpha_{m+1} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma}}
+      {\sqrt{1 - \rho^2}} \right) \phi \left( \frac{\alpha_{m+1} - {\vec{\beta}^O}' 
+      \vec{x}_i^O}{\sigma} \right) \cdot \frac{{\vec{\beta}^O}' 
+      \vec{x}_i^O - \alpha_{m+1}}{\sigma^2} \right. \nonumber \\
+   & \qquad - \left. \Phi \left( \frac{{\vec{\beta}^S}' \vec{x}_i^S 
+      + \rho \frac{\alpha_{m} - {\vec{\beta}^O}' \vec{x}_i^O}{\sigma}}
+      {\sqrt{1 - \rho^2}} \right) \phi \left( \frac{\alpha_{m} - {\vec{\beta}^O}' 
+      \vec{x}_i^O}{\sigma} \right) \cdot \frac{{\vec{\beta}^O}' 
+      \vec{x}_i^O - \alpha_{m}}{\sigma^2} \right) \nonumber
+\end{align}
+
+\begin{align}
+\frac{\partial \ell_i}{\partial \log(\sigma)}
+& = \frac{\partial \ell_i}{\partial \sigma}
+   \frac{\partial \sigma}{\partial \log(\sigma)}
+= \frac{\partial \ell_i}{\partial \sigma}
+   \; \sigma
+\end{align}
+
+
+\section{Example with a Generated Dataset}
+
+\section{Generate Dataset}
+
+<<>>=
+library( "mvtnorm" )
+# number of observations
+nObs <- 300
+# parameters
+betaS <- c( 1, 1, -1 )
+betaO <- c( 10, 4 )
+rho <- 0.4
+sigma <- 5
+# boundaries of the intervals
+bound <- c(-Inf,5,15,Inf)
+
+# set 'seed' of the pseudo random number generator
+# in order to always generate the same pseudo random numbers
+set.seed(123)
+# generate variables x1 and x2
+dat <- data.frame( x1 = rnorm( nObs ), x2 = rnorm( nObs ) )
+# variance-covariance matrix of the two error terms
+vcovMat <- matrix( c( 1, rho*sigma, rho*sigma, sigma^2 ), nrow = 2 )
+# generate the two error terms
+eps <- rmvnorm( nObs, sigma = vcovMat )
+dat$epsS <- eps[,1]
+dat$epsO <- eps[,2]
+# generate the selection variable
+dat$yS <- with( dat, betaS[1] + betaS[2] * x1 + betaS[3] * x2 + epsS ) > 0
+table( dat$yS )
+# generate the unobserved/latent outcome variable
+dat$yOu <- with( dat, betaO[1] + betaO[2] * x1 + epsO )
+dat$yOu[ !dat$yS ] <- NA
+# obtain the intervals of the outcome variable
+dat$yO <- cut( dat$yOu, bound )
+table( dat$yO )
+@
+
+\subsection{Estimation of the Model}
+
+In the following estimation, 
+the starting values are obtained by a maximum-likelihood (ML) estimation
+of a tobit-2 model, 
+where the dependent variable of the outcome equation
+is set to the mid points of the intervals:
+<<>>=
+library( "sampleSelection" )
+res <- selection( yS ~ x1 + x2, yO ~ x1, data = dat, boundaries = bound )
+res
+summary( res )
+@
+
+
+In the following estimation, 
+the starting values are obtained by a two-step estimation
+of a tobit-2 model, 
+where the dependent variable of the outcome equation
+is set to the mid points of the intervals:
+<<>>=
+res2 <- selection( yS ~ x1 + x2, yO ~ x1, data = dat, boundaries = bound, 
+   start = "2step" )
+res2
+summary( res2 )
+@
+
+The following commands compare the starting values
+and the estimated coefficients:
+<<>>=
+# compare starting values (small differences)
+cbind( res$start, res2$start, res$start - res2$start )
+
+# combare estimated coefficients (virtually identical)
+cbind( coef( res ), coef( res2 ), coef( res ) - coef( res2 ) )
+@
+
+
+\section{Example with the `Smoke' dataset}
+
+The following command loads the dataset:
+<<>>=
+data( "Smoke" )
+@
+
+The following command creates a vector with the boundaries of the intervals:
+<<>>=
+bounds <- c( 0, 5, 10, 20, 50, Inf )
+@
+
+The following command estimates the model with few explanatory variables:
+<<>>=
+SmokeRes1 <- selection( smoker ~ educ + age, 
+  cigs_intervals ~ educ, data = Smoke, boundaries = bounds )
+@
+
+The following command estimates the model with more explanatory variables:
+<<>>=
+SmokeRes2 <- selection( smoker ~ educ + age + restaurn, 
+  cigs_intervals ~ educ + income + restaurn, data = Smoke, 
+  boundaries = bounds )
+@
+
+The following commands test 
+whether adding further explanatory variables
+significantly improves the explanatory power of the model:
+<<>>=
+library( "lmtest" )
+lrtest( SmokeRes1, SmokeRes2 )
+waldtest( SmokeRes1, SmokeRes2 )
+@
+Both tests indicate
+that---at 5\%~significance level---%
+the model with more explanatory variables (\code{SmokeRes2})
+has significantly higher explanatory power
+than the model with fewer explanatory variables~(\code{SmokeRes1}).
+
+
+\bibliographystyle{apalike}
+\bibliography{selection}
+\end{document}

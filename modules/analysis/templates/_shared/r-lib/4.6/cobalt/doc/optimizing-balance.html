@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Optimizing Tuning Parameters for Balance</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Optimizing Tuning Parameters for
+Balance</h1>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#bal.compute-and-bal.init" id="toc-bal.compute-and-bal.init"><code>bal.compute()</code> and
+<code>bal.init()</code></a></li>
+<li><a href="#balance-statistics" id="toc-balance-statistics">Balance
+statistics</a>
+<ul>
+<li><a href="#choosing-a-balance-statistic" id="toc-choosing-a-balance-statistic">Choosing a balance
+statistic</a></li>
+</ul></li>
+<li><a href="#example" id="toc-example">Example</a>
+<ul>
+<li><a href="#tuning-gbm-for-balance" id="toc-tuning-gbm-for-balance">Tuning GBM for balance</a></li>
+</ul></li>
+<li><a href="#references" id="toc-references">References</a></li>
+</ul>
+</div>
+
+<p>Part of using balancing methods, including matching, weighting, and
+subclassification, involves specifying a conditioning method, assessing
+balance after applying that method, and repeating until satisfactory
+balance is achieved. For example, in propensity score score
+subclassification, one needs to decide on the number of subclasses to
+use, and one way to do so is to try a number of of subclasses, assess
+balance after subclassification, try another number of subclasses,
+assess balance, and so on. As another example, in estimating the
+propensity score model itself, one might decided which covariates to
+include in the model (after deciding on a fixed set of covariates to
+balance), which covariates should have squares or interactions, and
+which link function (e.g., probit, logit) to use. Or choosing the number
+of matches each unit should receive in k:1 matching, or which value of
+the propensity score should be used to trim samples, etc.</p>
+<p>Essentially, these problems all involve selecting a specification by
+varying a number of parameters, which are sometimes called “tuning
+parameters”, in order to optimize balance. Many popular methods adjust
+tuning parameters to optimize balance as inherent parts of the method,
+like genetic matching <span class="citation">(<a href="#ref-diamondGeneticMatchingEstimating2013">Diamond and Sekhon
+2013</a>)</span>, which tunes variance importance in the distance
+matrix, or generalized boosted modeling <span class="citation">(<a href="#ref-mccaffreyPropensityScoreEstimation2004">McCaffrey et al.
+2004</a>)</span>, which tunes the number of trees in the prediction
+model for propensity scores. This strategy tends to yield methods that
+perform better than methods that don’t tune at all or tune to optimize a
+criterion other than balance (e.g., prediction accuracy) <span class="citation">Pirracchio and Carone (<a href="#ref-pirracchioBalanceSuperLearner2018">2018</a>)</span>.</p>
+<p>As of version 4.5.0, <em>cobalt</em> provides the functions
+<code>bal.compute()</code> and <code>bal.init()</code> to aid in
+selecting these tuning parameters in an efficient way without needing to
+manually program the computation of the balance statistic used as the
+criterion to optimize. This vignette explains how to use these
+functions, describes the balance statistics that are available, and
+provides examples of using these functions to implement new and existing
+balancing methods yourself. These functions are primarily for use inside
+other packages but may be useful to users experimenting with new
+methods. For a complete way to assess balance for a single
+specification, users should use <code>bal.tab()</code> and
+<code>bal.plot()</code> instead.</p>
+<div id="bal.compute-and-bal.init" class="section level2">
+<h2><code>bal.compute()</code> and <code>bal.init()</code></h2>
+<p>Broadly, these functions work by taking in the treatment, covariates
+for which balance is to be computed, and a set of balancing weights and
+return a scalar balance statistic that summarizes balance for the
+sample. <code>bal.compute()</code> does the work of computing the
+balance statistic, and <code>bal.init()</code> processes the inputs so
+they don’t need to be processed every time <code>bal.compute()</code> is
+called with a new set of weights.</p>
+<p>For <code>bal.init()</code>, we need to supply the covariates, the
+treatment, the name of the balance statistic we wish to compute,
+sampling weights (if any), and any other inputs required, which depend
+on the specific balance statistic requested. <code>bal.init()</code>
+returns a <code>bal.init</code> object, which is then passed to
+<code>bal.compute()</code> along with a set of balancing weights (which
+may result from weighting, matching, or subclassification).</p>
+<p>Below, we provide an example using the <code>lalonde</code> dataset.
+Our balance statistic will be the largest absolute standardized mean
+difference among the included covariates, which is specified as
+<code>&quot;smd.max&quot;</code>. We will first supply the required inputs to
+<code>bal.init()</code> and pass its output to
+<code>bal.compute()</code> to compute the balance statistic for the
+sample prior to weighting.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(cobalt)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;lalonde&quot;</span>, <span class="at">package =</span> <span class="st">&quot;cobalt&quot;</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>covs <span class="ot">&lt;-</span> <span class="fu">subset</span>(lalonde, <span class="at">select =</span> <span class="sc">-</span><span class="fu">c</span>(treat, race, re78))</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="co"># Initialize the object with the balance statistic,</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co"># treatment, and covariates</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>smd.init <span class="ot">&lt;-</span> <span class="fu">bal.init</span>(covs,</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>                     <span class="at">treat =</span> lalonde<span class="sc">$</span>treat,</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>                     <span class="at">stat =</span> <span class="st">&quot;smd.max&quot;</span>,</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>                     <span class="at">estimand =</span> <span class="st">&quot;ATT&quot;</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co"># Compute balance with no weights</span></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="fu">bal.compute</span>(smd.init)</span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="co">#&gt; [1] 0.8263093</span></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a><span class="co"># Can also compute the statistic directly using bal.compute():</span></span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a><span class="fu">bal.compute</span>(covs,</span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a>            <span class="at">treat =</span> lalonde<span class="sc">$</span>treat,</span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a>            <span class="at">stat =</span> <span class="st">&quot;smd.max&quot;</span>,</span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a>            <span class="at">estimand =</span> <span class="st">&quot;ATT&quot;</span>)</span>
+<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a><span class="co">#&gt; [1] 0.8263093</span></span></code></pre></div>
+<p>The largest absolute standardized mean difference with no weights is
+0.8263, which we can verify and investigate further using
+<code>bal.tab()</code>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">bal.tab</span>(covs,</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>        <span class="at">treat =</span> lalonde<span class="sc">$</span>treat,</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>        <span class="at">binary =</span> <span class="st">&quot;std&quot;</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>        <span class="at">estimand =</span> <span class="st">&quot;ATT&quot;</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>        <span class="at">thresholds =</span> .<span class="dv">05</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt; Balance Measures</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt;             Type Diff.Un      M.Threshold.Un</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt; age      Contin. -0.3094 Not Balanced, &gt;0.05</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt; educ     Contin.  0.0550 Not Balanced, &gt;0.05</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&gt; married   Binary -0.8263 Not Balanced, &gt;0.05</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co">#&gt; nodegree  Binary  0.2450 Not Balanced, &gt;0.05</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="co">#&gt; re74     Contin. -0.7211 Not Balanced, &gt;0.05</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co">#&gt; re75     Contin. -0.2903 Not Balanced, &gt;0.05</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co">#&gt; Balance tally for mean differences</span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="co">#&gt;                     count</span></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co">#&gt; Balanced, &lt;0.05         0</span></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="co">#&gt; Not Balanced, &gt;0.05     6</span></span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="co">#&gt; Variable with the greatest mean difference</span></span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a><span class="co">#&gt;  Variable Diff.Un      M.Threshold.Un</span></span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a><span class="co">#&gt;   married -0.8263 Not Balanced, &gt;0.05</span></span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a><span class="co">#&gt; Sample sizes</span></span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a><span class="co">#&gt;     Control Treated</span></span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a><span class="co">#&gt; All     429     185</span></span></code></pre></div>
+<p>We can see that the largest value corresponds to the covariate
+<code>married</code>.</p>
+<p>Now, lets estimate weights using probit regression propensity scores
+in <em>WeightIt</em> and see whether this balance statistic decreases
+after applying the weights:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;WeightIt&quot;</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>w.out <span class="ot">&lt;-</span> <span class="fu">weightit</span>(treat <span class="sc">~</span> age <span class="sc">+</span> educ <span class="sc">+</span> married <span class="sc">+</span> nodegree <span class="sc">+</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>                    re74 <span class="sc">+</span> re75,</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>                  <span class="at">data =</span> lalonde,</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>                  <span class="at">method =</span> <span class="st">&quot;glm&quot;</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>                  <span class="at">estimand =</span> <span class="st">&quot;ATT&quot;</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>                  <span class="at">link =</span> <span class="st">&quot;probit&quot;</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co"># Compute the balance statistic on the estimated weights</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="fu">bal.compute</span>(smd.init, <span class="fu">get.w</span>(w.out))</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt; [1] 0.06936946</span></span></code></pre></div>
+<p>After weighting, our balance statistic is 0.0694, indicating a
+significant improvement. Let’s try again with logistic regression:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>w.out <span class="ot">&lt;-</span> <span class="fu">weightit</span>(treat <span class="sc">~</span> age <span class="sc">+</span> educ <span class="sc">+</span> married <span class="sc">+</span> nodegree <span class="sc">+</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>                    re74 <span class="sc">+</span> re75,</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>                  <span class="at">data =</span> lalonde,</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>                  <span class="at">method =</span> <span class="st">&quot;glm&quot;</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>                  <span class="at">estimand =</span> <span class="st">&quot;ATT&quot;</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>                  <span class="at">link =</span> <span class="st">&quot;logit&quot;</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co"># Compute the balance statistic on the estimated weights</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="fu">bal.compute</span>(smd.init, <span class="fu">get.w</span>(w.out))</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; [1] 0.04791925</span></span></code></pre></div>
+<p>This is better, but we can do even better with bias-reduced logistic
+regression <span class="citation">(<a href="#ref-kosmidis2020">Kosmidis
+and Firth 2020</a>)</span>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>w.out <span class="ot">&lt;-</span> <span class="fu">weightit</span>(treat <span class="sc">~</span> age <span class="sc">+</span> educ <span class="sc">+</span> married <span class="sc">+</span> nodegree <span class="sc">+</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>                    re74 <span class="sc">+</span> re75,</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>                  <span class="at">data =</span> lalonde,</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>                  <span class="at">method =</span> <span class="st">&quot;glm&quot;</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>                  <span class="at">estimand =</span> <span class="st">&quot;ATT&quot;</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>                  <span class="at">link =</span> <span class="st">&quot;br.logit&quot;</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co"># Compute the balance statistic on the estimated weights</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="fu">bal.compute</span>(smd.init, <span class="fu">get.w</span>(w.out))</span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt; [1] 0.04392724</span></span></code></pre></div>
+<p>Instead of writing each complete call one at a time, we can do a
+little programming to make this happen automatically:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># Initialize object to compute the largest SMD</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>smd.init <span class="ot">&lt;-</span> <span class="fu">bal.init</span>(covs,</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>                     <span class="at">treat =</span> lalonde<span class="sc">$</span>treat,</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>                     <span class="at">stat =</span> <span class="st">&quot;smd.max&quot;</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>                     <span class="at">estimand =</span> <span class="st">&quot;ATT&quot;</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co"># Create vector of tuning parameters</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>links <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;probit&quot;</span>, <span class="st">&quot;logit&quot;</span>, <span class="st">&quot;cloglog&quot;</span>,</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>           <span class="st">&quot;br.probit&quot;</span>, <span class="st">&quot;br.logit&quot;</span>, <span class="st">&quot;br.cloglog&quot;</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co"># Apply each link to estimate weights</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co"># Can replace sapply() with purrr::map()</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>weights.list <span class="ot">&lt;-</span> <span class="fu">sapply</span>(links, <span class="cf">function</span>(link) {</span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>  <span class="fu">weightit</span>(treat <span class="sc">~</span> age <span class="sc">+</span> educ <span class="sc">+</span> married <span class="sc">+</span> nodegree <span class="sc">+</span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a>             re74 <span class="sc">+</span> re75,</span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a>           <span class="at">data =</span> lalonde,</span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;glm&quot;</span>,</span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a>           <span class="at">estimand =</span> <span class="st">&quot;ATT&quot;</span>,</span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a>           <span class="at">link =</span> link) <span class="sc">|&gt;</span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a>    <span class="fu">get.w</span>()</span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a>}, <span class="at">simplify =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a></span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="co"># Use each set of weights to compute balance</span></span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a><span class="co"># Can replace sapply() with purrr:map_vec()</span></span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a>stats <span class="ot">&lt;-</span> <span class="fu">sapply</span>(weights.list, bal.compute,</span>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a>                <span class="at">x =</span> smd.init)</span>
+<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a></span>
+<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a><span class="co"># See which set of weights is the best</span></span>
+<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a>stats</span>
+<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a><span class="co">#&gt;     probit      logit    cloglog  br.probit   br.logit br.cloglog </span></span>
+<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a><span class="co">#&gt; 0.06936946 0.04791925 0.02726102 0.06444577 0.04392724 0.02457557</span></span>
+<span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a>stats[<span class="fu">which.min</span>(stats)]</span>
+<span id="cb6-33"><a href="#cb6-33" tabindex="-1"></a><span class="co">#&gt; br.cloglog </span></span>
+<span id="cb6-34"><a href="#cb6-34" tabindex="-1"></a><span class="co">#&gt; 0.02457557</span></span></code></pre></div>
+<p>Interestingly, bias-reduced complimentary log-log regression produced
+weights with the smallest maximum absolute standardized mean difference.
+We can use <code>bal.tab()</code> to more finely examine balance on the
+chosen weights:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">bal.tab</span>(covs,</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>        <span class="at">treat =</span> lalonde<span class="sc">$</span>treat,</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>        <span class="at">binary =</span> <span class="st">&quot;std&quot;</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>        <span class="at">weights =</span> weights.list[[<span class="st">&quot;br.cloglog&quot;</span>]])</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co">#&gt; Balance Measures</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">#&gt;             Type Diff.Adj</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#&gt; age      Contin.  -0.0089</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt; educ     Contin.  -0.0246</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt; married   Binary  -0.0012</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#&gt; nodegree  Binary   0.0145</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt; re74     Contin.  -0.0209</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt; re75     Contin.  -0.0213</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt; Effective sample sizes</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co">#&gt;            Control Treated</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="co">#&gt; Unadjusted  429.       185</span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="co">#&gt; Adjusted    240.83     185</span></span></code></pre></div>
+<p>If balance is acceptable, you would move forward with these weights
+in estimating the treatment effect. Otherwise, you might try other
+values of the tuning parameters, other specifications of the model, or
+other weighting methods to try to achieve excellent balance.</p>
+</div>
+<div id="balance-statistics" class="section level2">
+<h2>Balance statistics</h2>
+<p>Several balance statistics can be computed by
+<code>bal.compute()</code> and <code>bal.init()</code>, and the ones
+available depend on whether the treatment is binary, multi-category, or
+continuous. These are explained below and on the help page
+<code>?bal.compute</code>. A complete list for a given treatment type
+can be requested using <code>available.stats()</code>. Some balance
+statistics are appended with <code>&quot;.mean&quot;</code>, <code>&quot;.max&quot;</code>,
+or <code>&quot;.rms&quot;</code>, which correspond to the mean (or L1-norm),
+maximum (or L-infinity norm), and root mean square (or L2-norm) of the
+absolute univariate balance statistic computed for each covariate.</p>
+<p>In addition, balance statistics can be compute between a sample and
+the same sample but weighted; this is known as “target balance” and is
+important when assessing the quality of weights for continuous
+treatments or for selecting a representative subset. To assess target
+balance, the treatment variable should be omitted from
+<code>bal.compute()</code> and <code>bal.init()</code>.</p>
+<div id="smd.mean-smd.max-smd.rms" class="section level4">
+<h4><code>smd.mean</code>, <code>smd.max</code>,
+<code>smd.rms</code></h4>
+<p>The mean, maximum, and root mean square of the absolute standardized
+mean differences computed for the covariates using
+<code>col_w_smd()</code>. The other allowable arguments include
+<code>estimand</code> (ATE, ATC, or ATT) to select the estimand,
+<code>focal</code> to identify the focal treatment group when the ATT is
+the estimand and the treatment has more than two categories, and
+<code>pairwise</code> to select whether mean differences should be
+computed between each pair of treatment groups or between each treatment
+group and the target group identified by <code>estimand</code> (default
+<code>TRUE</code>). Can be used with binary and multi-category
+treatments and for target balance (where the standardization factor is
+computed using the full original sample).</p>
+</div>
+<div id="ks.mean-ks.max-ks.rms" class="section level4">
+<h4><code>ks.mean</code>, <code>ks.max</code>, <code>ks.rms</code></h4>
+<p>The mean, maximum, or root-mean-squared Kolmogorov-Smirnov statistic,
+computed using <code>col_w_ks()</code>. The other allowable arguments
+include <code>estimand</code> (ATE, ATC, or ATT) to select the estimand,
+<code>focal</code> to identify the focal treatment group when the ATT is
+the estimand and the treatment has more than two categories, and
+<code>pairwise</code> to select whether statistics should be computed
+between each pair of treatment groups or between each treatment group
+and the target group identified by <code>estimand</code> (default
+<code>TRUE</code>). Can be used with binary and multi-category
+treatments and for target balance.</p>
+</div>
+<div id="ovl.mean-ovl.max-ovl.rms" class="section level4">
+<h4><code>ovl.mean</code>, <code>ovl.max</code>,
+<code>ovl.rms</code></h4>
+<p>The mean, maximum, or root-mean-squared overlapping coefficient
+compliment, computed using <code>col_w_ovl()</code>. The other allowable
+arguments include <code>estimand</code> (ATE, ATC, or ATT) to select the
+estimand, <code>focal</code> to identify the focal treatment group when
+the ATT is the estimand and the treatment has more than two categories,
+and <code>pairwise</code> to select whether statistics should be
+computed between each pair of treatment groups or between each treatment
+group and the target group identified by <code>estimand</code> (default
+<code>TRUE</code>). Can be used with binary and multi-category
+treatments and for target balance.</p>
+</div>
+<div id="mahalanobis" class="section level4">
+<h4><code>mahalanobis</code></h4>
+<p>The Mahalanobis distance between the treatment group means, which is
+computed as <span class="math display">\[
+\sqrt{(\mathbf{\bar{x}}_1 - \mathbf{\bar{x}}_0) \Sigma^{-1}
+(\mathbf{\bar{x}}_1 - \mathbf{\bar{x}}_0)}
+\]</span> where <span class="math inline">\(\mathbf{\bar{x}}_1\)</span>
+and <span class="math inline">\(\mathbf{\bar{x}}_0\)</span> are the
+vectors of covariate means in the two treatment groups, <span class="math inline">\(\Sigma^-1\)</span> is the (generalized) inverse of
+the covariance matrix of the covariates <span class="citation">(<a href="#ref-franklinMetricsCovariateBalance2014">Franklin et al.
+2014</a>)</span>. This is similar to <code>&quot;smd.rms&quot;</code> but the
+covariates are standardized to remove correlations between and
+de-emphasize redundant covariates. The other allowable arguments include
+<code>estimand</code> (ATE, ATC, or ATT) to select the estimand, which
+determines how the covariance matrix is calculated, and
+<code>focal</code> to identify the focal treatment group when the ATT is
+the estimand. Can only be used with binary treatments and for target
+balance.</p>
+</div>
+<div id="energy.dist" class="section level4">
+<h4><code>energy.dist</code></h4>
+<p>The total energy distance between each treatment group and the target
+sample, which is a scalar measure of the similarity between two
+multivariate distributions. See <span class="citation">Huling and Mak
+(<a href="#ref-hulingEnergyBalancingCovariate2024">2024</a>)</span> for
+details. The other allowable arguments include <code>estimand</code>
+(ATE, ATC, or ATT) to select the estimand, <code>focal</code> to
+identify the focal treatment group when the ATT is the estimand and the
+treatment has more than two categories, and <code>improved</code> to
+select whether the “improved” energy distance should be used, which
+emphasizes difference between treatment groups in addition to difference
+between each treatment group and the target sample (default
+<code>TRUE</code>). Can be used with binary and multi-category
+treatments and for target balance.</p>
+</div>
+<div id="kernel.dist" class="section level4">
+<h4><code>kernel.dist</code></h4>
+<p>The kernel distance between treatment groups, which is a scalar
+measure of the similarity between two multivariate distributions. See
+<span class="citation">Zhu et al. (<a href="#ref-zhuKernelBasedMetricBalance2018">2018</a>)</span> for
+details. Can only be used with binary treatments.</p>
+</div>
+<div id="l1.med" class="section level4">
+<h4><code>l1.med</code></h4>
+<p>The median L1 statistic computed across a random selection of
+possible coarsening of the data. See <span class="citation">Iacus et al.
+(<a href="#ref-iacusMultivariateMatchingMethods2011">2011</a>)</span>
+for details. The other allowable arguments include
+<code>l1.min.bin</code> (default 2) and <code>l1.max.bin</code> default
+(12) to select the minimum and maximum number of bins with which to bin
+continuous variables and <code>l1.n</code> (default 101) to select the
+number of binnings used to select the binning at the median.
+<code>covs</code> should be supplied without splitting factors into
+dummies to ensure the binning works correctly. Can be used with binary
+and multi-category treatments.</p>
+</div>
+<div id="r2-r2.2-r2.3" class="section level4">
+<h4><code>r2</code>, <code>r2.2</code>, <code>r2.3</code></h4>
+<p>The post-weighting <span class="math inline">\(R^2\)</span> of a
+model for the treatment given the covariates. <span class="citation">Franklin et al. (<a href="#ref-franklinMetricsCovariateBalance2014">2014</a>)</span>
+describe a similar but less generalizable metric, the “post-matching
+c-statistic”. The other allowable arguments include <code>poly</code> to
+add polynomial terms of the supplied order to the model and
+<code>int</code> (default <code>FALSE</code>) to add two-way
+interactions between covariates into the model. Using
+<code>&quot;r2.2&quot;</code> is a shortcut to requesting squares, and using
+<code>&quot;r2.3&quot;</code> is a shortcut to requesting cubes. Can be used with
+binary and continuous treatments. For binary treatments, the McKelvey
+and Zavoina <span class="math inline">\(R^2\)</span> from a logistic
+regression is used; for continuous treatments, the <span class="math inline">\(R^2\)</span> from a linear regression is used.</p>
+</div>
+<div id="p.mean-p.max-p.rms" class="section level4">
+<h4><code>p.mean</code>, <code>p.max</code>, <code>p.rms</code></h4>
+<p>The mean, maximum, or root-mean-squared absolute Pearson correlation
+between the treatment and covariates, computed using
+<code>col_w_corr()</code>. Can only be used with continuous
+treatments.</p>
+</div>
+<div id="s.mean-s.max-s.rms" class="section level4">
+<h4><code>s.mean</code>, <code>s.max</code>, <code>s.rms</code></h4>
+<p>The mean, maximum, or root-mean-squared absolute Spearman correlation
+between the treatment and covariates, computed using
+<code>col_w_corr()</code>. Can only be used with continuous
+treatments.</p>
+</div>
+<div id="distance.cov-distance.cor" class="section level4">
+<h4><code>distance.cov</code>, <code>distance.cor</code></h4>
+<p>The distance covariance or distance correlation between the scaled
+covariates and treatment, which is a scalar measure of the independence
+of two possibly multivariate distributions. See <span class="citation">Huling et al. (<a href="#ref-hulingIndependenceWeightsCausal2023a">2023</a>)</span> for
+details. Can only be used with continuous treatments. The distance
+correlation is a scaled version of the distance covariance to range from
+0 to 1.</p>
+</div>
+<div id="choosing-a-balance-statistic" class="section level3">
+<h3>Choosing a balance statistic</h3>
+<p>Given all these options, how should one choose? There has been some
+research into which yields the best results <span class="citation">(<a href="#ref-franklinMetricsCovariateBalance2014">Franklin et al.
+2014</a>; <a href="#ref-griffinChasingBalanceOther2017">Griffin et al.
+2017</a>; <a href="#ref-stuartPrognosticScorebasedBalance2013">Stuart et
+al. 2013</a>; <a href="#ref-belitserMeasuringBalanceModel2011"><span class="nocase">Belitser et al.</span> 2011</a>; <a href="#ref-parastOptimizingVariancebiasTradeoff2017">Parast et al.
+2017</a>)</span>, but the actual performance of each depends on the
+unique features of the data and system under study. For example, in the
+unlikely case that the true outcome model is linear in the covariates,
+using the <code>&quot;smd&quot;</code> or <code>&quot;mahalanobis&quot;</code> statistics
+will work well for binary and multi-category treatments. In more
+realistic cases, though, every measure has its advantages and
+disadvantages.</p>
+<p>For binary and multi-category treatments, only
+<code>&quot;energy.dist&quot;</code>, <code>&quot;kernel.dist&quot;</code>, and
+<code>&quot;L1.med&quot;</code> reflect balance on all features of the joint
+covariate distribution, whereas the others summarize across balance
+statistics computed for each covariate ignoring the others. Similarly,
+for continuous treatments, only <code>&quot;distance.cor&quot;</code> (or
+<code>&quot;distance.cov&quot;</code>) reflects balance on all features of the
+joint covariate distribution. Given these advantages,
+<code>&quot;energy.dist&quot;</code> and <code>&quot;distance.cor&quot;</code> are my
+preferences. That said, other measures are better studied, possibly more
+intuitive, and more familiar to a broad audience.</p>
+</div>
+</div>
+<div id="example" class="section level2">
+<h2>Example</h2>
+<p>In this section, I will provide an example that demonstrates how
+these functions could be used to replicate the functionality of existing
+packages or develop new methods for optimizing balance. We will use
+these functions to replicate the functionality of <em>WeightIt</em> and
+<em>twang</em> for estimating propensity score weights for a binary
+treatment using generalized boosted modeling (GBM). See
+<code>?bal.compute</code> for another example that optimizes balance to
+find the number of subclasses in propensity score subclassification.</p>
+<div id="tuning-gbm-for-balance" class="section level3">
+<h3>Tuning GBM for balance</h3>
+<p>GBM has many tuning parameters that can be optimized, but the key
+parameter is the number of trees to use to calculate the predictions.
+<em>WeightIt</em> and <em>twang</em> both implement the methods
+described in <span class="citation">McCaffrey et al. (<a href="#ref-mccaffreyPropensityScoreEstimation2004">2004</a>)</span> for
+selecting the number of trees using a balance criterion. Here, we will
+do so manually both to understand the internals of these functions and
+illustrate the uses of <code>bal.compute()</code> and
+<code>bal.init()</code> to select the ideal number of trees for
+propensity score weighting with a binary treatment.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;lalonde&quot;</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co"># Initialize balance</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>covs <span class="ot">&lt;-</span> <span class="fu">subset</span>(lalonde, <span class="at">select =</span> <span class="sc">-</span><span class="fu">c</span>(treat, re78))</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>ks.init <span class="ot">&lt;-</span> <span class="fu">bal.init</span>(covs,</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>                    <span class="at">treat =</span> lalonde<span class="sc">$</span>treat,</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>                    <span class="at">stat =</span> <span class="st">&quot;ks.max&quot;</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>                    <span class="at">estimand =</span> <span class="st">&quot;ATT&quot;</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co"># Fit a GBM model using *WeightIt* and `twang` defaults</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>fit <span class="ot">&lt;-</span> gbm<span class="sc">::</span><span class="fu">gbm</span>(treat <span class="sc">~</span> age <span class="sc">+</span> educ <span class="sc">+</span> married <span class="sc">+</span> race <span class="sc">+</span></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>                    nodegree <span class="sc">+</span> re74 <span class="sc">+</span> re75,</span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a>                <span class="at">data =</span> lalonde,</span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>                <span class="at">distribution =</span> <span class="st">&quot;bernoulli&quot;</span>,</span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a>                <span class="at">n.trees =</span> <span class="dv">4000</span>, <span class="at">interaction.depth =</span> <span class="dv">3</span>,</span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a>                <span class="at">shrinkage =</span> .<span class="dv">01</span>, <span class="at">bag.fraction =</span> <span class="dv">1</span>)</span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a>trees_to_test <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4000</span></span>
+<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a></span>
+<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a>p.mat <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit, <span class="at">type =</span> <span class="st">&quot;response&quot;</span>,</span>
+<span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a>                 <span class="at">n.trees =</span> trees_to_test)</span>
+<span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a></span>
+<span id="cb8-23"><a href="#cb8-23" tabindex="-1"></a>stats <span class="ot">&lt;-</span> <span class="fu">apply</span>(p.mat, <span class="dv">2</span><span class="dt">L</span>, <span class="cf">function</span>(p) {</span>
+<span id="cb8-24"><a href="#cb8-24" tabindex="-1"></a>    <span class="co"># Compute ATT weights</span></span>
+<span id="cb8-25"><a href="#cb8-25" tabindex="-1"></a>    w <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(lalonde<span class="sc">$</span>treat <span class="sc">==</span> <span class="dv">1</span>, <span class="dv">1</span>, p <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> p))</span>
+<span id="cb8-26"><a href="#cb8-26" tabindex="-1"></a>    </span>
+<span id="cb8-27"><a href="#cb8-27" tabindex="-1"></a>    <span class="fu">bal.compute</span>(ks.init, <span class="at">weights =</span> w)</span>
+<span id="cb8-28"><a href="#cb8-28" tabindex="-1"></a>})</span>
+<span id="cb8-29"><a href="#cb8-29" tabindex="-1"></a></span>
+<span id="cb8-30"><a href="#cb8-30" tabindex="-1"></a>stats[<span class="fu">which.min</span>(stats)]</span>
+<span id="cb8-31"><a href="#cb8-31" tabindex="-1"></a><span class="co">#&gt;       1408 </span></span>
+<span id="cb8-32"><a href="#cb8-32" tabindex="-1"></a><span class="co">#&gt; 0.09563649</span></span></code></pre></div>
+<p>From these results, we see that using 1408 trees gives us the lowest
+maximum KS statistic of 0.0956. Out of interest, we can plot the
+relationship between the number of trees and our balance statistic to
+see what it looks like:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;ggplot2&quot;</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> trees_to_test, <span class="at">y =</span> stats)) <span class="sc">+</span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>    <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">&quot;ks.max&quot;</span>, <span class="at">x =</span> <span class="st">&quot;n.trees&quot;</span>)</span></code></pre></div>
+<p><img role="img" aria-label src="data:image/png;base64,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" alt style="display: block; margin: auto;" /></p>
+<p>Let’s compare this to the output of <em>WeightIt</em>:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">library</span>(<span class="st">&quot;WeightIt&quot;</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>w.out <span class="ot">&lt;-</span> <span class="fu">weightit</span>(treat <span class="sc">~</span> age <span class="sc">+</span> educ <span class="sc">+</span> married <span class="sc">+</span> race <span class="sc">+</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>                    nodegree <span class="sc">+</span> re74 <span class="sc">+</span> re75,</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>                <span class="at">data =</span> lalonde, <span class="at">estimand =</span> <span class="st">&quot;ATT&quot;</span>,</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>                <span class="at">method =</span> <span class="st">&quot;gbm&quot;</span>,</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>                <span class="at">n.trees =</span> <span class="dv">4000</span>, <span class="at">interaction.depth =</span> <span class="dv">3</span>,</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>                <span class="at">shrinkage =</span> .<span class="dv">01</span>, <span class="at">bag.fraction =</span> <span class="dv">1</span>,</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>                <span class="at">criterion =</span> <span class="st">&quot;ks.max&quot;</span>)</span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co"># Display the best tree:</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>w.out<span class="sc">$</span>info<span class="sc">$</span>best.tree</span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="co">#&gt;    1 </span></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="co">#&gt; 1408</span></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="co"># ks.max from weightit()</span></span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="fu">bal.compute</span>(ks.init, <span class="at">weights =</span> <span class="fu">get.w</span>(w.out))</span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="co">#&gt; [1] 0.09563649</span></span></code></pre></div>
+<p>We can see that <code>weightit()</code> also selects 1408 trees as
+the optimum and the resulting maximum KS statistic computed using the
+returned weights is equal to the one we computed manually. Using
+<code>twang::ps()</code> also produces the same results.</p>
+</div>
+</div>
+<div id="references" class="section level2 unnumbered">
+<h2 class="unnumbered">References</h2>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-belitserMeasuringBalanceModel2011" class="csl-entry">
+<span class="nocase">Belitser, Svetlana V., Edwin P. Martens, Wiebe R.
+Pestman, Rolf H. H. Groenwold, Anthonius de Boer, and Olaf H.
+Klungel</span>. 2011. <span>“Measuring Balance and Model Selection in
+Propensity Score Methods.”</span> <em>Pharmacoepidemiology and Drug
+Safety</em> 20 (11): 1115–29. <a href="https://doi.org/10.1002/pds.2188">https://doi.org/10.1002/pds.2188</a>.
+</div>
+<div id="ref-diamondGeneticMatchingEstimating2013" class="csl-entry">
+Diamond, Alexis, and Jasjeet S. Sekhon. 2013. <span>“Genetic Matching
+for Estimating Causal Effects: A General Multivariate Matching Method
+for Achieving Balance in Observational Studies.”</span> <em>Review of
+Economics and Statistics</em> 95 (3): 932945. <a href="https://doi.org/10.1162/REST_a_00318">https://doi.org/10.1162/REST_a_00318</a>.
+</div>
+<div id="ref-franklinMetricsCovariateBalance2014" class="csl-entry">
+Franklin, Jessica M., Jeremy A. Rassen, Diana Ackermann, Dorothee B.
+Bartels, and Sebastian Schneeweiss. 2014. <span>“Metrics for Covariate
+Balance in Cohort Studies of Causal Effects.”</span> <em>Statistics in
+Medicine</em> 33 (10): 1685–99. <a href="https://doi.org/10.1002/sim.6058">https://doi.org/10.1002/sim.6058</a>.
+</div>
+<div id="ref-griffinChasingBalanceOther2017" class="csl-entry">
+Griffin, Beth Ann, Daniel F. McCaffrey, Daniel Almirall, Lane F.
+Burgette, and Claude Messan Setodji. 2017. <span>“Chasing Balance and
+Other Recommendations for Improving Nonparametric Propensity Score
+Models.”</span> <em>Journal of Causal Inference</em> 5 (2). <a href="https://doi.org/10.1515/jci-2015-0026">https://doi.org/10.1515/jci-2015-0026</a>.
+</div>
+<div id="ref-hulingIndependenceWeightsCausal2023a" class="csl-entry">
+Huling, Jared D., Noah Greifer, and Guanhua Chen. 2023.
+<span>“Independence Weights for Causal Inference with Continuous
+Treatments.”</span> <em>Journal of the American Statistical
+Association</em> 0 (0): 1–14. <a href="https://doi.org/10.1080/01621459.2023.2213485">https://doi.org/10.1080/01621459.2023.2213485</a>.
+</div>
+<div id="ref-hulingEnergyBalancingCovariate2024" class="csl-entry">
+Huling, Jared D., and Simon Mak. 2024. <span>“Energy Balancing of
+Covariate Distributions.”</span> <em>Journal of Causal Inference</em> 12
+(1). <a href="https://doi.org/10.1515/jci-2022-0029">https://doi.org/10.1515/jci-2022-0029</a>.
+</div>
+<div id="ref-iacusMultivariateMatchingMethods2011" class="csl-entry">
+Iacus, Stefano M., Gary King, and Giuseppe Porro. 2011.
+<span>“Multivariate Matching Methods That Are Monotonic Imbalance
+Bounding.”</span> <em>Journal of the American Statistical
+Association</em> 106 (493): 345–61. <a href="https://doi.org/10.1198/jasa.2011.tm09599">https://doi.org/10.1198/jasa.2011.tm09599</a>.
+</div>
+<div id="ref-kosmidis2020" class="csl-entry">
+Kosmidis, Ioannis, and David Firth. 2020. <span>“Jeffreys-Prior Penalty,
+Finiteness and Shrinkage in Binomial-Response Generalized Linear
+Models.”</span> <em>Biometrika</em> 108 (1): 71–82. <a href="https://doi.org/10.1093/biomet/asaa052">https://doi.org/10.1093/biomet/asaa052</a>.
+</div>
+<div id="ref-mccaffreyPropensityScoreEstimation2004" class="csl-entry">
+McCaffrey, Daniel F., Greg Ridgeway, and Andrew R. Morral. 2004.
+<span>“Propensity Score Estimation with Boosted Regression for
+Evaluating Causal Effects in Observational Studies.”</span>
+<em>Psychological Methods</em> 9 (4): 403–25. <a href="https://doi.org/10.1037/1082-989X.9.4.403">https://doi.org/10.1037/1082-989X.9.4.403</a>.
+</div>
+<div id="ref-parastOptimizingVariancebiasTradeoff2017" class="csl-entry">
+Parast, Layla, Daniel F. McCaffrey, Lane F. Burgette, et al. 2017.
+<span>“Optimizing Variance-Bias Trade-Off in the TWANG Package for
+Estimation of Propensity Scores.”</span> <em>Health Services and
+Outcomes Research Methodology</em> 17 (3): 175–97. <a href="https://doi.org/10.1007/s10742-016-0168-2">https://doi.org/10.1007/s10742-016-0168-2</a>.
+</div>
+<div id="ref-pirracchioBalanceSuperLearner2018" class="csl-entry">
+Pirracchio, Romain, and Marco Carone. 2018. <span>“The Balance Super
+Learner: A Robust Adaptation of the <span><em>Super Learner</em></span>
+to Improve Estimation of the Average Treatment Effect in the Treated
+Based on Propensity Score Matching.”</span> <em>Statistical Methods in
+Medical Research</em> 27 (8): 2504–18. <a href="https://doi.org/10.1177/0962280216682055">https://doi.org/10.1177/0962280216682055</a>.
+</div>
+<div id="ref-stuartPrognosticScorebasedBalance2013" class="csl-entry">
+Stuart, Elizabeth A., Brian K. Lee, and Finbarr P. Leacy. 2013.
+<span>“Prognostic Score-Based Balance Measures Can Be a Useful
+Diagnostic for Propensity Score Methods in Comparative Effectiveness
+Research.”</span> <em>Journal of Clinical Epidemiology</em> 66 (8): S84.
+<a href="https://doi.org/10.1016/j.jclinepi.2013.01.013">https://doi.org/10.1016/j.jclinepi.2013.01.013</a>.
+</div>
+<div id="ref-zhuKernelBasedMetricBalance2018" class="csl-entry">
+Zhu, Yeying, Jennifer S. Savage, and Debashis Ghosh. 2018. <span>“A
+Kernel-Based Metric for Balance Assessment.”</span> <em>Journal of
+Causal Inference</em> 6 (2). <a href="https://doi.org/10.1515/jci-2016-0029">https://doi.org/10.1515/jci-2016-0029</a>.
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

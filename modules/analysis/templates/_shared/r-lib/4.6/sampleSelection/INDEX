@@ -1,0 +1,31 @@
+Mroz87                  U.S. Women's Labor Force Participation
+RandHIE                 RAND Health Insurance Experiment
+Smoke                   Survey Responses on Smoking Behaviour
+coef.selection          Extract Coefficients from Selection Models
+fitted.selection        Fitted Values of Selection Models
+heckitVcov              Heckit Variance Covariance Matrix
+invMillsRatio           Inverse Mill's Ratio of probit models
+linearPredictors        Calculates linear predictors for different
+                        models
+model.frame.binaryChoice
+                        Data of Binary Choice Models
+model.frame.selection   Data of Selection Models
+model.matrix.binaryChoice
+                        Design Matrix of Binary Choice Models
+model.matrix.selection
+                        Design Matrix of Selection Models
+nlswork                 National Longitudinal Survey of Young Working
+                        Women
+predict.probit          Predict method for fitted probit models
+predict.selection       Predict method for fitted sample selection
+                        models
+probit                  Binary choice models.
+probit-methods          probit-methods
+residuals.probit        Residuals of probit models
+residuals.selection     Residuals of Selection Models
+selection               Heckman-style selection and treatment effect
+                        models
+selection-methods       selection-methods
+summary.probit          Summarizing Probit Estimations
+summary.selection       Summarizing Selection Estimations
+vcov.selection          Extract Variance Covariance Matrix

@@ -1,0 +1,19 @@
+plot.summclust          Plotting method for objects of type 'summclust'
+summary.summclust       A 'summary()' method for objects of type
+                        'summclust'
+summclust               Compute Influence and Leverage Metrics
+summclust.fixest        Compute Influence and Leverage Metrics for
+                        objects of type 'fixest'
+summclust.lm            Compute Influence and Leverage Metrics for
+                        objects of type 'lm'
+tidy.summclust          S3 method to summarize objects of class
+                        boottest into tidy data.frame
+vcov_CR3J               Compute CRV3 covariance matrices via a cluster
+                        jackknife as described in MacKinnon, Nielsen &
+                        Webb (2022)
+vcov_CR3J.fixest        Compute CRV3 covariance matrices via a cluster
+                        jackknife as described in MacKinnon, Nielsen &
+                        Webb (2022) for objects of type 'fixest'
+vcov_CR3J.lm            Compute CRV3 covariance matrices via a cluster
+                        jackknife as described in MacKinnon, Nielsen &
+                        Webb (2022) for objects of type 'lm'

@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Jared Huling" />
+
+<meta name="date" content="2026-08-26" />
+
+<title>Overview of the ‘fastglm’ Package</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Overview of the ‘fastglm’ Package</h1>
+<h4 class="author">Jared Huling</h4>
+<h4 class="date">2026-08-26</h4>
+
+
+
+<p>The <em>fastglm</em> package is intended as a <strong>fast</strong>
+<em>and</em> <strong>stable</strong> alternative to
+<code>stats::glm()</code> for fitting generalized linear models. It is
+compatible with <code>R</code>’s <code>family</code> objects (see
+<code>?family</code>) and produces fitted objects whose downstream
+methods (<code>summary()</code>, <code>vcov()</code>,
+<code>predict()</code>, <code>coef()</code>, <code>residuals()</code>,
+<code>logLik()</code>) behave exactly like those for a <code>glm</code>.
+This vignette walks through the main functionality of the package at a
+higher level than the other vignettes.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(fastglm)</span></code></pre></div>
+<div id="fitting-a-glm" class="section level1">
+<h1>Fitting a GLM</h1>
+<p>The main package function is <code>fastglm()</code>. It takes a
+numeric design matrix <code>x</code>, a response <code>y</code>, and an
+<code>R</code> <code>family</code> object:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">data</span>(esoph)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span> agegp <span class="sc">+</span> <span class="fu">unclass</span>(tobgp) <span class="sc">+</span> <span class="fu">unclass</span>(alcgp),</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>                  <span class="at">data =</span> esoph)</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">cbind</span>(esoph<span class="sc">$</span>ncases, esoph<span class="sc">$</span>ncontrols)</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">fastglm</span>(x, y, <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">&quot;cloglog&quot;</span>))</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="fu">summary</span>(fit)</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&gt; fastglm.default(x = x, y = y, family = binomial(link = &quot;cloglog&quot;))</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co">#&gt;                Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co">#&gt; (Intercept)    -4.29199    0.29777 -14.414  &lt; 2e-16 ***</span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co">#&gt; agegp.L         3.30677    0.63454   5.211 1.88e-07 ***</span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="co">#&gt; agegp.Q        -1.35525    0.57310  -2.365    0.018 *  </span></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co">#&gt; agegp.C         0.20296    0.43333   0.468    0.640    </span></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="co">#&gt; agegp^4         0.15056    0.29318   0.514    0.608    </span></span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="co">#&gt; agegp^5        -0.23425    0.17855  -1.312    0.190    </span></span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="co">#&gt; unclass(tobgp)  0.33276    0.07285   4.568 4.93e-06 ***</span></span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a><span class="co">#&gt; unclass(alcgp)  0.80384    0.07538  10.664  &lt; 2e-16 ***</span></span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</span></span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a><span class="co">#&gt; (Dispersion parameter for binomial family taken to be 1)</span></span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a><span class="co">#&gt;     Null deviance: 61.609  on 87  degrees of freedom</span></span>
+<span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a><span class="co">#&gt; Residual deviance: 96.950  on 80  degrees of freedom</span></span>
+<span id="cb2-29"><a href="#cb2-29" tabindex="-1"></a><span class="co">#&gt; AIC: 228</span></span>
+<span id="cb2-30"><a href="#cb2-30" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-31"><a href="#cb2-31" tabindex="-1"></a><span class="co">#&gt; Number of Fisher Scoring iterations: 6</span></span></code></pre></div>
+<p><code>fastglm()</code> does not accept a formula directly, it
+operates on a pre-built design matrix. To use a formula and a data
+frame, pass <code>fastglm_fit</code> as the fitting function to base
+<code>glm()</code>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>fit2 <span class="ot">&lt;-</span> <span class="fu">glm</span>(<span class="fu">cbind</span>(ncases, ncontrols) <span class="sc">~</span> agegp <span class="sc">+</span> <span class="fu">unclass</span>(tobgp) <span class="sc">+</span> <span class="fu">unclass</span>(alcgp),</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>            <span class="at">data =</span> esoph, <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">&quot;cloglog&quot;</span>),</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>            <span class="at">method =</span> fastglm_fit)</span></code></pre></div>
+</div>
+<div id="decomposition-methods" class="section level1">
+<h1>Decomposition methods</h1>
+<p>The IRLS algorithm reduces every iteration to a weighted
+least-squares problem. <em>fastglm</em> supports six different matrix
+decompositions for solving that WLS step, all from <em>RcppEigen</em>
+(Bates and Eddelbuettel, 2013); the choice trades off speed against
+numerical stability and rank-revealing behavior:</p>
+<table>
+<thead>
+<tr class="header">
+<th><code>method</code></th>
+<th>decomposition</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>0</code></td>
+<td>column-pivoted Householder QR (default; rank-revealing)</td>
+</tr>
+<tr class="even">
+<td><code>1</code></td>
+<td>unpivoted Householder QR</td>
+</tr>
+<tr class="odd">
+<td><code>2</code></td>
+<td>LLT Cholesky</td>
+</tr>
+<tr class="even">
+<td><code>3</code></td>
+<td>LDLT Cholesky</td>
+</tr>
+<tr class="odd">
+<td><code>4</code></td>
+<td>full-pivoted Householder QR</td>
+</tr>
+<tr class="even">
+<td><code>5</code></td>
+<td>bidiagonal divide-and-conquer SVD</td>
+</tr>
+</tbody>
+</table>
+<p>The default (<code>method = 0</code>) is the safe choice: it is
+rank-revealing, so it handles aliased / collinear columns gracefully.
+The Cholesky methods (<code>2</code> and <code>3</code>) are roughly
+3–4× faster but assume full column rank.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">5000</span>; p <span class="ot">&lt;-</span> <span class="dv">30</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n <span class="sc">*</span> p), n, p)</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fu">plogis</span>(x <span class="sc">%*%</span> <span class="fu">rnorm</span>(p) <span class="sc">*</span> <span class="fl">0.05</span>))</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="fu">system.time</span>(f0 <span class="ot">&lt;-</span> <span class="fu">fastglm</span>(x, y, <span class="at">family =</span> <span class="fu">binomial</span>()))                 <span class="co"># default</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt;    user  system elapsed </span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt;   0.005   0.000   0.005</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="fu">system.time</span>(f2 <span class="ot">&lt;-</span> <span class="fu">fastglm</span>(x, y, <span class="at">family =</span> <span class="fu">binomial</span>(), <span class="at">method =</span> <span class="dv">2</span>))     <span class="co"># LLT</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt;    user  system elapsed </span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt;   0.002   0.000   0.002</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="fu">system.time</span>(f3 <span class="ot">&lt;-</span> <span class="fu">fastglm</span>(x, y, <span class="at">family =</span> <span class="fu">binomial</span>(), <span class="at">method =</span> <span class="dv">3</span>))     <span class="co"># LDLT</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt;    user  system elapsed </span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt;   0.003   0.000   0.002</span></span></code></pre></div>
+</div>
+<div id="stability" class="section level1">
+<h1>Stability</h1>
+<p><em>fastglm</em> does not compromise computational stability for
+speed. It uses a step-halving safeguard following Marschner (2011) and
+starts from better-initialized values than <code>glm()</code> or
+<code>glm2::glm2()</code>, so it tends to converge in cases where the
+standard IRLS algorithm fails. See
+<code>vignette(&quot;fastglm&quot;, package = &quot;fastglm&quot;)</code> for a
+Gamma-with-<code>sqrt</code>-link example where <code>glm()</code> does
+not converge but <code>fastglm()</code> does.</p>
+</div>
+<div id="inference-vcov-robust-se-predictions" class="section level1">
+<h1>Inference: <code>vcov()</code>, robust SE, predictions</h1>
+<p>The fitted object stores the unscaled covariance directly (no
+refitting), and the standard <code>vcov()</code> /
+<code>summary()</code> machinery works as expected:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">fastglm</span>(x, y, <span class="at">family =</span> <span class="fu">binomial</span>(), <span class="at">method =</span> <span class="dv">2</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>V    <span class="ot">&lt;-</span> <span class="fu">vcov</span>(fit)</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="fu">dim</span>(V)</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt; [1] 30 30</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="do">## standard errors agree with the diagonal of vcov()</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="fu">all.equal</span>(<span class="fu">sqrt</span>(<span class="fu">diag</span>(V)), <span class="fu">unname</span>(<span class="fu">coef</span>(<span class="fu">summary</span>(fit))[, <span class="st">&quot;Std. Error&quot;</span>]))</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt; [1] &quot;names for target but not for current&quot;</span></span></code></pre></div>
+<p>Heteroskedasticity-consistent and cluster-robust covariance matrices
+are available via <code>sandwich::vcovHC()</code> and
+<code>sandwich::vcovCL()</code> — <code>fastglm</code> registers methods
+on those generics, so loading <code>sandwich</code> is all that is
+required:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">library</span>(sandwich)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>V_hc <span class="ot">&lt;-</span> <span class="fu">vcovHC</span>(fit, <span class="at">type =</span> <span class="st">&quot;HC0&quot;</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>V_hc[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt;              X1           X2           X3</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt; X1 8.546454e-04 7.509395e-06 1.483571e-06</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt; X2 7.509395e-06 8.321108e-04 7.951566e-07</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt; X3 1.483571e-06 7.951566e-07 8.351855e-04</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>cluster <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">seq_len</span>(<span class="dv">20</span>), <span class="at">length.out =</span> n)</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>V_cl    <span class="ot">&lt;-</span> <span class="fu">vcovCL</span>(fit, <span class="at">cluster =</span> cluster, <span class="at">type =</span> <span class="st">&quot;HC1&quot;</span>)</span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>V_cl[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]</span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt;               X1            X2           X3</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt; X1  0.0007676800 -3.021035e-04 1.517204e-04</span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt; X2 -0.0003021035  8.060696e-04 8.492543e-05</span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt; X3  0.0001517204  8.492543e-05 7.823621e-04</span></span></code></pre></div>
+<p>Results are numerically identical to <code>sandwich::vcovHC()</code>
+and <code>sandwich::vcovCL()</code> applied to a <code>glm</code> fit
+(Zeileis, Köll, and Graham, 2020) to floating-point precision. They work
+for sparse and <code>big.matrix</code> fits as well, since the full
+design matrix is preserved on the fitted object (as a reference, not
+copied).</p>
+<p><code>predict()</code> supports <code>se.fit = TRUE</code>:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>xnew <span class="ot">&lt;-</span> x[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="fu">predict</span>(fit, <span class="at">newdata =</span> xnew, <span class="at">type =</span> <span class="st">&quot;response&quot;</span>, <span class="at">se.fit =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co">#&gt; $fit</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">#&gt; [1] 0.6087584 0.5272820 0.4245913 0.5494426 0.6192178</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">#&gt; $se.fit</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#&gt; [1] 0.03919065 0.03095856 0.03623790 0.03629691 0.03512202</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt; $residual.scale</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span></code></pre></div>
+</div>
+<div id="sparse-big.matrix-and-streaming-designs" class="section level1">
+<h1>Sparse, big.matrix, and streaming designs</h1>
+<p>For designs that are sparse, that live on disc, or that have to be
+built from a parquet / <em>arrow</em> / <em>DuckDB</em> source,
+<em>fastglm</em> provides three large-data paths that share a common
+streaming kernel and produce identical results:</p>
+<ul>
+<li><code>Matrix::dgCMatrix</code>: pass directly to
+<code>fastglm()</code>. Useful for one-hot encoded categoricals and
+high-dimensional sparse designs.</li>
+<li><code>bigmemory::big.matrix</code>: pass directly to
+<code>fastglm()</code>. The matrix is read in row-blocks and never fully
+materialised in memory.</li>
+<li><code>fastglm_streaming(chunk_callback, n_chunks, family)</code>: a
+user-supplied closure yields one row-block per call. The right path for
+fitting on a parquet dataset, <em>DuckDB</em> query, or any external
+columnar store.</li>
+</ul>
+<p>See <code>vignette(&quot;large-data-fastglm&quot;, package = &quot;fastglm&quot;)</code>
+for a detailed walk through all three paths. A short example:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">4000</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="dv">1</span>, <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n <span class="sc">*</span> <span class="dv">3</span>), n, <span class="dv">3</span>))</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fu">plogis</span>(X <span class="sc">%*%</span> <span class="fu">c</span>(<span class="fl">0.2</span>, <span class="fl">0.4</span>, <span class="sc">-</span><span class="fl">0.2</span>, <span class="fl">0.3</span>)))</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>chunk_size <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>chunks <span class="ot">&lt;-</span> <span class="cf">function</span>(k) {</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>    idx <span class="ot">&lt;-</span> ((k <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">*</span> chunk_size <span class="sc">+</span> <span class="dv">1</span>)<span class="sc">:</span>(k <span class="sc">*</span> chunk_size)</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>    <span class="fu">list</span>(<span class="at">X =</span> X[idx, , <span class="at">drop =</span> <span class="cn">FALSE</span>], <span class="at">y =</span> y[idx])</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>}</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>fit_stream <span class="ot">&lt;-</span> <span class="fu">fastglm_streaming</span>(chunks, <span class="at">n_chunks =</span> <span class="dv">4</span>, <span class="at">family =</span> <span class="fu">binomial</span>())</span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>fit_full   <span class="ot">&lt;-</span> <span class="fu">fastglm</span>(X, y, <span class="at">family =</span> <span class="fu">binomial</span>(), <span class="at">method =</span> <span class="dv">2</span>)</span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="fu">max</span>(<span class="fu">abs</span>(<span class="fu">coef</span>(fit_stream) <span class="sc">-</span> <span class="fu">coef</span>(fit_full)))</span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co">#&gt; [1] 1.111683e-07</span></span></code></pre></div>
+</div>
+<div id="native-families" class="section level1">
+<h1>Native families</h1>
+<p>For the most commonly-used <code>family</code>/<code>link</code>
+combinations, <em>fastglm</em> dispatches <code>variance()</code>,
+<code>mu.eta()</code>, <code>linkinv()</code>, and
+<code>dev.resids()</code> to inline C++ implementations rather than
+calling back into <code>R</code> once per IRLS iteration. The covered
+combinations are:</p>
+<ul>
+<li>gaussian (identity, log, inverse)</li>
+<li>binomial (logit, probit, cloglog, log)</li>
+<li>poisson (log, identity, sqrt)</li>
+<li>Gamma (log, inverse, identity)</li>
+<li>inverse.gaussian (1/mu^2, log, identity, inverse)</li>
+</ul>
+<p>Detection is automatic, if the <code>family</code> object matches one
+of the above, the native path is used; otherwise <em>fastglm</em> falls
+back to the <code>R</code>-callback path used in earlier versions. The
+native path is meaningfully faster on large <code>n</code> because it
+eliminates the per-iteration round-trip to <code>R</code> for each of
+the four family functions:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">library</span>(microbenchmark)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">7</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">50000</span>; p <span class="ot">&lt;-</span> <span class="dv">30</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n <span class="sc">*</span> p), n, p)</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rpois</span>(n, <span class="fu">exp</span>(x <span class="sc">%*%</span> <span class="fu">rnorm</span>(p) <span class="sc">*</span> <span class="fl">0.05</span> <span class="sc">+</span> <span class="dv">1</span>))</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="do">## force the R-callback path by giving the family object an unrecognized name</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>disguise <span class="ot">&lt;-</span> <span class="cf">function</span>(fam) { fam<span class="sc">$</span>family <span class="ot">&lt;-</span> <span class="fu">paste0</span>(fam<span class="sc">$</span>family, <span class="st">&quot;*&quot;</span>); fam }</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>mb <span class="ot">&lt;-</span> <span class="fu">microbenchmark</span>(</span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>    <span class="at">native   =</span> <span class="fu">fastglm</span>(x, y, <span class="at">family =</span> <span class="fu">poisson</span>(),            <span class="at">method =</span> <span class="dv">2</span>),</span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>    <span class="at">callback =</span> <span class="fu">fastglm</span>(x, y, <span class="at">family =</span> <span class="fu">disguise</span>(<span class="fu">poisson</span>()),  <span class="at">method =</span> <span class="dv">2</span>),</span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a>    <span class="at">times =</span> <span class="dv">5</span><span class="dt">L</span></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>)</span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="fu">print</span>(mb)</span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co">#&gt; Unit: milliseconds</span></span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="co">#&gt;      expr      min       lq     mean   median       uq      max neval cld</span></span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a><span class="co">#&gt;    native 20.26351 21.02849 21.55994 21.26838 22.09428 23.14503     5  a </span></span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a><span class="co">#&gt;  callback 29.96538 30.14283 31.94754 30.67452 32.47065 36.48430     5   b</span></span></code></pre></div>
+<p>The <em>fastglm</em> package switches transparently between the two
+paths; user code does not change.</p>
+</div>
+<div id="negative-binomial-hurdle-zero-inflation-and-firth-logistic" class="section level1">
+<h1>Negative binomial, hurdle, zero-inflation, and Firth logistic</h1>
+<p>A handful of regressions that come up often in practice are not
+standard GLMs but build on the same IRLS machinery. <em>fastglm</em>
+provides dedicated fitting functions for these:</p>
+<ul>
+<li><strong><code>fastglm_nb()</code></strong> — negative-binomial
+regression with the dispersion <code>theta</code> estimated jointly with
+<code>beta</code>. Plays the same role as <code>MASS::glm.nb()</code>
+but runs the joint <code>(beta, theta)</code> MLE entirely in C++ (IRLS
+for <code>beta</code>, Brent for <code>theta</code>).</li>
+<li><strong><code>firth = TRUE</code></strong> — a flag on
+<code>fastglm()</code> / <code>fastglm_fit()</code> that activates
+Firth’s bias-reducing penalty on the score. Useful for binary logistic
+regression under separation or in small samples; analogous to
+<code>logistf::logistf()</code>.</li>
+<li><strong><code>fastglm_hurdle()</code></strong> — a two-part count
+model: a binary regression for whether <code>y &gt; 0</code>, plus a
+zero-truncated Poisson or NB regression on the positive subset. The two
+parts factorize, and both are fit by the same C++ IRLS solver. Same
+model as <code>pscl::hurdle()</code>.</li>
+<li><strong><code>fastglm_zi()</code></strong> — a zero-inflated Poisson
+or NB regression: a binary inflation component overlaid on the original
+count distribution, fit by an EM algorithm in C++ with closed-form
+posterior responsibilities and an analytical observed-information
+<code>vcov</code>. Same model as <code>pscl::zeroinfl()</code>.</li>
+</ul>
+<p>All four take the standard <em>fastglm</em> tuning options
+(<code>method</code>, <code>tol</code>, <code>maxit</code>) and return
+objects with the usual <code>coef()</code>, <code>vcov()</code>,
+<code>predict()</code>, <code>logLik()</code> methods.
+<code>fastglm_hurdle()</code> and <code>fastglm_zi()</code> use the
+<code>Formula</code> package’s two-RHS syntax
+<code>y ~ x1 + x2 | z1 + z2</code> to specify different designs for the
+count and zero parts. See
+<code>vignette(&quot;count-firth-fastglm&quot;, package = &quot;fastglm&quot;)</code> for
+examples and timing comparisons against the canonical reference
+packages.</p>
+</div>
+<div id="three-r-entry-points" class="section level1">
+<h1>Three R entry points</h1>
+<p>There are three <code>R</code>-side functions to fit a GLM with
+<em>fastglm</em>. They all call into the same C++ solver, but differ in
+how much of base R’s machinery they wrap around it:</p>
+<ul>
+<li><strong><code>fastglm()</code></strong> is the top-level S3
+function. It returns an object of class <code>&quot;fastglm&quot;</code> with
+deviance, AIC, null deviance, residuals, etc. populated for interactive
+use.</li>
+<li><strong><code>fastglm_fit()</code></strong> is designed to be passed
+as <code>method = fastglm_fit</code> to base <code>glm()</code>. The
+returned object inherits from <code>&quot;fastglmFit&quot;</code> so that
+<code>glm()</code>’s formula/data handling, <code>update()</code>,
+<code>predict()</code>, etc. all work on top.</li>
+<li><strong><code>fastglmPure()</code></strong> is the lowest-level
+wrapper: no dispersion, no AIC, no null-deviance computation. Use this
+when calling <em>fastglm</em> from another package and you only need the
+coefficients.</li>
+</ul>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<ul>
+<li><p>Marschner, I. C. (2011). glm2: Fitting generalized linear models
+with convergence problems. <em>The R Journal</em>, 3(2), 12–15. <a href="doi:10.32614/RJ-2011-012" class="uri">doi:10.32614/RJ-2011-012</a></p></li>
+<li><p>Bates, D. and Eddelbuettel, D. (2013). Fast and elegant numerical
+linear algebra using the RcppEigen package. <em>Journal of Statistical
+Software</em>, 52(5), 1–24. <a href="doi:10.18637/jss.v052.i05" class="uri">doi:10.18637/jss.v052.i05</a></p></li>
+<li><p>Zeileis, A., Köll, S., and Graham, N. (2020). Various versatile
+variances: An object-oriented implementation of clustered covariances in
+R. <em>Journal of Statistical Software</em>, 95(1), 1–36. <a href="doi:10.18637/jss.v095.i01" class="uri">doi:10.18637/jss.v095.i01</a></p></li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

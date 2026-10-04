@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Sebastian Krantz" />
+
+<meta name="date" content="2026-08-29" />
+
+<title>collapse Documentation and Resources</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">collapse Documentation and Resources</h1>
+<h4 class="author">Sebastian Krantz</h4>
+<h4 class="date">2026-08-29</h4>
+
+
+
+<p><em>collapse</em> is a C/C++ based package for data transformation
+and statistical computing in R. It’s aims are:</p>
+<ol style="list-style-type: decimal">
+<li>To facilitate complex data transformation, exploration and computing
+tasks in R.</li>
+<li>To help make R code fast, flexible, parsimonious and programmer
+friendly.</li>
+</ol>
+<p>Documentation comes in 7 different forms:</p>
+<div id="built-in-structured-documentation" class="section level2">
+<h2>Built-In Structured Documentation</h2>
+<p>After installing <em>collapse</em>, you can call
+<code>help(&quot;collapse-documentation&quot;)</code> which will produce a central
+help page providing a broad overview of the entire functionality of the
+package, including direct links to all function documentation pages and
+links to 13 further topical documentation pages (names in
+<code>.COLLAPSE_TOPICS</code>) describing how clusters of related
+functions work together.</p>
+<!-- The names of these additional help pages are contained in a global macro `.COLLAPSE_TOPICS` and can so easily be called from the R console as well. Function documentation is interlinked with the relevant topical pages, and all documentation pages link back to the central overview page at `help("collapse-documentation")`.  -->
+<p>Thus <em>collapse</em> comes with a fully structured hierarchical
+documentation which you can browse within R - and that provides
+everything necessary to fully understand the package. The Documentation
+is also available <a href="https://fastverse.org/collapse/reference/collapse-documentation.html">online</a>.</p>
+<p>The package page under <code>help(&quot;collapse-package&quot;)</code> provides
+some general information about the package and its design philosophy, as
+well as a compact set of examples covering important functionality.</p>
+<p>Reading <code>help(&quot;collapse-package&quot;)</code> and
+<code>help(&quot;collapse-documentation&quot;)</code> is the most comprehensive
+way to get acquainted with the package.
+<code>help(&quot;collapse-documentation&quot;)</code> is always the most
+up-to-date resource.</p>
+</div>
+<div id="deepwiki" class="section level2">
+<h2>DeepWiki</h2>
+<p><a href="https://deepwiki.com/">DeepWiki</a> is an AI-powered
+platform designed to automatically generate structured, interactive
+documentation for software repositories, primarily on GitHub. Developed
+by <a href="https://cognition.com/">Cognition AI</a>—the same laboratory
+behind the autonomous AI engineer <a href="https://devin.ai/">Devin</a>—it serves as a dynamic,
+“Wikipedia-like” encyclopedia for codebases.</p>
+<p>While not more comprehensive or accurate than the structured
+documentation, it is great to learn more about the internal structure of
+<em>collapse</em> and use a chatbot (Devin) to ask questions about or
+write code using <em>collapse</em>.</p>
+<p>You can access the <em>collapse</em> DeepWiki <a href="https://deepwiki.com/fastverse/collapse">here</a>.</p>
+</div>
+<div id="jss-article" class="section level2">
+<h2>JSS Article</h2>
+<p>The <a href="https://doi.org/10.18637/jss.v116.i01">collapse
+article</a> is published in the <a href="https://www.jstatsoft.org/">Journal of Statistical Software</a>
+(volume 116, issue 1). If you want to ‘read something concise’ about
+<em>collapse</em>, this is the best place to start.</p>
+</div>
+<div id="cheatsheet" class="section level2">
+<h2>Cheatsheet</h2>
+<p>A fairly up-to-date (v2.0) <a href="https://raw.githubusercontent.com/fastverse/collapse/master/misc/collapse%20cheat%20sheet/collapse_cheat_sheet.pdf">cheatsheet</a>
+compactly summarizes the package.</p>
+</div>
+<div id="vignettes" class="section level2">
+<h2>Vignettes</h2>
+<p>Updated vignettes are</p>
+<ul>
+<li><p><a href="https://fastverse.org/collapse/articles/collapse_for_tidyverse_users.html"><strong><em>collapse</em>
+for <em>tidyverse</em> Users</strong></a>: A quick introduction to
+<em>collapse</em> for <em>tidyverse</em> users</p></li>
+<li><p><a href="https://fastverse.org/collapse/articles/collapse_and_sf.html"><strong><em>collapse</em>
+and <em>sf</em></strong></a>: Shows how collapse can be used to
+efficiently manipulate <em>sf</em> data frames</p></li>
+<li><p><a href="https://fastverse.org/collapse/articles/collapse_object_handling.html"><strong><em>collapse</em>’s
+Handling of R Objects</strong></a>: A quick view behind the scenes of
+class-agnostic R programming</p></li>
+<li><p><a href="https://fastverse.org/collapse/articles/developing_with_collapse.html"><strong>Developing
+with <em>collapse</em></strong></a>: How to write efficient statistical
+packages using R and <em>collapse</em></p></li>
+</ul>
+<p>The other vignettes (only available <a href="https://fastverse.org/collapse/articles/index.html">online</a>) do
+not cover major features introduced in versions &gt;= 1.7, but contain
+much useful information and examples:</p>
+<ul>
+<li><p><a href="https://fastverse.org/collapse/articles/collapse_intro.html"><strong>Introduction
+to <em>collapse</em> </strong></a>: Introduces key features in a
+structured way</p></li>
+<li><p><a href="https://fastverse.org/collapse/articles/collapse_and_dplyr.html"><strong><em>collapse</em>
+and <em>dplyr</em> </strong></a>: Demonstrates the integration of
+collapse with <em>dplyr</em> / <em>tidyverse</em> workflows and
+associated performance improvements</p></li>
+<li><p><a href="https://fastverse.org/collapse/articles/collapse_and_plm.html"><strong><em>collapse</em>
+and <em>plm</em></strong></a>: Demonstrates the integration of collapse
+with <em>plm</em> and shows examples of efficient programming with panel
+data</p></li>
+<li><p><a href="https://fastverse.org/collapse/articles/collapse_and_data.table.html"><strong><em>collapse</em>
+and <em>data.table</em></strong></a>: Shows how collapse and
+<em>data.table</em> may be used together in a harmonious way</p></li>
+</ul>
+</div>
+<div id="blog" class="section level2">
+<h2>Blog</h2>
+<p>I maintain a <a href="https://sebkrantz.github.io/Rblog/">blog</a>
+linked to <a href="https://www.r-bloggers.com/">Rbloggers.com</a> where
+I introduced <em>collapse</em> with some compact posts covering central
+functionality. Among these, the post about <a href="https://sebkrantz.github.io/Rblog/2020/09/13/programming-with-collapse/">programming
+with <em>collapse</em></a> is useful for developers. <!--
+A recent post about [*collapse* and the *fastverse*](https://sebkrantz.github.io/Rblog/2023/04/12/collapse-and-the-fastverse-reflecting-the-past-present-and-future/) also provides a broader contextualization and reflective outlook for the *collapse* and [*fastverse*](https://fastverse.org/fastverse/) projects. 
+--></p>
+</div>
+<div id="presentations-and-slides" class="section level2">
+<h2>Presentations and Slides</h2>
+<ul>
+<li><p>I have presented <em>collapse</em> (v1.8) in some level of detail
+at useR 2022. A 2h video recording that provides a quite comprehensive
+introduction is available <a href="https://www.youtube.com/watch?v=OwWT1-dSEts">here</a>. The
+corresponding slides are available <a href="https://raw.githubusercontent.com/fastverse/collapse/master/misc/useR2022%20presentation/collapse_useR2022_final.pdf">here</a>.</p></li>
+<li><p>I have recently presented <em>collapse</em> (v2.1) and the
+<em>fastverse</em> at a workshop on “<a href="https://www.bportugal.pt/en/evento/workshop-speeding-empirical-research-tools-and-techniques-fast-computing-bplim">Speeding
+Up Empirical Research: Tools and Techniques for Fast Computing</a>”
+organized by the Bank of Portugal in December 2025. My 45-minute talk
+focused on two advanced applications in international trade and spatial
+network analysis/package development. You can find the materials (slides
+and recording) <a href="https://github.com/BPLIM/Workshops/tree/master/BPLIM2025">here</a>.</p></li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

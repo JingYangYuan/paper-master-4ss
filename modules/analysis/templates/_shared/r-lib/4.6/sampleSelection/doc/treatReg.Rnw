@@ -1,0 +1,537 @@
+% -*- eval: (flyspell-mode 1); -*-
+% mode: Tex-Pdf -*-
+\documentclass[a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[bookmarks=TRUE,
+            colorlinks,
+            pdfpagemode=none,
+            pdfstartview=FitH,
+            citecolor=black,
+            filecolor=black,
+            linkcolor=black,
+            urlcolor=black,
+            ]{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\RequirePackage{bbm}
+\usepackage{graphicx}
+\usepackage{icomma}
+\usepackage{natbib}
+\usepackage{xspace}
+
+\newcommand{\code}[1]{\texttt{#1}}
+\DeclareMathOperator*{\E}{\mathbbm{E}}% expectation
+\newcommand{\indic}{\mathbbm{1}}% indicator function
+\newcommand{\loglik}{\ell}% log likelihood
+\newcommand{\var}{\mathrm{Var}\,}
+\renewcommand*{\vec}[1]{\boldsymbol{#1}}
+
+\title{Treatment Effects with Normal Disturbances in
+  \code{sampleSelection} Package}
+\author{Ott Toomet\\
+University of Washington}
+
+\begin{document}
+%\VignetteIndexEntry{Using treatReg}
+%\VignetteKeyword{models}
+%\VignetteKeyword{regression}
+<<echo=FALSE>>=
+library(sampleSelection)
+options(width=70)
+set.seed(0)
+@ 
+
+\maketitle
+
+\section{The Problem}
+\label{sec:problem}
+
+Recent decades have seen a surge in interest for evidence-based
+policy-making.  This is a welcome trend but it sets high demands for
+the corresponding evidence.  Typical policy questions---how much
+will the variable of interest increase or decrease if we change a
+policy parameter---require estimation of causal effects that are,
+unfortunately, hard to identify
+based on commonly available data.  The reasons are related to
+sample selection, the
+fact that these are typically different people and different economies that face different
+policy variables.  For instance, workers who sign up for a training
+program may be more motivated or faster learners than those who do not
+enter the program.  And if their post-program outcome
+differs, this may just reflect the obvious: different people behave in
+a different way.  Unfortunately, the gold standard for measuring
+causal effects, randomized experiments, are sometimes too expensive or completely unfeasible.
+
+An econometric solution to these problems is offered by \citet{heckman1976}.  The paper suggests to
+rephrase the model in terms of a latent variable, ``participation
+tendency'', and assumes all the disturbance terms are drawn from a
+common bivariate normal distribution.  Although more recent literature
+shows that these assumptions are often unrealistic, the model remains
+popular in many applications due to it's simplicity and few additional
+demands on data.  Below, we describe the model, and thereafter
+illustrate it's usage in \texttt{sampleSelection} package.
+
+
+\section{Treatment Effects with Spherical Disturbances}
+\label{sec:treatment_model}
+
+\subsection{The Model}
+\label{sec:model}
+
+Assume the individual participation and outcome process is described
+by two latent variables: ``participation tendency''
+$y^{s*}$ ($s$ stands for ``selection'' and asterisk $^{*}$ means the
+variable is not directly observed) and ``outcome'' $y^{o}$:
+\begin{equation}
+  \begin{split}
+    y_{i}^{s*} &= \alpha_{0} + \vec{\alpha}_{1}' \vec{x}_{i}^{s} 
+    + u_{i}
+    \\
+    y_{i}^{o} &= \beta_{0} + \vec{\beta}_{1}' \vec{x}_{i}^{o} 
+    + \beta_{2} y_{i}^{s}
+    + v_{i}
+  \end{split}
+  \label{eq:the_model}
+\end{equation}
+where $u$ and $v$ are disturbance terms, derived from a bivariate
+normal distribution:
+\begin{equation}
+  \begin{pmatrix}
+    u \\ v
+  \end{pmatrix}
+  \sim
+  N \left( 
+    \begin{pmatrix}
+      0 \\ 0
+    \end{pmatrix}
+    ,
+    \begin{pmatrix}
+      1 & \rho\sigma \\
+      \rho\sigma & \sigma^{2}
+    \end{pmatrix}
+  \right).
+  \label{eq:2dnormal}
+\end{equation}
+$\vec{x}^{s}$ may include exclusion restrictions, variables not in $\vec{x}^{o}$,
+but it is not necessary as the model is also identified based on the
+functional form assumptions only.\footnote{Although formally
+  identified, the estimates are much less precise if we do not include a
+  strong exclusion restriction.}  If participation is
+decided based on outcome (for instance, when individuals select the
+training only if they expect it to pay off), one may also want that
+$\vec{x}^{s}$ to include
+all the components of $\vec{x}^{o}$.  However, the general model does
+not require it.
+
+Instead of the latent participation tendency we observe the actual
+$y^{s}$ participation that occurs if $y^{s*} > 0$: $y^{s} =
+\indic(y^{s*} > 0)$, and outcome $y^{o}$.  The
+parameter of interest is $\beta_{2}$ that measures how much will
+$y^{o}$ rise or fall if someone chooses participation instead of non-participation.
+Note that this specification
+assumes no individual heterogeneity: $\beta_{2}$ is constant
+across individuals.
+
+Individuals participate if $y^{s} = \indic(y^{s*} > 0) = 1$ i.e. $u > - \alpha_{0} -
+\vec{\alpha}_{1}' \vec{x}^{s}$.  Denote $z \equiv \alpha_{0} +
+\vec{\alpha}_{1}' \vec{x}^{s}$ for notational simplicity, hence the participation condition 
+can be written as $y^{s} = \indic(u > -z)$.
+For participants
+\begin{equation}
+  \E [y^{o}|\vec{x}^{o}, y^{s} = 1]
+  = 
+  \beta_{0} + \vec{\beta}_{1}' \vec{x}^{o} 
+  + \beta_{2}
+  + \E [v|u > -z]
+  \label{eq:outcomeParticipants}
+\end{equation}
+and for non-participants
+\begin{equation}
+  \E [y^{o}|\vec{x}, y^{s} = 0]
+  = \beta_{0} + \vec{\beta}_{1}' \vec{x}^{o} 
+  + \E [v|u < -z].
+  \label{eq:outcomeNonParticipants}
+\end{equation}
+We can identify $\beta_{2}$ in the usual way as
+$\E[y_{i}^{o}|\vec{x}_{i}, y_{i}^{s} = 1] 
+- 
+\E [y_{i}^{o}|\vec{x}_{i},
+y_{i}^{s} = 0]$.  However, as the conditional expectations in
+\eqref{eq:outcomeParticipants} and \eqref{eq:outcomeNonParticipants}
+are not 0, OLS estimation will give biased results.
+
+In econometric classification, it is a switching regression (tobit-5)
+model where:
+\begin{itemize}
+\item Everyone has an observable outcome $y^{o}$.
+\item The selection indicator $y^{s}$ enters the outcome
+  equation.
+\item The variables $\vec{x}^{o}$ and
+  parameters $\vec{\beta}_{1}$ are equal for both outcome
+  types.
+\end{itemize}
+Note that this model cannot be estimated by the ordinary tobit-5
+selection equation: intercept and $\beta_{2}$ are not identified
+unless we impose certain cross-equation restrictions.  Neither can
+you estimate the model by tobit-2 as here both selections are
+observed. 
+
+
+\subsection{Two-Step Solution}
+\label{sec:two-step_solution}
+
+This model can be estimated by a version of
+\citet{heckman1976} two-step estimator.  
+
+First, the selection process parameters $\vec{\alpha}$ can be consistently estimated
+by standard probit model, and hence we can compute estimated values
+$\hat z_{i}$, the estimates for the true $z_{i}$.
+
+Next, from normal
+density properties we know that
+\begin{equation}
+  \E [v|u > -z]
+  =
+  \rho\sigma\lambda(z)
+  \qquad\text{and}\qquad
+  \E [v|u < -z ]
+  =
+  - \rho\sigma\lambda(-z),
+  \label{eq:Ev_u}
+\end{equation}
+and
+\begin{align}
+  \label{eq:var_u1|v}
+  \sigma_{0}^{2} \equiv
+  \var [v|u > -z]
+  &=
+  \sigma^{2} -
+  \rho^{2}\sigma^{2} z \lambda(z) -
+  \rho^{2}\sigma^{2} \lambda^{2}(z)
+  \\
+  \label{eq:var_u0|v}
+  \sigma_{1}^{2} \equiv
+  \var [v|u < -z]
+  &=
+  \sigma^{2} +
+  \rho^{2}\sigma^{2} z \lambda(-z) -
+  \rho^{2}\sigma^{2} \lambda^{2}(-z),
+\end{align}
+where $\lambda(\cdot) = \phi(\cdot)/\Phi(\cdot)$ (commonly referred to
+as inverse Mill's ratio), and
+$\phi(\cdot)$ and $\Phi(\cdot)$ are the standard normal density
+and cumulative distribution functions.  As we have estimates for $z$,
+we can also calculate the corresponding estimates $\hat\lambda =
+\phi(\hat z)/\Phi(\hat z)$.
+Hence we can re-write the
+outcome equation as
+\begin{equation}
+  y_{i}^{o}
+  = 
+  \beta_{0} + \vec{\beta}_{1}' \vec{x}_{i}^{o} 
+  + \beta_{2} y_{i}^{s}
+  + \beta_{3} \hat\lambda_{i}
+  + \eta_{i}
+  \label{eq:outcome_imr}
+\end{equation}
+where
+\begin{equation}
+  \label{eq:hat_lambda}
+  \hat\lambda_{i}
+  =
+  \begin{cases}
+    \lambda(z_{i})
+    & \text{if}\quad y^{s} = 1\\
+    -\lambda(-z_{i})
+    & \text{if}\quad y^{s} = 0.
+  \end{cases}
+\end{equation}
+From~\eqref{eq:outcome_imr} and~\eqref{eq:Ev_u} we can see that
+$\beta_{3} = \rho\sigma$. 
+$\eta$ is a disturbance term that by construction is independent of
+$\hat \lambda$ and has variance $\sigma_{0}^{2}$ or $\sigma_{1}^{2}$,
+depending on the participation status.
+We can estimate $\rho$ and $\sigma$ from~\eqref{eq:outcome_imr} in
+two ways.  First, for participants, from~\eqref{eq:var_u1|v} we have
+\begin{equation}
+  \label{eq:sigma2_participants}
+  \hat \sigma^{2} = 
+  \sigma_{1}^{2} +
+  \rho^{2}\sigma^{2} \bar z \bar\lambda(z) +
+  \rho^{2}\sigma^{2} \bar\lambda^{2}(z)
+  =
+  \sigma_{1}^{2} +
+  \hat \beta_{3}^{2} \bar z \bar\lambda(z) +
+  \hat \beta_{3}^{2} \bar\lambda^{2}(z)
+\end{equation}
+and second, for non-participants we get from~\eqref{eq:var_u0|v} 
+\begin{equation}
+  \label{eq:sigma2_non-participants}
+  \hat \sigma^{2} = 
+  \sigma_{0}^{2} - 
+  \rho^{2}\sigma^{2} \bar z \bar\lambda(-z) +
+  \rho^{2}\sigma^{2} \bar\lambda^{2}(-z)
+  =
+  \sigma_{0}^{2} - 
+  \hat \beta_{3}^{2} \bar z \bar\lambda(-z) +
+  \hat \beta_{3}^{2} \bar\lambda^{2}(-z)
+\end{equation}
+where upper bar denotes the corresponding sample means.
+$\sigma_{0}^{2}$ and $\sigma_{1}^{2}$ can be estimated from
+the residuals for non-participants and participants.
+In either case the estimator for $\rho$ is
+\begin{equation}
+  \label{eq:rho}
+  \hat\rho = \frac{\hat \beta_{3}}{\hat\sigma}.
+\end{equation}
+
+\subsection{Maximum Likelihood Estimation}
+\label{sec:ml_estimation}
+
+It is straightforward to use Maximum Likelihood for this model.
+Denote the disturbance vectors by $\vec{u} = (u_{1}, u_{2}, \dots, u_{N})$ and $\vec{v} =
+(v_{1}, v_{2}, \dots, v_{N})$.
+Based on \eqref{eq:the_model}, the likelihood of modeled disturbances can be written as
+\begin{equation}
+  \begin{split}
+    \Pr(\vec{u},\vec{v}) &=
+    \prod_{i \in \text{non-participants}}
+    \Pr(v_{i}|u_{i} < -z_{i}) \Pr(u_{i} < -z_{i})
+    \times
+    \\
+    &\times
+    \prod_{i \in \text{participants}}
+    \Pr(v_{i}|u_{i} > -z_{i}) \Pr(u_{i} > -z_{i})
+  \end{split}
+\end{equation}
+Using well-known normal density properties, we get from
+% a citation would be good here ....
+\eqref{eq:2dnormal}: 
+\begin{align}
+  \label{eq:likelihood}
+  \Pr(v_{i}|u_{i} < -z_{i})
+  &=
+  \frac{
+    \frac{1}{\sigma}
+    \phi \left( \frac{v_{i}}{\sigma} \right)
+  }{\Phi(-z_{i})}
+  \Phi \left( 
+    \frac{-z_{i} - \frac{\rho}{\sigma} v_{i}}{\sqrt{1 - \rho^{2}}}
+  \right)
+  \\
+  \Pr(u_{i} < -z_{i})
+  &=
+  \Phi(-z_{i})
+  \\
+  \Pr(v_{i}|u_{i} > -z_{i}) 
+  &=
+  \frac{
+    \frac{1}{\sigma}
+    \phi \left( \frac{v_{i}}{\sigma} \right)
+  }{\Phi(z_{i})}
+  \Phi \left( 
+    -\frac{-z_{i} - \frac{\rho}{\sigma} v_{i}}{\sqrt{1 - \rho^{2}}}
+  \right)
+  \\
+  \Pr(u_{i} > -z_{i})
+  &=
+  \Phi(z_{i})
+\end{align}
+  The disturbance terms $v_{i}$ 
+can
+be written based on observables as $v_{i} = y_{i}^{o} - 
+\beta_{0} - \vec{\beta}_{1}' \vec{x}_{i}^{o} 
+- \beta_{2} y_{i}^{s}$. 
+Accordingly, we can write the
+model log-likelihood in the model parameters $(\alpha_{0},
+\vec{\alpha}_{1}, \beta_{0}, \vec{\beta}_{1}, \beta_{2}, \sigma, \rho)$ 
+and observed data $(\vec{x}, \vec{y})$ as
+\begin{multline}
+  \label{eq:log_likelihood}
+  \loglik =
+  -\frac{N}{2} \log 2\pi 
+  - N \log \sigma 
+  - \frac{1}{2} 
+  \sum_{i=1}^{N} 
+  \left( \frac{y_{i}^{o} - 
+\beta_{0} - \vec{\beta}_{1}' \vec{x}_{i}^{o} 
+- \beta_{2} y_{i}^{s}}{\sigma} \right)^{2}
+  +
+  \\
+  + \sum_{i \in \text{non-participants}}
+  \log \Phi \left( 
+    \frac{-\alpha_{0} - \vec{\alpha}_{1}' \vec{x}_{i}^{s} 
+      - \displaystyle\frac{\rho}{\sigma} 
+      \left( y_{i}^{o} - 
+        \beta_{0} - \vec{\beta}_{1}' \vec{x}_{i}^{o} 
+        - \beta_{2} y_{i}^{s} \right)}
+    {\sqrt{1 - \rho^{2}}}
+  \right)
+  +
+  \\
+  + \sum_{i \in \text{participants}}
+  \log \Phi \left( 
+    -\frac{-\alpha_{0} - \vec{\alpha}_{1}' \vec{x}_{i}^{s} 
+      - \displaystyle\frac{\rho}{\sigma} 
+            \left( y_{i}^{o} - 
+\beta_{0} - \vec{\beta}_{1}' \vec{x}_{i}^{o} 
+- \beta_{2} y_{i}^{s} \right)}{\sqrt{1 - \rho^{2}}}
+  \right).
+\end{multline}
+The model is very similar in structure to the standard tobit-5 models
+\citep{amemiya1985,toomet08}.  Essentially it is a
+tobit-5 model where
+explanatory variables and coefficients are identical for both
+choices---participation and
+non-participation.
+
+
+\section{\code{treatReg}}
+\label{sec:treatReg}
+
+\subsection{Synthetic Data}
+\label{sec:synthetic_data}
+
+Technically,
+\code{treatReg} is an amended version of tobit-5 models in the
+\code{selection} command in the package \code{sampleSelection2}
+\citep{toomet08}.  It
+supports both 2-step and maximum likelihood estimation.  In the
+latter case, 2-step method is used for calculating the
+initial values of parameters
+(unless these are supplied by the user).  The only difference between
+\code{treatReg} and \code{selection} is the default model type: the
+former forces to estimate the treatment effect model, the latter
+detects the model type based on the arguments.  If the outcome
+equation includes the selection outcome as an explanatory variable, it
+assumes the user want to treatment effect model.
+
+First we provide an example usage using random data.  We create highly
+correlated error terms ($\rho=0.8$), and set all the coefficients
+(except the intercepts) equal
+to unity:
+<<generate_data>>=
+N <- 2000
+sigma <- 1
+rho <- 0.8
+Sigma <- matrix(c(1, rho*sigma, rho*sigma, sigma^2), 2, 2)
+                           # variance-covariance matrix
+uv <- mvtnorm::rmvnorm(N, mean=c(0,0), sigma=Sigma)
+                           # bivariate normal RV
+u <- uv[,1]
+v <- uv[,2]
+x <- rnorm(N)              # normal covariates
+z <- rnorm(N)
+ySX <- -1 + x + z + u      # unobserved participation tendency
+yS <- ySX > 0              # observed participation
+yO <- x + yS + v
+dat <- data.frame(yO, yS, x, z)
+@ 
+The code generates two correlated random variables, $u$ and $v$
+(using \code{rmvnorm}).  It also creates an explanatory variable $x$
+and an exclusion restriction $z$.  Finally, we set the observable
+treatment indicator $y^{s}$ equal to unity for those whose $y^{s*} >
+0$, and calculate the outcome $y^{o}$.
+
+First, we run a naive OLS estimate ignoring the selectivity:
+<<OLS>>=
+m <- lm(yO ~ x + yS, data=dat)
+print(summary(m))
+@ 
+Our estimated treatment effect (\code{yS}) is close to 2, instead of
+the correct value 1.  This is because the error terms are highly
+positively correlated---the participants are those who have the
+``best'' outcomes anyway.  Note that the estimates for the
+intercept and $x$ are biased too.
+
+Next we use the correct statistical model
+with \code{treatReg}.  We have to specify two equations: the first
+one is the selection equation and the second one the outcome equation.
+The treatment indicator enters in the latter as an ordinary control variable: 
+<<treatReg>>=
+tm <- treatReg(yS ~ x + z, yO ~ x + yS, data=dat)
+print(summary(tm))
+@ 
+The estimates are divided into three blocks: the first block describes
+the selection equation, the next one the outcome, and the last block
+describes the error terms.  Note that the selection variable is listed
+with the corresponding factor level (here \code{ySTRUE}).
+In this case all the estimates are close to their true values.
+This is not surprising as we have
+specified the model correctly.  We also recover the
+error term correlation 0.8 rather precisely.
+
+
+\subsection{Labor Market Training Data}
+\label{sec:training_data}
+
+However, the real life is almost never that simple.  The data in the example above
+has 
+two advantages not commonly seen in real data: first, 
+the model is correctly specified, and second---the treatment effect is
+extremely strong with $\beta_{2} = \sigma$, the disturbance variance
+in the outcome process.
+
+Let us analyze real treatment data from library
+\code{Ecdat}.  This is a US training program data from 1970s.
+\code{educ} measures education (in years), \code{u74} and \code{u75}
+are unemployment indicators for 1974 and 1975, \code{ethn} is race
+(``black'', ``hispanic'' and ``other'') and \code{re78} measures real
+income in 1978.  The logical \code{treat} tells if the individual was
+treated.  First, choose \code{u74} and \code{u75} as exclusion
+restrictions.  This amounts to assuming that previous unemployment is
+unrelated to the wage a few years later, except through eventual
+training.  
+<<EcdatExample>>=
+data(Treatment, package="Ecdat")
+er <- treatReg(treat~poly(age,2) + educ + u74 + u75 + ethn,
+               log(re78)~treat + poly(age,2) + educ + ethn,
+               data=Treatment)
+print(summary(er))
+@ 
+We see that low education and unemployment are strong predictors for
+training 
+participation.  We also see that blacks and hispanics
+are more likely to
+be trained that ``others''.  Surprisingly, the trainings seems to
+have a strong negative impact on earnings: the estimate -0.96 means
+that participants earn
+less than 40\% of what the non-participants do!
+
+Let's now acknowledge that previous unemployment may also have direct
+causal effect on wage and add the variables \code{u74} and \code{u75}
+to the outcome equation too.  Now we do not have any exclusion
+restriction and the identification is solely based on the functional
+form assumptions.
+<<EcdatNoExclusion>>=
+noer <- treatReg(treat~poly(age,2) + educ + u74 + u75 + ethn,
+                 log(re78)~treat + poly(age,2) + educ + u74 + u75 + ethn,
+                 data=Treatment)
+print(summary(noer))
+@ 
+Now the estimated treatment effect is substantially smaller in
+absolute value, only -0.51, and hence participants earn about 60\% of
+income of non-participants.
+
+We also see that while the error terms in the first model above were slightly
+positively correlated, now these are essentially
+independent.  However, as the selection equation estimates suggest,
+the participants are drawn from the weak end of the
+observable skill distribution.  If this is also true for
+unobservables, we would expect the
+correlation to be negative.  Seems like this data is too
+coarse to correctly determine the bias.  The reader is encouraged to
+experiment with further variables in the data, such as pre-program incomes.
+
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+Treatment effect models with spherical disturbances remain popular in
+applied research despite the often disputed assumptions.
+\code{sampleSelection} offers an easy interface to estimate such models.
+
+\bibliographystyle{apecon}
+\bibliography{selection}
+
+\end{document}

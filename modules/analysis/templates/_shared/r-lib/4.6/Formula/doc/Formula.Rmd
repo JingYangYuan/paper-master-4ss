@@ -1,0 +1,527 @@
+---
+title: "Extended Model Formulas in R: Multiple Parts and Multiple Responses"
+author:
+  - name: Achim Zeileis
+    affiliation: Universität Innsbruck
+    address: Austria
+    orcid: 0000-0003-0918-3766
+    email: Achim.Zeileis@R-project.org
+    url: https://www.zeileis.org/
+  - name: Yves Croissant
+    affiliation: Université de la Réunion
+    address: France
+    orcid: 0000-0002-4857-7736
+    email: Yves.Croissant@univ-reunion.fr
+output:
+  rmarkdown::html_vignette:
+    highlight: monochrome
+    toc: true
+abstract: >
+  This introduction to the R package **Formula** is a (slightly)
+  modified version of @Formula:Zeileis+Croissant:2010, published in the
+  _Journal of Statistical Software_.  
+  Model formulas are the standard approach for specifying the variables
+  in statistical models in the S language. Although being eminently
+  useful in an extremely wide class of applications, they have certain limitations
+  including being confined to single responses and not providing convenient support for
+  processing formulas with multiple parts. The latter is relevant for models
+  with two or more sets of variables, e.g., different equations for different model
+  parameters (such as mean and dispersion), regressors and instruments in instrumental
+  variable regressions, two-part models such as hurdle models, or alternative-specific
+  and individual-specific variables in choice models among many others.
+  The R package **Formula** addresses these two problems
+  by providing a new class `"Formula"` (inheriting from `"formula"`)
+  that accepts an additional formula operator `|` separating multiple parts
+  and by allowing all formula operators (including the new `|`)
+  on the left-hand side to support multiple responses.
+bibliography: Formula.bib
+vignette: >
+  %\VignetteIndexEntry{Extended Model Formulas in R: Multiple Parts and Multiple Responses}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteDepends{stats}
+  %\VignetteKeywords{formula processing, model frame, model matrix, R}
+  %\VignettePackage{Formula}
+---
+
+```{r, include = FALSE}
+library("Formula")
+knitr::opts_chunk$set(
+  engine = "R",
+  collapse = TRUE,
+  comment = "##",
+  message = FALSE,
+  warning = FALSE,
+  echo = TRUE
+)
+```
+
+
+## Introduction {#sec:intro}
+
+Since publication of the seminal "white book" [@Formula:Chambers+Hastie:1992]
+the standard approach for fitting statistical models in the S
+language is to apply some model-fitting function (such as `lm()` or `glm()`)
+to a `"formula"` description of the variables involved in the model and typically
+stored in a `"data.frame"`. The semantics of formula processing
+are based on the ideas of the @Formula:Wilkinson+Rogers:1973 notation which in turn
+was targeted at specification of analysis of variance models. Despite this emphasis on
+specification of terms in models with linear predictors, formula notation
+has always been used much more generally in S, e.g., for specifying variables in classification
+and regression trees, margins in contingency tables, or variables in graphical displays.
+In such applications, the precise meaning of a particular formula depends on the function
+that processes it. Typically, the standard formula processing approach would
+encompass extraction of the specified terms using `terms()`, preparation of a preprocessed
+data frame using `model.frame()`, and computation of a "design" or "regressor"
+matrix using `model.matrix()`.
+However, there are certain limitations to these standard formula processing tools in S that
+can be rather inconvenient in certain applications:
+
+  -  The formula notation can just be used on the right-hand side (RHS) of a formula
+        (to the right of the `~`) while it has its original arithmetic meaning on
+	the left-hand side (LHS). This makes it difficult to specify multiple responses,
+	especially if these are not numeric (e.g., factors). This feature would be
+	useful for specifying multivariate outcomes of mixed types in independence tests
+	[e.g., in the **coin** package, @Formula:Hothorn+Hornik+VanDeWiel:2006, @Formula:Hothorn+Hornik+VanDeWiel:2008]
+        or in models with multivariate responses
+	[e.g., supported in the **party** package, @Formula:Zeileis+Hothorn+Hornik:2008].
+  -  There is no simple construct in standard formula notation that allows one to
+        separate several groups of variables from which separate model matrices can be
+        derived. This task occurs in many types of models, e.g., when processing
+        separate sets of variables for mean and dispersion
+        [e.g., in the **betareg** package, @Formula:Cribari-Neto+Zeileis:2010],
+        separate equations for location, scatter, and shape
+        [e.g., in the **gamlss** package, @Formula:Stasinopoulos+Rigby:2007],
+        regressors and instruments in instrumental variable regressions
+        [e.g., in the **plm** package, @Formula:Croissant+Millo:2008,
+	or the **AER** package, @Formula:Kleiber+Zeileis:2008],
+        variables in two-part models such as hurdle models or zero-inflated regressions
+        [e.g., in the **pscl** package, @Formula:Zeileis+Kleiber+Jackman:2008],
+        alternative-specific and individual-specific variables in choice models
+        [e.g., in the **mlogit** package, @Formula:Croissant:2010],
+        efficiency level variables in stochastic frontier analysis
+        [e.g., in the **frontier** package, @Formula:Coelli+Henningsen:2010], or
+        modeling variables and partitioning variables in model-based recursive partitioning techniques
+        [e.g., in the **party** package, @Formula:Zeileis+Hothorn+Hornik:2008].
+
+
+In many of the aformentioned packages, standard `"formula"` objects are employed
+but their processing is generalized, e.g., by using multiple formulas, multiple terms,
+by adding new formula operators or even more elaborate solutions. However, in many situations
+it is not easy to reuse these generalizations outside the package/function they were designed for.
+Therefore, as we repeatedly needed such generalizations in our own packages
+and addressed this in the past by various different solutions, it seemed natural
+to provide a more general unified approach by means of our new **Formula** package.
+This has already been reused in some of our own packages (including **AER**, **betareg**,
+**mlogit**, and **plm**) but can also be easily employed by other package developers
+(e.g., as in the **frontier** package). More applications in our own and other packages
+will hopefully follow.
+
+In the remainder of this paper we discuss
+how multiple responses and multiple parts (both on the LHS and RHS) are enabled
+in the **Formula** package written in the R system for statistical
+computing [@Formula:R:2009] and available from the Comprehensive R
+Archive Network (CRAN) at <https://CRAN.R-project.org/package=Formula>. Built on top of
+basic `"formula"` objects, the `"Formula"` class just adds a thin additional layer
+which is based on a single additional operator, namely `|`, that can be used to separate different
+parts (or groups) of variables. **Formula** essentially just handles the different
+formula parts and leverages the existing methods for `"formula"` objects for all
+remaining operations. (Throughout the paper, no terminological distinction is made between
+classic `"formula"` objects as such and the way they are interpreted by
+standard processing tools (e.g., `terms()`, `model.frame()`, `model.matrix()`).
+The reasons for this are twofold: First, it reflects their use as described in
+@Formula:Chambers+Hastie:1992 and, second, generalizations generally require
+extra effort from the user.)
+In the ["Motivating examples"](#sec:motivation) we show the main ideas implemented in the package and how easily they
+can be employed. The details of the `"Formula"` class and its associated methods
+are discussed in the ["Implementation"](#sec:implementation) section and the
+["Usage in model fitting functions"](#sec:usage) illustrates how **Formula** 
+can be used in the development of new functions/packages.
+A short ["Summary"](#sec:summary) concludes the paper.
+
+
+## Motivating examples {#sec:motivation}
+
+To illustrate the basic ideas of the **Formula** package, we first generate a small
+artificial data set (with both numeric and categorical variables) and subsequently
+illustrate its usage with a multi-part and a multi-response `"Formula"`, respectively. 
+
+```{r example-data}
+set.seed(1090)
+dat <- as.data.frame(matrix(round(runif(21), digits = 2), ncol = 7))
+colnames(dat) <- c("y1", "y2", "y3", "x1", "x2", "x3", "x4")
+for(i in c(2, 6:7)) dat[[i]] <- factor(dat[[i]] < 0.5,
+  labels = c("a", "b"))
+dat$y2[1] <- NA
+dat
+```
+
+
+### Multiple parts
+
+We start out with a simple formula `log(y1) ~ x1 + x2 | I(x1^2)` which
+has a single response `log(y1)` on the LHS and two parts on the RHS, separated
+by `|`. The first part contains `x1` and `x2`, the second contains
+`I(x1^2)`, i.e., the squared values of `x1`. The initial `"formula"`
+can be transformed to a `"Formula"` using the constructor function `Formula()`:
+
+```{r multi-part1}
+F1 <- Formula(log(y1) ~ x1 + x2 | I(x1^2))
+length(F1)
+```
+
+The `length()` method indicates that there is one part on the LHS and two parts
+on the RHS. The first step of processing data using a formula is typically the
+construction of a so-called model frame containing only the variables required
+by the formula. As usual, this can be obtained with the `model.frame()` method.
+
+```{r multi-part2}
+mf1 <- model.frame(F1, data = dat)
+mf1
+```
+
+As this model just has a single response (as in base `"formula"` objects),
+the extractor function `model.response()` can be employed:
+
+```{r multi-part3}
+model.response(mf1)
+```
+
+For constructing separate model matrices for the two parts on the RHS, the
+`model.matrix()` can be employed and additionally specifying the argument
+`rhs`:
+
+```{r multi-part4}
+model.matrix(F1, data = mf1, rhs = 1)
+model.matrix(F1, data = mf1, rhs = 2)
+```
+
+
+### Multiple responses
+
+To accommodate multiple responses, all formula operators can be employed
+on the LHS in `"Formula"` objects (whereas they would have their original
+arithmetic meaning in `"formula"` objects). This also includes the 
+new `|` operator for separating different parts. Thus, one could
+specify a two-part response via `y1 | y2 ~ x3` or a single part
+with two variables via `y1 + y2 ~ x3`. We do the latter in the
+following illustration.
+
+```{r multi-response1}
+F2 <- Formula(y1 + y2 ~ x3)
+length(F2)
+```
+
+As usual, the model frame can be derived by
+
+```{r multi-response2}
+mf2 <- model.frame(F2, data = dat)
+mf2
+```
+
+However, there is an important difference to the model frame `mf1`
+derived in the previous example. As the (non-generic) `model.response()`
+function would only be able to extract a single response column from a model frame,
+multi-response model frames in **Formula** are implemented to have no response
+at all in the `model.response()` sense:
+
+```{r multi-response3}
+model.response(mf2)
+```
+
+As `model.response()` cannot be extended (without overloading the base R
+function), **Formula** provides a new generic function `model.part()` which can
+be used to extract all variables from a model frame pertaining to specific parts.
+This can also be used to extract multiple responses. Its syntax is modeled
+after `model.matrix()` taking a `"Formula"` as the first argument. For further
+details see the ["Implementation"](#sec:implementation) section. Its application is straightforward
+and all LHS variables (in the first and only part of the LHS) can be extracted via
+
+```{r multi-response4}
+model.part(F2, data = mf2, lhs = 1)
+```
+
+The same method also works for single response models as in the previous example:
+
+```{r single-response}
+model.part(F1, data = mf1, lhs = 1, drop = TRUE)
+```
+
+## Implementation {#sec:implementation}
+
+Below we discuss the ideas for the design of the `"Formula"` class
+and methods. As all tools are built on top of the
+`"formula"` class and its associated methods whose most important feature are briefly outlined
+as well.
+
+### Working with classic `"formula"` objects
+
+Classic `"formula"` objects [@Formula:Chambers+Hastie:1992]
+are constructed by using `~` to separate LHS and RHS, typically
+(but not necessarily) interpreted as "dependent" and "explanatory"
+variables. For describing relationships between variables on
+the RHS, several operators can be used: `+`, `-`, `*`,
+`/`, `:`, `%in%`, `^`. Thus, these do not have
+their original meaning in the top-level RHS while they keep their original
+arithmetic meaning on higher levels of the RHS (thus, within function
+calls such as `I(x1^2)`) and on the LHS in general. A first step
+in using `"formula"` objects is often to compute the associated
+`"terms"` using the function `terms()`. Based on the formula or
+the associated terms and a suitable set of variables (typically either
+in a data frame or in the global environment) `model.frame()` can
+build a so-called model frame that contains all variables in the formula/terms.
+This might include processing of missing values (`NA`s),
+carrying out variable transformations (such as logs, squares,
+or other functions of one or more variables) and providing further variables
+like weights, offset, etc. A model frame is simply a `"data.frame"` with
+additional attributes (including `"terms"`) but without a specific class.
+From this preprocessed model frame several components can
+be extracted using `model.extract()` or `model.response()`,
+`model.weights()`, and `model.offset()`, all of which are non-generic.
+Last not least, `model.matrix()` (which is generic) can compute "design" or "regressor"
+matrices based on the formula/terms and the associated model frame.
+
+
+### Constructing `"Formula"` objects
+
+To accomplish the main objectives of the `"Formula"` class,
+the following design
+principles have been used: reuse of `"formula"` objects,
+introduction of a single new operator `|`, and support of all
+formula operators on the LHS. Thus, `|` loses its original 
+meaning (logical "or") on the first level of formulas but can
+still be used with its original meaning on higher levels, e.g.,
+`factor(x1 > 0.5 | x3 == "a")` still works as before.
+For assigning a new class to formulas containing `|`,
+the constructor function `Formula()` is used:
+
+```{r details1}
+F3 <- Formula(y1 + y2 | log(y3) ~ x1 + I(x2^2) | 0 + log(x1) | x3 / x4)
+F3
+length(F3)
+```
+
+In this example, `F3` is an artificially complex formula with two
+parts on the LHS and three parts on the RHS, both containing multiple
+terms, transformations or other formula operators. Apart from assigning
+the new class `"Formula"` (in addition to the old `"formula"` class),
+`Formula()` also splits up the formula into LHS and RHS parts which
+are stored as list attributes `"lhs"` and `"rhs"`, respectively,
+e.g.,
+
+```{r details2}
+attr(F3, "lhs")
+```
+and analogously `attr(F3, "rhs")`. The user never has to compute
+on these attributes directly, but many methods for `"Formula"`
+objects take `lhs` and/or `rhs` arguments. These always refer
+to index vectors for the two respective lists.
+
+It would have been conceivable to generalize not only the notion of
+formulas but also of terms or model frames. However, there are few
+generics with methods for `"terms"` objects and there is
+no particular class for model frames at all. Hence, computing with
+generalized versions of these concepts would have required much more
+overhead for users of **Formula**. Hence, it was decided
+not to do so and keep the package interface as simple as possible.
+
+
+### Extracting `"formula"` and `"terms"` objects
+
+As subsequent computations typically require a `"formula"` or
+a `"terms"` object, **Formula** provides suitable `formula()`
+and `terms()` extractors for `"Formula"` objects. For the former,
+the idea is to be able to switch back and forth between the `"Formula"`
+and `"formula"` representation, e.g., `formula(Formula(...))`
+should recover the original input formula. For the latter, the objective
+is somewhat different: `terms()` should always return a `"terms"`
+object that can be processed by `model.frame()` and similar functions.
+Thus, the terms must not contain multiple responses and/or the new
+`|` operator.
+
+The `formula()` method is straightforward. When no additional arguments
+are supplied it recovers the original `"formula"`. Furthermore, there
+are two optional additional arguments `lhs` and `rhs`. With
+these arguments subsets of formulas
+can be chosen, indexing the LHS and RHS parts. The default value for
+both is `NULL`, meaning that all parts are employed.
+
+```{r formula-method}
+formula(F3)
+formula(F3, lhs = 2, rhs = -2)
+formula(F3, lhs = c(TRUE, FALSE), rhs = 0)
+```
+
+Similarly, `terms()` computes a `"terms"` object, by default using
+all parts in the formula, but `lhs` and `rhs` can be used as
+above. To remove the `|` operator, all parts are collapsed using the
+`+` operator. Furthermore, the LHS variables can only be kept on the
+LHS if they contain a single term. Otherwise, to stop subsequent computations
+from interpreting the formula operators as arithmetic operators, all LHS
+components are added on the RHS as well. Thus, for `F3` we obtain
+
+```{r terms-method1}
+terms(F3)
+```
+
+Instead of using all parts, subsets can again be selected. We illustrate this
+below but only show the associated `"formula"` to save output space:
+```{r terms-method}
+formula(terms(F3))
+formula(terms(F3, lhs = 2, rhs = -2))
+formula(terms(F3, lhs = c(TRUE, FALSE), rhs = 0))
+```
+
+### Computing model frames, matrices, and responses
+
+Given that suitable `"terms"` can be extracted from `"Formula"`
+objects, it is straightforward to set up the corresponding model frame.
+The `model.frame()` method simply first calls the `terms()` method
+and then applies the default `model.frame()`. Hence, all further
+arguments are processed as usual, e.g.,
+
+```{r model.frame-method}
+mf3 <- model.frame(F3, data = dat, subset = y1 < 0.75, weights = x1)
+mf3
+```
+
+All subsequent computations are then based on this preprocessed model
+frame (and possibly the original `"Formula"`). Thus, the model matrices
+for each RHS part can be easily computed, again setting the `rhs` argument:
+
+```{r model.matrix-method}
+model.matrix(F3, data = mf3, rhs = 2)
+```
+
+Typically, just a single RHS will be selected and hence `rhs = 1`
+and not `rhs = NULL` is the default in this method. However, multiple RHS parts
+are also supported. Also, there is a `lhs` argument available (defaulting to `NULL`)
+which might seem unnecessary at first sight but it is important
+in case the selected RHS part(s) contain(s) a "`.`" that needs to
+be resolved (see `?model.matrix.Formula` for an example).
+
+The LHS parts can be extracted using the method
+for the new `model.part()` generic, employing a syntax similar to `model.matrix()`:
+
+```{r model.response-substitute}
+model.part(F3, data = mf3, lhs = 1)
+model.part(F3, data = mf3, lhs = 2)
+```
+
+As argued above, introduction of a new generic is necessary for supporting multi-response
+formulas because `model.response()` is non-generic. For model frames derived
+from single-response formulas, `model.response()` can be used as usual.
+The remaining extractors work as usual:
+
+```{r model.foo-methods}
+model.weights(mf3)
+```
+
+
+### Further methods
+
+To conclude the suite of methods available for the new `"Formula"` class,
+**Formula** provides an `update()` method and a new `as.Formula()`
+generic with suitable methods. The former updates the formula part by part,
+adding new parts if necessary:
+
+```{r update-method}
+update(F1, . ~ . - x1 | . + x1)
+update(F1, . + y2 | y3 ~ .)
+```
+
+The `as.Formula()` method coerces to `"Formula"`, possibly also processing
+multiple arguments:
+
+```{r as.Formula-method}
+as.Formula(y1 ~ x1, y2 ~ x2, ~ x3)
+```
+
+
+## Usage in model fitting functions {#sec:usage}
+
+A typical application of **Formula** is to provide the workhorse for formula
+processing in model-fitting functions that require specification of multiple
+parts or multiple responses. To provide a very brief and simple example, we
+show how such a function can be set up. For illustration, we compute the
+coefficients in an instrumental variables regression using two-stage least
+squares.
+
+The `ivcoef()` function below takes the usual arguments `formula`,
+`data`, `subset`, and `na.action` (and further arguments
+`weights` and `offset` could be included in the same way).
+The `formula` should be a two-part formula like `y ~ x1 + x2 | z1 + z2 + z3`.
+There is a single response on the LHS, one RHS part with the regressors and
+a second RHS part with the instruments. The function `ivcoef()` uses the
+typical workflow of model-fitting functions and processes
+its arguments in the following four steps:
+(1)&nbsp;process the call,
+(2)&nbsp;set up the model frame (using the `"Formula"` method),
+(3)&nbsp;extract response and regressors from the model frame,
+(4)&nbsp;estimate the model (by calling `lm.fit()` twice to compute the
+    two-stage least squares coefficients).
+
+```{r ivcoef}
+ivcoef <- function(formula, data, subset, na.action, ...)
+{
+  mf <- match.call(expand.dots = FALSE)
+  m <- match(c("formula", "data", "subset", "na.action"), names(mf), 0)
+  mf <- mf[c(1, m)]
+  
+  f <- Formula(formula)
+  mf[[1]] <- as.name("model.frame")
+  mf$formula <- f
+  mf <- eval(mf, parent.frame())
+  
+  y <- model.response(mf)
+  x <- model.matrix(f, data = mf, rhs = 1)
+  z <- model.matrix(f, data = mf, rhs = 2)
+
+  xz <- as.matrix(lm.fit(z, x)$fitted.values)
+  lm.fit(xz, y)$coefficients
+}
+```
+
+The resulting function can then be applied easily (albeit not very meaningfully)
+to the `dat` data frame:
+
+```{r ivcoef-example}
+ivcoef(log(y1) ~ x1 | x2, data = dat)
+```
+
+The same coefficients can be derived along with all the usual inference
+using the `ivreg()` function from the **AER** package [@Formula:Kleiber+Zeileis:2008],
+which also uses the **Formula** tools in its latest release. Apart from
+providing inference and many other details, `ivreg()` also supports `weights`,
+`offsets` etc. Finally, for backward compatibility, the function
+also allows separate formulas for regressors and instruments (i.e.,
+`formula = y ~ x1 + x2` and `instruments = ~ z1 + z2 + z3`)
+which can be easily incorporated using the **Formula** tools, e.g.,
+replacing `f <- Formula(formula)` by
+
+```{r, eval=FALSE}
+  f <- if(!is.null(instruments)) as.Formula(formula, instruments)
+    else as.Formula(formula)
+  stopifnot(isTRUE(all.equal(length(f), c(1, 2))))
+```
+
+In summary, the usage of **Formula** should reduce the overhead for the
+developers of model-fitting functions in R with multiple responses and/or multiple
+parts and make the resulting programs more intelligible. Further R
+packages employing the `"Formula"` approach can be obtained from CRAN,
+including **betareg**, **frontier**, **mlogit**, and **plm**.
+
+
+## Summary {#sec:summary}
+
+The **Formula** package provides tools for processing multi-response and
+multi-part formulas in the R system for statistical computing.
+The new class `"Formula"` inherits from the existing `"formula"`
+class, only adds a single new formula operator `|`, and enables
+the usage of formula operators on the left-hand side of formulas. The methods provided
+for `"Formula"` objects are as similar as possible to the classic
+methods, facilitating their usage in model-fitting functions that require
+support for multiple responses and/or multiple parts of variables.
+
+
+## References

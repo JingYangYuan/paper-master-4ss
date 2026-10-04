@@ -1,0 +1,30 @@
+check_arg               Checks arguments and informs the user
+                        appropriately
+check_expr              Checks the evaluation of an expression
+dreamerr-package        Error Handling Made Easy
+enumerate_items         Enumerates the elements of a vector
+fit_screen              Nicely fits a message in the current R console
+fsignif                 Formatting numbers with display of significant
+                        digits
+generate_set_hook       Error displaying a call located at a hook
+                        location
+ifsingle                Conditional element selection
+n_times                 Numbers in letters
+package_stats           Provides package statistics
+plural                  Adds an s and/or a singular/plural verb
+                        depending on the argument's length
+setDreamerr_check       Sets dreamerr argument checking functions on or
+                        off
+setDreamerr_dev.mode    Sets the developer mode to help form check_arg
+                        calls
+setDreamerr_show_stack
+                        Settings telling whether or not to display the
+                        full call stack on errors
+set_check               Sets argument checking on/off "semi-globally"
+set_up                  Sets "semi-globally" the 'up' argument of
+                        dreamerr's functions
+sfill                   Fills a string vector with a symbol
+stop_up                 Stops (or warns in) sub-function execution
+suggest_item            Suggest the the closest elements from a string
+                        vector
+validate_dots           Checks the arguments in dots from methods

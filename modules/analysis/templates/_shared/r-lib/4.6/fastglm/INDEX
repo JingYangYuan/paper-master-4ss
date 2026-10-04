@@ -1,0 +1,23 @@
+%*%,big.matrix,vector-method
+                        big.matrix prod
+fastglm                 Fast generalized linear model fitting
+fastglm-sandwich        Empirical estimating-function and bread methods
+                        for 'fastglm' objects
+fastglmPure             Fast generalized linear model fitting
+fastglm_fit             Fast generalized linear model fitting
+fastglm_hurdle          Hurdle (two-part) Poisson / Negative-Binomial
+                        regression
+fastglm_nb              Fit a negative-binomial GLM with simultaneous
+                        (beta, theta) MLE
+fastglm_streaming       Fit a GLM by streaming row-blocks of the design
+                        matrix
+fastglm_zi              Zero-inflated Poisson / Negative-Binomial
+                        regression
+negbin                  Negative binomial family with known dispersion
+predict.fastglm         Obtains predictions and optionally estimates
+                        standard errors of those predictions from a
+                        fitted generalized linear model object.
+summary.fastglm         'summary()' method for 'fastglm' fitted objects
+vcov.fastglm            'vcov()' method for 'fastglm' fitted objects
+vcovHC.fastglm          Heteroskedasticity-consistent (HC) variance
+                        estimators for 'fastglm' objects

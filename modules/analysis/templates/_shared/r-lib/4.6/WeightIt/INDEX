@@ -1,0 +1,45 @@
+.cens                   Mark a censoring indicator in a model formula
+.weightit_methods       Weighting methods
+ESS                     Compute effective sample size of weighted
+                        sample
+anova.glm_weightit      Methods for 'glm_weightit' objects
+as.weightit             Create a 'weightit' object manually
+calibrate               Calibrate Propensity Score Weights
+coxph_weightit          Fitting (Weighted) Cox Proportional Hazards
+                        Models
+get_w_from_ps           Compute weights from propensity scores
+glm_weightit            Fitting (Weighted) Generalized Linear Models
+glm_weightit-methods    Methods for 'glm_weightit()' objects
+make_full_rank          Make a design matrix full rank
+method_bart             Propensity Score Weighting Using BART
+method_cbps             Covariate Balancing Propensity Score Weighting
+method_cfd              Characteristic Function Distance Balancing
+method_ebal             Entropy Balancing
+method_energy           Energy Balancing
+method_gbm              Propensity Score Weighting Using Generalized
+                        Boosted Models
+method_glm              Propensity Score Weighting Using Generalized
+                        Linear Models
+method_ipt              Inverse Probability Tilting
+method_npcbps           Nonparametric Covariate Balancing Propensity
+                        Score Weighting
+method_optweight        Stable Balancing Weights
+method_ps               Weighting from Supplied Propensity Scores
+method_super            Propensity Score Weighting Using SuperLearner
+method_user             User-Defined Functions for Estimating Weights
+msmdata                 Simulated data for a 3 time point sequential
+                        study
+multinom_weightit       Fitting (Weighted) Multinomial Regression
+                        Models
+ordinal_weightit        Fitting (Weighted) Ordinal Regression Models
+plot.weightit           Plot information about the weight estimation
+                        process
+predict.glm_weightit    Predictions for 'glm_weightit' objects
+sbps                    Subgroup Balancing Propensity Score
+summary.weightit        Print and Summarize Output
+trim                    Trim (Winsorize) Large Weights
+weightit                Estimate Balancing Weights
+weightit.fit            Generate Balancing Weights with Minimal Input
+                        Processing
+weightitMSM             Generate Balancing Weights for Longitudinal
+                        Treatments

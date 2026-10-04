@@ -1,0 +1,11 @@
+plot.summclust	plot.summclust
+reexports	reexports
+summary.summclust	summary.summclust
+summclust	summclust
+summclust.fixest	summclust.fixest
+summclust.lm	summclust.lm
+tidy	reexports
+tidy.summclust	tidy.summclust
+vcov_CR3J	vcov_CR3J
+vcov_CR3J.fixest	vcov_CR3J.fixest
+vcov_CR3J.lm	vcov_CR3J.lm

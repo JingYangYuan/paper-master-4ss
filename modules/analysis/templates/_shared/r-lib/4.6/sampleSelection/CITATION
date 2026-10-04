@@ -1,0 +1,20 @@
+citHeader("To cite sampleSelection in publications use:")
+
+bibentry(
+  bibtype      = "Article",
+  title        = "Sample Selection Models in {R}: Package {sampleSelection}",
+  author       = c( person( "Ott", "Toomet" ),
+                    person( "Arne", "Henningsen" ) ),
+  journal      = "Journal of Statistical Software",
+  year         = "2008",
+  volume       = "27",
+  number       = "7",
+  url          = "https://www.jstatsoft.org/v27/i07/",
+
+  textVersion  =
+  paste("Ott Toomet, Arne Henningsen (2008).",
+        "Sample Selection Models in R: Package sampleSelection.",
+        "Journal of Statistical Software 27(7).",
+        "URL https://www.jstatsoft.org/v27/i07/.")
+)
+

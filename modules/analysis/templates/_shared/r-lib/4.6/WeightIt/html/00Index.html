@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head><title>R: Weighting for Covariate Balance in Observational Studies</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<link rel="stylesheet" type="text/css" href="R.css">
+</head><body><div class="container">
+<h1> Weighting for Covariate Balance in Observational Studies
+<img class="toplogo" src="figures/logo.png" alt="[R logo]">
+</h1>
+<hr>
+<div style="text-align: center;">
+<a href="../../../doc/html/packages.html"><img class="arrow" src="../../../doc/html/left.jpg" alt="[Up]"></a>
+<a href="../../../doc/html/index.html"><img class="arrow" src="../../../doc/html/up.jpg" alt="[Top]"></a>
+</div><h2>Documentation for package &lsquo;WeightIt&rsquo; version 2.1.0</h2>
+
+<ul><li><a href="../DESCRIPTION" type="text/plain; charset=utf-8">DESCRIPTION file</a></li>
+<li><a href="../doc/index.html">User guides, package vignettes and other documentation</a></li>
+<li><a href="../NEWS.md">Package NEWS</a></li>
+<li><a href="../README.md">Package README</a></li>
+</ul>
+
+<h2>Help Pages</h2>
+
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="dot-cens.html">.cens</a></td>
+<td>Mark a censoring indicator in a model formula</td></tr>
+<tr><td style="width: 25%;"><a href="dot-weightit_methods.html">.weightit_methods</a></td>
+<td>Weighting methods</td></tr>
+<tr><td style="width: 25%;"><a href="anova.glm_weightit.html">anova.glm_weightit</a></td>
+<td>Methods for 'glm_weightit' objects</td></tr>
+<tr><td style="width: 25%;"><a href="as.weightit.html">as.weightit</a></td>
+<td>Create a 'weightit' object manually</td></tr>
+<tr><td style="width: 25%;"><a href="as.weightit.html">as.weightit.default</a></td>
+<td>Create a 'weightit' object manually</td></tr>
+<tr><td style="width: 25%;"><a href="as.weightit.html">as.weightit.weightit.fit</a></td>
+<td>Create a 'weightit' object manually</td></tr>
+<tr><td style="width: 25%;"><a href="as.weightit.html">as.weightitMSM</a></td>
+<td>Create a 'weightit' object manually</td></tr>
+<tr><td style="width: 25%;"><a href="as.weightit.html">as.weightitMSM.default</a></td>
+<td>Create a 'weightit' object manually</td></tr>
+<tr><td style="width: 25%;"><a href="calibrate.html">calibrate</a></td>
+<td>Calibrate Propensity Score Weights</td></tr>
+<tr><td style="width: 25%;"><a href="calibrate.html">calibrate.default</a></td>
+<td>Calibrate Propensity Score Weights</td></tr>
+<tr><td style="width: 25%;"><a href="calibrate.html">calibrate.weightit</a></td>
+<td>Calibrate Propensity Score Weights</td></tr>
+<tr><td style="width: 25%;"><a href="coxph_weightit.html">coxph_weightit</a></td>
+<td>Fitting (Weighted) Cox Proportional Hazards Models</td></tr>
+<tr><td style="width: 25%;"><a href="ESS.html">ESS</a></td>
+<td>Compute effective sample size of weighted sample</td></tr>
+<tr><td style="width: 25%;"><a href="glm_weightit-methods.html">estfun.glm_weightit</a></td>
+<td>Methods for 'glm_weightit()' objects</td></tr>
+<tr><td style="width: 25%;"><a href="get_w_from_ps.html">get_w_from_ps</a></td>
+<td>Compute weights from propensity scores</td></tr>
+<tr><td style="width: 25%;"><a href="glm_weightit.html">glm_weightit</a></td>
+<td>Fitting (Weighted) Generalized Linear Models</td></tr>
+<tr><td style="width: 25%;"><a href="glm_weightit-methods.html">glm_weightit-methods</a></td>
+<td>Methods for 'glm_weightit()' objects</td></tr>
+<tr><td style="width: 25%;"><a href="glm_weightit.html">lm_weightit</a></td>
+<td>Fitting (Weighted) Generalized Linear Models</td></tr>
+<tr><td style="width: 25%;"><a href="make_full_rank.html">make_full_rank</a></td>
+<td>Make a design matrix full rank</td></tr>
+<tr><td style="width: 25%;"><a href="method_bart.html">method_bart</a></td>
+<td>Propensity Score Weighting Using BART</td></tr>
+<tr><td style="width: 25%;"><a href="method_cbps.html">method_cbps</a></td>
+<td>Covariate Balancing Propensity Score Weighting</td></tr>
+<tr><td style="width: 25%;"><a href="method_cfd.html">method_cfd</a></td>
+<td>Characteristic Function Distance Balancing</td></tr>
+<tr><td style="width: 25%;"><a href="method_ebal.html">method_ebal</a></td>
+<td>Entropy Balancing</td></tr>
+<tr><td style="width: 25%;"><a href="method_energy.html">method_energy</a></td>
+<td>Energy Balancing</td></tr>
+<tr><td style="width: 25%;"><a href="method_ebal.html">method_entropy</a></td>
+<td>Entropy Balancing</td></tr>
+<tr><td style="width: 25%;"><a href="method_gbm.html">method_gbm</a></td>
+<td>Propensity Score Weighting Using Generalized Boosted Models</td></tr>
+<tr><td style="width: 25%;"><a href="method_glm.html">method_glm</a></td>
+<td>Propensity Score Weighting Using Generalized Linear Models</td></tr>
+<tr><td style="width: 25%;"><a href="method_ipt.html">method_ipt</a></td>
+<td>Inverse Probability Tilting</td></tr>
+<tr><td style="width: 25%;"><a href="method_cfd.html">method_kernel</a></td>
+<td>Characteristic Function Distance Balancing</td></tr>
+<tr><td style="width: 25%;"><a href="method_npcbps.html">method_npcbps</a></td>
+<td>Nonparametric Covariate Balancing Propensity Score Weighting</td></tr>
+<tr><td style="width: 25%;"><a href="method_optweight.html">method_optweight</a></td>
+<td>Stable Balancing Weights</td></tr>
+<tr><td style="width: 25%;"><a href="method_ps.html">method_ps</a></td>
+<td>Weighting from Supplied Propensity Scores</td></tr>
+<tr><td style="width: 25%;"><a href="method_optweight.html">method_sbw</a></td>
+<td>Stable Balancing Weights</td></tr>
+<tr><td style="width: 25%;"><a href="method_super.html">method_super</a></td>
+<td>Propensity Score Weighting Using SuperLearner</td></tr>
+<tr><td style="width: 25%;"><a href="method_user.html">method_user</a></td>
+<td>User-Defined Functions for Estimating Weights</td></tr>
+<tr><td style="width: 25%;"><a href="msmdata.html">msmdata</a></td>
+<td>Simulated data for a 3 time point sequential study</td></tr>
+<tr><td style="width: 25%;"><a href="multinom_weightit.html">multinom_weightit</a></td>
+<td>Fitting (Weighted) Multinomial Regression Models</td></tr>
+<tr><td style="width: 25%;"><a href="ordinal_weightit.html">ordinal_weightit</a></td>
+<td>Fitting (Weighted) Ordinal Regression Models</td></tr>
+<tr><td style="width: 25%;"><a href="summary.weightit.html">plot.summary.weightit</a></td>
+<td>Print and Summarize Output</td></tr>
+<tr><td style="width: 25%;"><a href="summary.weightit.html">plot.summary.weightitMSM</a></td>
+<td>Print and Summarize Output</td></tr>
+<tr><td style="width: 25%;"><a href="plot.weightit.html">plot.weightit</a></td>
+<td>Plot information about the weight estimation process</td></tr>
+<tr><td style="width: 25%;"><a href="predict.glm_weightit.html">predict.glm_weightit</a></td>
+<td>Predictions for 'glm_weightit' objects</td></tr>
+<tr><td style="width: 25%;"><a href="predict.glm_weightit.html">predict.multinom_weightit</a></td>
+<td>Predictions for 'glm_weightit' objects</td></tr>
+<tr><td style="width: 25%;"><a href="predict.glm_weightit.html">predict.ordinal_weightit</a></td>
+<td>Predictions for 'glm_weightit' objects</td></tr>
+<tr><td style="width: 25%;"><a href="glm_weightit-methods.html">print.glm_weightit</a></td>
+<td>Methods for 'glm_weightit()' objects</td></tr>
+<tr><td style="width: 25%;"><a href="sbps.html">sbps</a></td>
+<td>Subgroup Balancing Propensity Score</td></tr>
+<tr><td style="width: 25%;"><a href="glm_weightit-methods.html">summary.coxph_weightit</a></td>
+<td>Methods for 'glm_weightit()' objects</td></tr>
+<tr><td style="width: 25%;"><a href="glm_weightit-methods.html">summary.glm_weightit</a></td>
+<td>Methods for 'glm_weightit()' objects</td></tr>
+<tr><td style="width: 25%;"><a href="glm_weightit-methods.html">summary.multinom_weightit</a></td>
+<td>Methods for 'glm_weightit()' objects</td></tr>
+<tr><td style="width: 25%;"><a href="glm_weightit-methods.html">summary.ordinal_weightit</a></td>
+<td>Methods for 'glm_weightit()' objects</td></tr>
+<tr><td style="width: 25%;"><a href="summary.weightit.html">summary.weightit</a></td>
+<td>Print and Summarize Output</td></tr>
+<tr><td style="width: 25%;"><a href="summary.weightit.html">summary.weightitMSM</a></td>
+<td>Print and Summarize Output</td></tr>
+<tr><td style="width: 25%;"><a href="trim.html">trim</a></td>
+<td>Trim (Winsorize) Large Weights</td></tr>
+<tr><td style="width: 25%;"><a href="trim.html">trim.default</a></td>
+<td>Trim (Winsorize) Large Weights</td></tr>
+<tr><td style="width: 25%;"><a href="trim.html">trim.weightit</a></td>
+<td>Trim (Winsorize) Large Weights</td></tr>
+<tr><td style="width: 25%;"><a href="glm_weightit-methods.html">update.glm_weightit</a></td>
+<td>Methods for 'glm_weightit()' objects</td></tr>
+<tr><td style="width: 25%;"><a href="glm_weightit-methods.html">vcov.glm_weightit</a></td>
+<td>Methods for 'glm_weightit()' objects</td></tr>
+<tr><td style="width: 25%;"><a href="weightit.html">weightit</a></td>
+<td>Estimate Balancing Weights</td></tr>
+<tr><td style="width: 25%;"><a href="weightit.fit.html">weightit.fit</a></td>
+<td>Generate Balancing Weights with Minimal Input Processing</td></tr>
+<tr><td style="width: 25%;"><a href="weightitMSM.html">weightitMSM</a></td>
+<td>Generate Balancing Weights for Longitudinal Treatments</td></tr>
+</table>
+</div></body></html>

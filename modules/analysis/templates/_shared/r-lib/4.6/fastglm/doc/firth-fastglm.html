@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Jared Huling" />
+
+<meta name="date" content="2026-08-26" />
+
+<title>Firth Bias-Reduced GLMs with ‘fastglm’</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Firth Bias-Reduced GLMs with ‘fastglm’</h1>
+<h4 class="author">Jared Huling</h4>
+<h4 class="date">2026-08-26</h4>
+
+
+
+<p>Firth’s (1993) penalized likelihood removes the leading <span class="math inline">\(O(1/n)\)</span> bias from maximum likelihood
+estimates and produces finite estimates even under separation.
+<em>fastglm</em> implements the general mean-bias reduction of Kosmidis
+and Firth (2009, 2021), which extends Firth’s original logistic penalty
+to arbitrary GLM families. The method is activated with a single
+flag:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">fastglm</span>(x, y, <span class="at">family =</span> <span class="fu">binomial</span>(), <span class="at">firth =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<p>The penalty adds <span class="math inline">\(\frac{1}{2} \partial
+\log |X^\top W X| / \partial \beta\)</span> to the score, which is
+equivalent to modifying the IRLS working response by</p>
+<p><span class="math display">\[
+\xi_i = \frac{\phi \, h_i \, \mu&#39;&#39;(\eta_i) \, V(\mu_i)}{2 \, w_i
+\, [\mu&#39;(\eta_i)]^3}
+\]</span></p>
+<p>where <span class="math inline">\(h_i\)</span> is the <span class="math inline">\(i\)</span>-th diagonal of the hat matrix <span class="math inline">\(H = W^{1/2} X (X^\top W X)^{-1} X^\top
+W^{1/2}\)</span>, <span class="math inline">\(\mu&#39;&#39;(\eta)\)</span> is the second
+derivative of the inverse link, <span class="math inline">\(V(\mu)\)</span> is the variance function, <span class="math inline">\(w_i\)</span> is the prior weight, and <span class="math inline">\(\phi\)</span> is the dispersion (1 for binomial
+and Poisson families; estimated iteratively for Gaussian, Gamma, and
+inverse Gaussian). This is the AS_mean adjustment of Kosmidis and Firth
+(2009), the same method used by
+<code>brglm2::brglmFit(type = &quot;AS_mean&quot;)</code>.</p>
+<p>The adjustment is computed once per IRLS iteration using the
+leverages from the weighted least-squares decomposition that
+<em>fastglm</em> already performs, so the overhead relative to an
+unpenalized fit is modest.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(fastglm)</span></code></pre></div>
+<div id="logistic-regression-under-separation" class="section level1">
+<h1>Logistic regression under separation</h1>
+<p>The canonical application is logistic regression with (quasi-)
+separation, where the standard MLE diverges. The <code>sex2</code>
+dataset from <em>logistf</em> (Heinze and Schemper, 2002)
+demonstrates:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">data</span>(sex2, <span class="at">package =</span> <span class="st">&quot;logistf&quot;</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span> age <span class="sc">+</span> oc <span class="sc">+</span> vic <span class="sc">+</span> vicl <span class="sc">+</span> vis <span class="sc">+</span> dia, <span class="at">data =</span> sex2)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>y <span class="ot">&lt;-</span> sex2<span class="sc">$</span>case</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>fit_f <span class="ot">&lt;-</span> <span class="fu">fastglm</span>(X, y, <span class="at">family =</span> <span class="fu">binomial</span>(), <span class="at">firth =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>fit_l <span class="ot">&lt;-</span> logistf<span class="sc">::</span><span class="fu">logistf</span>(case <span class="sc">~</span> age <span class="sc">+</span> oc <span class="sc">+</span> vic <span class="sc">+</span> vicl <span class="sc">+</span> vis <span class="sc">+</span> dia,</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>                          <span class="at">data =</span> sex2, <span class="at">pl =</span> <span class="cn">FALSE</span>, <span class="at">plconf =</span> <span class="cn">NULL</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>                          <span class="at">control =</span> logistf<span class="sc">::</span><span class="fu">logistf.control</span>(</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>                              <span class="at">lconv =</span> <span class="fl">1e-12</span>, <span class="at">gconv =</span> <span class="fl">1e-12</span>, <span class="at">xconv =</span> <span class="fl">1e-12</span>,</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>                              <span class="at">maxit =</span> <span class="dv">200</span><span class="dt">L</span>))</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="fu">cbind</span>(<span class="at">fastglm =</span> <span class="fu">unname</span>(<span class="fu">coef</span>(fit_f)), <span class="at">logistf =</span> <span class="fu">unname</span>(<span class="fu">coef</span>(fit_l)))</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt;          fastglm     logistf</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt; [1,]  0.12025405  0.12025405</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; [2,] -1.10598133 -1.10598133</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt; [3,] -0.06881673 -0.06881673</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt; [4,]  2.26887465  2.26887465</span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt; [5,] -2.11140819 -2.11140819</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt; [6,] -0.78831695 -0.78831695</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt; [7,]  3.09601183  3.09601183</span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="fu">max</span>(<span class="fu">abs</span>(<span class="fu">unname</span>(<span class="fu">coef</span>(fit_f)) <span class="sc">-</span> <span class="fu">unname</span>(<span class="fu">coef</span>(fit_l))))</span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#&gt; [1] 1.478671e-09</span></span></code></pre></div>
+<p>Coefficients agree to roughly 1e-7. The runtime advantage is
+substantial because <em>fastglm</em>’s Firth solver reuses the C++ IRLS
+infrastructure:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>mb <span class="ot">&lt;-</span> microbenchmark<span class="sc">::</span><span class="fu">microbenchmark</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>    <span class="at">fastglm =</span> <span class="fu">fastglm</span>(X, y, <span class="at">family =</span> <span class="fu">binomial</span>(), <span class="at">firth =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>    <span class="at">logistf =</span> logistf<span class="sc">::</span><span class="fu">logistf</span>(case <span class="sc">~</span> age <span class="sc">+</span> oc <span class="sc">+</span> vic <span class="sc">+</span> vicl <span class="sc">+</span> vis <span class="sc">+</span> dia,</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>                               <span class="at">data =</span> sex2, <span class="at">pl =</span> <span class="cn">FALSE</span>, <span class="at">plconf =</span> <span class="cn">NULL</span>),</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>    <span class="at">times =</span> <span class="dv">10</span><span class="dt">L</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>)</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="fu">print</span>(mb, <span class="at">unit =</span> <span class="st">&quot;ms&quot;</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; Unit: milliseconds</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt;     expr      min       lq      mean   median       uq      max neval cld</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt;  fastglm 0.282449 0.290854 0.3289512 0.328451 0.346737 0.416847    10  a </span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt;  logistf 1.353943 1.402938 1.4900630 1.480223 1.560747 1.717613    10   b</span></span></code></pre></div>
+</div>
+<div id="general-glm-families" class="section level1">
+<h1>General GLM families</h1>
+<p><code>firth = TRUE</code> works with all standard R families and link
+functions. For each family below, we verify that <em>fastglm</em>
+reproduces the bias-reduced coefficients from
+<code>brglm2::brglmFit(type = &quot;AS_mean&quot;)</code> — both implement the
+same AS_mean adjustment, so the coefficients should agree to near
+machine precision.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">library</span>(brglm2)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">500</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>x1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n);  x2 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="dv">1</span>, x1, x2)</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>eta_true <span class="ot">&lt;-</span> <span class="fl">0.5</span> <span class="sc">+</span> <span class="fl">0.3</span> <span class="sc">*</span> x1 <span class="sc">-</span> <span class="fl">0.2</span> <span class="sc">*</span> x2</span></code></pre></div>
+<div id="binomial-logit-probit-cloglog" class="section level2">
+<h2>Binomial (logit, probit, cloglog)</h2>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>y_bin <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fu">plogis</span>(eta_true))</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">y =</span> y_bin, <span class="at">x1 =</span> x1, <span class="at">x2 =</span> x2)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="cf">for</span> (lnk <span class="cf">in</span> <span class="fu">c</span>(<span class="st">&quot;logit&quot;</span>, <span class="st">&quot;probit&quot;</span>, <span class="st">&quot;cloglog&quot;</span>)) {</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>    fam <span class="ot">&lt;-</span> <span class="fu">binomial</span>(lnk)</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>    f <span class="ot">&lt;-</span> <span class="fu">fastglm</span>(X, y_bin, <span class="at">family =</span> fam, <span class="at">firth =</span> <span class="cn">TRUE</span>, <span class="at">tol =</span> <span class="fl">1e-10</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>    b <span class="ot">&lt;-</span> <span class="fu">glm</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> df, <span class="at">family =</span> fam, <span class="at">method =</span> <span class="st">&quot;brglmFit&quot;</span>,</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>             <span class="at">type =</span> <span class="st">&quot;AS_mean&quot;</span>, <span class="at">control =</span> <span class="fu">list</span>(<span class="at">epsilon =</span> <span class="fl">1e-10</span>, <span class="at">maxit =</span> <span class="dv">200</span>))</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;binomial %-8s max|diff| = %.2e</span><span class="sc">\n</span><span class="st">&quot;</span>, lnk,</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>                <span class="fu">max</span>(<span class="fu">abs</span>(<span class="fu">unname</span>(<span class="fu">coef</span>(f)) <span class="sc">-</span> <span class="fu">unname</span>(<span class="fu">coef</span>(b))))))</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>}</span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt; binomial logit    max|diff| = 2.29e-12</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt; binomial probit   max|diff| = 1.10e-11</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt; binomial cloglog  max|diff| = 3.09e-11</span></span></code></pre></div>
+</div>
+<div id="poisson-log-sqrt" class="section level2">
+<h2>Poisson (log, sqrt)</h2>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>y_pois <span class="ot">&lt;-</span> <span class="fu">rpois</span>(n, <span class="fu">exp</span>(eta_true))</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="cf">for</span> (lnk <span class="cf">in</span> <span class="fu">c</span>(<span class="st">&quot;log&quot;</span>, <span class="st">&quot;sqrt&quot;</span>)) {</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>    fam <span class="ot">&lt;-</span> <span class="fu">poisson</span>(lnk)</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>    f <span class="ot">&lt;-</span> <span class="fu">fastglm</span>(X, y_pois, <span class="at">family =</span> fam, <span class="at">firth =</span> <span class="cn">TRUE</span>, <span class="at">tol =</span> <span class="fl">1e-10</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>    b <span class="ot">&lt;-</span> <span class="fu">glm</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> <span class="fu">data.frame</span>(<span class="at">y =</span> y_pois, <span class="at">x1 =</span> x1, <span class="at">x2 =</span> x2),</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>             <span class="at">family =</span> fam, <span class="at">method =</span> <span class="st">&quot;brglmFit&quot;</span>, <span class="at">type =</span> <span class="st">&quot;AS_mean&quot;</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>             <span class="at">control =</span> <span class="fu">list</span>(<span class="at">epsilon =</span> <span class="fl">1e-10</span>, <span class="at">maxit =</span> <span class="dv">200</span>))</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;poisson  %-8s max|diff| = %.2e</span><span class="sc">\n</span><span class="st">&quot;</span>, lnk,</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>                <span class="fu">max</span>(<span class="fu">abs</span>(<span class="fu">unname</span>(<span class="fu">coef</span>(f)) <span class="sc">-</span> <span class="fu">unname</span>(<span class="fu">coef</span>(b))))))</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>}</span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt; poisson  log      max|diff| = 2.13e-12</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt; poisson  sqrt     max|diff| = 6.30e-11</span></span></code></pre></div>
+</div>
+<div id="gamma-log-inverse" class="section level2">
+<h2>Gamma (log, inverse)</h2>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>y_gam <span class="ot">&lt;-</span> <span class="fu">rgamma</span>(n, <span class="at">shape =</span> <span class="dv">5</span>, <span class="at">rate =</span> <span class="dv">5</span> <span class="sc">/</span> <span class="fu">exp</span>(eta_true))</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="cf">for</span> (lnk <span class="cf">in</span> <span class="fu">c</span>(<span class="st">&quot;log&quot;</span>, <span class="st">&quot;inverse&quot;</span>)) {</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>    fam <span class="ot">&lt;-</span> <span class="fu">Gamma</span>(lnk)</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>    f <span class="ot">&lt;-</span> <span class="fu">fastglm</span>(X, y_gam, <span class="at">family =</span> fam, <span class="at">firth =</span> <span class="cn">TRUE</span>, <span class="at">tol =</span> <span class="fl">1e-10</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>    b <span class="ot">&lt;-</span> <span class="fu">glm</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> <span class="fu">data.frame</span>(<span class="at">y =</span> y_gam, <span class="at">x1 =</span> x1, <span class="at">x2 =</span> x2),</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>             <span class="at">family =</span> fam, <span class="at">method =</span> <span class="st">&quot;brglmFit&quot;</span>, <span class="at">type =</span> <span class="st">&quot;AS_mean&quot;</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>             <span class="at">control =</span> <span class="fu">list</span>(<span class="at">epsilon =</span> <span class="fl">1e-10</span>, <span class="at">maxit =</span> <span class="dv">200</span>))</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Gamma    %-8s max|diff| = %.2e</span><span class="sc">\n</span><span class="st">&quot;</span>, lnk,</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>                <span class="fu">max</span>(<span class="fu">abs</span>(<span class="fu">unname</span>(<span class="fu">coef</span>(f)) <span class="sc">-</span> <span class="fu">unname</span>(<span class="fu">coef</span>(b))))))</span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>}</span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co">#&gt; Gamma    log      max|diff| = 2.10e-05</span></span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co">#&gt; Gamma    inverse  max|diff| = 1.67e-05</span></span></code></pre></div>
+</div>
+<div id="gaussian-identity-log" class="section level2">
+<h2>Gaussian (identity, log)</h2>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>y_gauss <span class="ot">&lt;-</span> eta_true <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.5</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="cf">for</span> (lnk <span class="cf">in</span> <span class="fu">c</span>(<span class="st">&quot;identity&quot;</span>, <span class="st">&quot;log&quot;</span>)) {</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>    fam <span class="ot">&lt;-</span> <span class="fu">gaussian</span>(lnk)</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>    y0 <span class="ot">&lt;-</span> <span class="cf">if</span> (lnk <span class="sc">==</span> <span class="st">&quot;log&quot;</span>) <span class="fu">pmax</span>(y_gauss, <span class="fl">0.01</span>) <span class="cf">else</span> y_gauss</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>    f <span class="ot">&lt;-</span> <span class="fu">fastglm</span>(X, y0, <span class="at">family =</span> fam, <span class="at">firth =</span> <span class="cn">TRUE</span>, <span class="at">tol =</span> <span class="fl">1e-10</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>    b <span class="ot">&lt;-</span> <span class="fu">glm</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> <span class="fu">data.frame</span>(<span class="at">y =</span> y0, <span class="at">x1 =</span> x1, <span class="at">x2 =</span> x2),</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>             <span class="at">family =</span> fam, <span class="at">method =</span> <span class="st">&quot;brglmFit&quot;</span>, <span class="at">type =</span> <span class="st">&quot;AS_mean&quot;</span>,</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>             <span class="at">control =</span> <span class="fu">list</span>(<span class="at">epsilon =</span> <span class="fl">1e-10</span>, <span class="at">maxit =</span> <span class="dv">200</span>))</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;gaussian %-8s max|diff| = %.2e</span><span class="sc">\n</span><span class="st">&quot;</span>, lnk,</span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>                <span class="fu">max</span>(<span class="fu">abs</span>(<span class="fu">unname</span>(<span class="fu">coef</span>(f)) <span class="sc">-</span> <span class="fu">unname</span>(<span class="fu">coef</span>(b))))))</span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>}</span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt; gaussian identity max|diff| = 1.67e-16</span></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="co">#&gt; gaussian log      max|diff| = 1.78e-06</span></span></code></pre></div>
+</div>
+<div id="inverse-gaussian-log" class="section level2">
+<h2>Inverse Gaussian (log)</h2>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>mu_ig <span class="ot">&lt;-</span> <span class="fu">exp</span>(eta_true)</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>y_ig <span class="ot">&lt;-</span> statmod<span class="sc">::</span><span class="fu">rinvgauss</span>(n, <span class="at">mean =</span> mu_ig, <span class="at">shape =</span> <span class="dv">5</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>y_ig[y_ig <span class="sc">&lt;=</span> <span class="dv">0</span>] <span class="ot">&lt;-</span> <span class="fl">0.01</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="fu">fastglm</span>(X, y_ig, <span class="at">family =</span> <span class="fu">inverse.gaussian</span>(<span class="st">&quot;log&quot;</span>), <span class="at">firth =</span> <span class="cn">TRUE</span>, <span class="at">tol =</span> <span class="fl">1e-10</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">glm</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> <span class="fu">data.frame</span>(<span class="at">y =</span> y_ig, <span class="at">x1 =</span> x1, <span class="at">x2 =</span> x2),</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>         <span class="at">family =</span> <span class="fu">inverse.gaussian</span>(<span class="st">&quot;log&quot;</span>), <span class="at">method =</span> <span class="st">&quot;brglmFit&quot;</span>, <span class="at">type =</span> <span class="st">&quot;AS_mean&quot;</span>,</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>         <span class="at">control =</span> <span class="fu">list</span>(<span class="at">epsilon =</span> <span class="fl">1e-10</span>, <span class="at">maxit =</span> <span class="dv">200</span>))</span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;inv.gauss log      max|diff| = %.2e</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>            <span class="fu">max</span>(<span class="fu">abs</span>(<span class="fu">unname</span>(<span class="fu">coef</span>(f)) <span class="sc">-</span> <span class="fu">unname</span>(<span class="fu">coef</span>(b))))))</span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co">#&gt; inv.gauss log      max|diff| = 1.16e-06</span></span></code></pre></div>
+</div>
+</div>
+<div id="standard-errors" class="section level1">
+<h1>Standard errors</h1>
+<p>The standard errors reported by <code>fastglm</code> with
+<code>firth = TRUE</code> come from the unscaled <span class="math inline">\((X^\top W X)^{-1}\)</span> at convergence, the
+same quantity that <code>brglm2</code> uses. For unit-dispersion
+families (binomial, Poisson), these are the Firth-penalized standard
+errors directly; for other families, the dispersion is estimated as
+<span class="math inline">\(\hat\phi = D / (n - p)\)</span> and applied
+to the variance-covariance matrix.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="fu">fastglm</span>(X, y_bin, <span class="at">family =</span> <span class="fu">binomial</span>(), <span class="at">firth =</span> <span class="cn">TRUE</span>, <span class="at">tol =</span> <span class="fl">1e-10</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">glm</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> df, <span class="at">family =</span> <span class="fu">binomial</span>(), <span class="at">method =</span> <span class="st">&quot;brglmFit&quot;</span>,</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>         <span class="at">type =</span> <span class="st">&quot;AS_mean&quot;</span>, <span class="at">control =</span> <span class="fu">list</span>(<span class="at">epsilon =</span> <span class="fl">1e-10</span>, <span class="at">maxit =</span> <span class="dv">200</span>))</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="fu">cbind</span>(<span class="at">fastglm_SE =</span> f<span class="sc">$</span>se, <span class="at">brglm2_SE =</span> <span class="fu">summary</span>(b)<span class="sc">$</span>coefficients[, <span class="st">&quot;Std. Error&quot;</span>])</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="co">#&gt;             fastglm_SE  brglm2_SE</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co">#&gt; (Intercept) 0.09423309 0.09423309</span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="co">#&gt; x1          0.09910290 0.09910290</span></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="co">#&gt; x2          0.09527990 0.09527990</span></span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a><span class="fu">max</span>(<span class="fu">abs</span>(f<span class="sc">$</span>se <span class="sc">-</span> <span class="fu">summary</span>(b)<span class="sc">$</span>coefficients[, <span class="st">&quot;Std. Error&quot;</span>]))</span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a><span class="co">#&gt; [1] 8.0283e-14</span></span></code></pre></div>
+</div>
+<div id="penalized-deviance" class="section level1">
+<h1>Penalized deviance</h1>
+<p>The Firth-penalized deviance is <span class="math inline">\(D^* = D -
+\log |X^\top W X|\)</span>, where <span class="math inline">\(D\)</span>
+is the standard deviance and the log-determinant comes from the
+information matrix at the penalized MLE. Both the standard and penalized
+deviances are reported:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="fu">fastglm</span>(X, y_bin, <span class="at">family =</span> <span class="fu">binomial</span>(), <span class="at">firth =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="fu">c</span>(<span class="at">deviance =</span> f<span class="sc">$</span>deviance,</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>  <span class="at">log.det.XtWX =</span> f<span class="sc">$</span>log.det.XtWX,</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>  <span class="at">penalized.deviance =</span> f<span class="sc">$</span>penalized.deviance)</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="co">#&gt;           deviance       log.det.XtWX penalized.deviance </span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="co">#&gt;          644.08511           14.05578          630.02933</span></span></code></pre></div>
+</div>
+<div id="speed-comparison-across-families" class="section level1">
+<h1>Speed comparison across families</h1>
+<p>A timing comparison of <code>fastglm(firth = TRUE)</code> against
+<code>brglm2::brglmFit(type = &quot;AS_mean&quot;)</code> across families with
+<code>n = 10000</code> observations and <code>p = 5</code>
+covariates:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">10000</span>;  p <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>x1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n);  x2 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n); x3 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>x4 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n);  x5 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="dv">1</span>, x1, x2, x3, x4, x5)</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>eta <span class="ot">&lt;-</span> <span class="fl">0.5</span> <span class="sc">+</span> <span class="fl">0.3</span> <span class="sc">*</span> x1 <span class="sc">-</span> <span class="fl">0.2</span> <span class="sc">*</span> x2 <span class="sc">+</span> <span class="fl">0.1</span> <span class="sc">*</span> x3</span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>families <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>    <span class="st">`</span><span class="at">binomial logit</span><span class="st">`</span>   <span class="ot">=</span> <span class="fu">list</span>(<span class="at">fam =</span> <span class="fu">binomial</span>(<span class="st">&quot;logit&quot;</span>),</span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a>                              <span class="at">y =</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fu">plogis</span>(eta))),</span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a>    <span class="st">`</span><span class="at">binomial probit</span><span class="st">`</span>  <span class="ot">=</span> <span class="fu">list</span>(<span class="at">fam =</span> <span class="fu">binomial</span>(<span class="st">&quot;probit&quot;</span>),</span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a>                              <span class="at">y =</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fu">plogis</span>(eta))),</span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a>    <span class="st">`</span><span class="at">binomial cloglog</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">fam =</span> <span class="fu">binomial</span>(<span class="st">&quot;cloglog&quot;</span>),</span>
+<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a>                              <span class="at">y =</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fu">plogis</span>(eta))),</span>
+<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a>    <span class="st">`</span><span class="at">poisson log</span><span class="st">`</span>      <span class="ot">=</span> <span class="fu">list</span>(<span class="at">fam =</span> <span class="fu">poisson</span>(<span class="st">&quot;log&quot;</span>),</span>
+<span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a>                              <span class="at">y =</span> <span class="fu">rpois</span>(n, <span class="fu">exp</span>(eta))),</span>
+<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a>    <span class="st">`</span><span class="at">Gamma log</span><span class="st">`</span>        <span class="ot">=</span> <span class="fu">list</span>(<span class="at">fam =</span> <span class="fu">Gamma</span>(<span class="st">&quot;log&quot;</span>),</span>
+<span id="cb13-18"><a href="#cb13-18" tabindex="-1"></a>                              <span class="at">y =</span> <span class="fu">rgamma</span>(n, <span class="at">shape =</span> <span class="dv">5</span>, <span class="at">rate =</span> <span class="dv">5</span> <span class="sc">/</span> <span class="fu">exp</span>(eta))),</span>
+<span id="cb13-19"><a href="#cb13-19" tabindex="-1"></a>    <span class="st">`</span><span class="at">gaussian identity</span><span class="st">`</span><span class="ot">=</span> <span class="fu">list</span>(<span class="at">fam =</span> <span class="fu">gaussian</span>(<span class="st">&quot;identity&quot;</span>),</span>
+<span id="cb13-20"><a href="#cb13-20" tabindex="-1"></a>                              <span class="at">y =</span> eta <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.5</span>))</span>
+<span id="cb13-21"><a href="#cb13-21" tabindex="-1"></a>)</span>
+<span id="cb13-22"><a href="#cb13-22" tabindex="-1"></a></span>
+<span id="cb13-23"><a href="#cb13-23" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">y =</span> <span class="dv">0</span>, <span class="at">x1 =</span> x1, <span class="at">x2 =</span> x2, <span class="at">x3 =</span> x3, <span class="at">x4 =</span> x4, <span class="at">x5 =</span> x5)</span>
+<span id="cb13-24"><a href="#cb13-24" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb13-25"><a href="#cb13-25" tabindex="-1"></a><span class="cf">for</span> (nm <span class="cf">in</span> <span class="fu">names</span>(families)) {</span>
+<span id="cb13-26"><a href="#cb13-26" tabindex="-1"></a>    fi <span class="ot">&lt;-</span> families[[nm]]</span>
+<span id="cb13-27"><a href="#cb13-27" tabindex="-1"></a>    df<span class="sc">$</span>y <span class="ot">&lt;-</span> fi<span class="sc">$</span>y</span>
+<span id="cb13-28"><a href="#cb13-28" tabindex="-1"></a>    mb <span class="ot">&lt;-</span> microbenchmark<span class="sc">::</span><span class="fu">microbenchmark</span>(</span>
+<span id="cb13-29"><a href="#cb13-29" tabindex="-1"></a>        <span class="at">fastglm =</span> <span class="fu">fastglm</span>(X, fi<span class="sc">$</span>y, <span class="at">family =</span> fi<span class="sc">$</span>fam, <span class="at">firth =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb13-30"><a href="#cb13-30" tabindex="-1"></a>        <span class="at">brglm2  =</span> <span class="fu">glm</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2 <span class="sc">+</span> x3 <span class="sc">+</span> x4 <span class="sc">+</span> x5, <span class="at">data =</span> df,</span>
+<span id="cb13-31"><a href="#cb13-31" tabindex="-1"></a>                      <span class="at">family =</span> fi<span class="sc">$</span>fam, <span class="at">method =</span> <span class="st">&quot;brglmFit&quot;</span>, <span class="at">type =</span> <span class="st">&quot;AS_mean&quot;</span>),</span>
+<span id="cb13-32"><a href="#cb13-32" tabindex="-1"></a>        <span class="at">times =</span> <span class="dv">10</span><span class="dt">L</span></span>
+<span id="cb13-33"><a href="#cb13-33" tabindex="-1"></a>    )</span>
+<span id="cb13-34"><a href="#cb13-34" tabindex="-1"></a>    s <span class="ot">&lt;-</span> <span class="fu">summary</span>(mb, <span class="at">unit =</span> <span class="st">&quot;ms&quot;</span>)</span>
+<span id="cb13-35"><a href="#cb13-35" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;%-20s fastglm=%7.2f ms  brglm2=%7.2f ms  speedup=%.1fx</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb13-36"><a href="#cb13-36" tabindex="-1"></a>                nm, s<span class="sc">$</span>median[<span class="dv">1</span>], s<span class="sc">$</span>median[<span class="dv">2</span>], s<span class="sc">$</span>median[<span class="dv">2</span>] <span class="sc">/</span> s<span class="sc">$</span>median[<span class="dv">1</span>]))</span>
+<span id="cb13-37"><a href="#cb13-37" tabindex="-1"></a>}</span>
+<span id="cb13-38"><a href="#cb13-38" tabindex="-1"></a><span class="co">#&gt; binomial logit       fastglm=   3.67 ms  brglm2=  16.34 ms  speedup=4.5x</span></span>
+<span id="cb13-39"><a href="#cb13-39" tabindex="-1"></a><span class="co">#&gt; binomial probit      fastglm=   6.03 ms  brglm2=  19.82 ms  speedup=3.3x</span></span>
+<span id="cb13-40"><a href="#cb13-40" tabindex="-1"></a><span class="co">#&gt; binomial cloglog     fastglm=   5.24 ms  brglm2=  22.02 ms  speedup=4.2x</span></span>
+<span id="cb13-41"><a href="#cb13-41" tabindex="-1"></a><span class="co">#&gt; poisson log          fastglm=   4.29 ms  brglm2= 138.73 ms  speedup=32.4x</span></span>
+<span id="cb13-42"><a href="#cb13-42" tabindex="-1"></a><span class="co">#&gt; Gamma log            fastglm=   4.14 ms  brglm2= 118.31 ms  speedup=28.6x</span></span>
+<span id="cb13-43"><a href="#cb13-43" tabindex="-1"></a><span class="co">#&gt; gaussian identity    fastglm=   1.80 ms  brglm2=  27.47 ms  speedup=15.2x</span></span></code></pre></div>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<ul>
+<li><p>Firth, D. (1993). Bias reduction of maximum likelihood estimates.
+<em>Biometrika</em>, 80(1), 27–38. <a href="doi:10.1093/biomet/80.1.27" class="uri">doi:10.1093/biomet/80.1.27</a></p></li>
+<li><p>Heinze, G. and Schemper, M. (2002). A solution to the problem of
+separation in logistic regression. <em>Statistics in Medicine</em>,
+21(16), 2409–2419. <a href="doi:10.1002/sim.1047" class="uri">doi:10.1002/sim.1047</a></p></li>
+<li><p>Kosmidis, I. and Firth, D. (2009). Bias reduction in exponential
+family nonlinear models. <em>Biometrika</em>, 96(4), 793–804. <a href="doi:10.1093/biomet/asp055" class="uri">doi:10.1093/biomet/asp055</a></p></li>
+<li><p>Kosmidis, I. and Firth, D. (2021). Jeffreys-prior penalty,
+finiteness and shrinkage in binomial-response generalized linear models.
+<em>Biometrika</em>, 108(1), 71–82. <a href="doi:10.1093/biomet/asaa052" class="uri">doi:10.1093/biomet/asaa052</a></p></li>
+<li><p>Kosmidis, I. (2014). Bias in parametric estimation: reduction and
+useful side-effects. <em>WIREs Computational Statistics</em>, 6(3),
+185–196. <a href="doi:10.1002/wics.1296" class="uri">doi:10.1002/wics.1296</a></p></li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

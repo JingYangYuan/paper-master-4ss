@@ -1,0 +1,50 @@
+<!-- preamble start -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>$tinytable_TABLE_ID</title>
+    $tinytable_TABULATOR_CDN
+  </head>
+  <body>
+<!-- preamble end -->
+    $tinytable_SCRIPT
+
+    <div class="container">
+      $tinytable_TABULATOR_SEARCH_TOP
+      <div id="$tinytable_TABLE_ID" style="margin-left: auto; margin-right: auto;"></div>
+      $tinytable_TABULATOR_SEARCH_BOTTOM
+      <br>
+    </div>
+
+    <!-- Luxon for date handling -->
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+
+    <!-- Tabulator JS -->
+    <script src="https://cdn.jsdelivr.net/npm/tabulator-tables@6.3/dist/js/tabulator.min.js"></script>
+
+    <!-- TinyTable custom formatters -->
+    $tinytable_TINYTABLE_JS
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        const table_$tinytable_TABLE_ID = TinyTable.createTabulator("#$tinytable_TABLE_ID", {
+          data: $tinytable_TABULATOR_DATA,
+          columns: $tinytable_TABULATOR_COLUMNS,
+          $tinytable_TABULATOR_OPTIONS
+        });
+
+        $tinytable_TABULATOR_SEARCH_LISTENER
+
+        $tinytable_TABULATOR_POST_INIT
+      });
+    </script>
+
+    $tinytable_TABULATOR_CSS
+
+<!-- postamble start -->
+  </body>
+</html>
+<!-- postamble end -->
+<!-- hack to avoid NA insertion in last line -->
