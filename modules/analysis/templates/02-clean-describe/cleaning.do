@@ -16,7 +16,6 @@ global C "age gender education income"
 global ID "pid"
 global TIME "year"
 global CLUSTER "region"
-global RUN_LOG "${OUT_ROOT}/reports/run-log-`c(current_date)'.md"
 
 capture mkdir "${OUT_ROOT}"
 capture mkdir "paper-workspace"
@@ -25,52 +24,30 @@ capture mkdir "${OUT_ROOT}/data"
 capture mkdir "${OUT_ROOT}/tables"
 capture mkdir "${OUT_ROOT}/figures"
 capture mkdir "${OUT_ROOT}/reports"
-capture confirm file "${RUN_LOG}"
-if _rc {
-    file open flog using "${RUN_LOG}", write replace
-    file write flog "# Analysis Run Log" _n _n
-    file write flog "| Date | Step | Status | Outputs | Note |" _n
-    file write flog "|---|---|---|---|---|" _n
-    file close flog
-}
 
-capture confirm file "${RAW_DATA}"
-if _rc {
-    file open flog using "${RUN_LOG}", write append
-    file write flog "| `c(current_date)' | 02-clean-describe | blocked | - | 缺少 ${RAW_DATA}。 |" _n
-    file close flog
-    exit 2
-}
+capture log close _all
+log using "${OUT_ROOT}/reports/cleaning.log", replace text
 
 use "${RAW_DATA}", clear
 
 * 特殊缺失码、去重、缩尾。
-foreach v of varlist _all {
-    capture confirm numeric variable `v'
-    if !_rc {
-        quietly replace `v' = . if inlist(`v', -9, -8, -7, -99, -999)
-    }
+ds, has(type numeric)
+foreach v of varlist `r(varlist)' {
+    qui replace `v' = . if inlist(`v', -9, -8, -7, -99, -999)
 }
 duplicates drop
 
 * 连续变量缩尾：仅对 $Y $X $C 角色变量、排除 0/1 虚拟变量，执行 1%/99% 双侧缩尾
-capture which winsor2
-if !_rc {
-    foreach v in $Y $X $C {
-        capture confirm numeric variable `v'
-        if !_rc {
-            quietly summarize `v'
-            if !(r(min) == 0 & r(max) == 1) {
-                capture winsor2 `v', cuts(1 99) replace
-            }
-        }
+foreach v in $Y $X $C {
+    qui summarize `v'
+    if !(r(min) == 0 & r(max) == 1) {
+        winsor2 `v', cuts(1 99) replace
     }
 }
 
 gen byte analysis_sample = 1
 foreach v in $Y $X $C {
-    capture confirm variable `v'
-    if !_rc replace analysis_sample = 0 if missing(`v')
+    replace analysis_sample = 0 if missing(`v')
 }
 
 preserve
@@ -106,15 +83,13 @@ estpost summarize $Y $X $C, detail
 esttab using "${OUT_ROOT}/tables/table1-descriptives.csv", ///
     cells("mean(fmt(3)) sd(fmt(3)) min(fmt(3)) max(fmt(3)) count(fmt(0))") nogaps compress substitute("=" "") replace
 
-capture pwcorr $Y $X $C, star(0.05)
-capture estpost correlate $Y $X $C, matrix
-capture esttab using "${OUT_ROOT}/tables/table1c-correlation.csv", nogaps compress substitute("=" "") replace
+pwcorr $Y $X $C, star(0.05)
+estpost correlate $Y $X $C, matrix
+esttab using "${OUT_ROOT}/tables/table1c-correlation.csv", nogaps compress substitute("=" "") replace
 
-capture histogram $Y, name(hist_y, replace) normal
-capture graph export "${OUT_ROOT}/figures/dist-${Y}.png", replace width(1600)
-capture graph twoway (scatter $Y $X) (lfit $Y $X), name(scatter_yx, replace)
-capture graph export "${OUT_ROOT}/figures/scatter-${Y}-${X}.png", replace width(1600)
+histogram $Y, name(hist_y, replace) normal
+graph export "${OUT_ROOT}/figures/dist-${Y}.png", replace width(1600)
+graph twoway (scatter $Y $X) (lfit $Y $X), name(scatter_yx, replace)
+graph export "${OUT_ROOT}/figures/scatter-${Y}-${X}.png", replace width(1600)
 
-file open flog using "${RUN_LOG}", write append
-file write flog "| `c(current_date)' | 02-clean-describe | ok | analysis-data.csv<br>variable-dictionary.csv<br>table1-descriptives.csv | 已真实清洗并描述数据。 |" _n
-file close flog
+capture log close _all

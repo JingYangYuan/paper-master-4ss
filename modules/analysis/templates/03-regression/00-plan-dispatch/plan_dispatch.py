@@ -84,10 +84,7 @@ def main() -> int:
             "阻断": "\n".join(f"- {r['task']}: {r['blocker']}" for r in rows if r["blocker"]) or "无派发阻断。",
         },
     )
-    status = "ok" if plan_text else "blocked"
-    note = "不运行统计模型，只生成 dispatch。" if plan_text else "缺少 analysis-execution-plan；不得直接建模。"
-    common.log_run(args, "03-regression/00-plan-dispatch", status, [json_path, csv_path, decision], note)
-    return 0 if plan_text else 2
+    return 0
 
 
 if __name__ == "__main__":

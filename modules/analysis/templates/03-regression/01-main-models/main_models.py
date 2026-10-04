@@ -27,9 +27,6 @@ def main() -> int:
     args = parser.parse_args()
     p = common.paths(args.out_root)
     data_path = Path(args.data) if args.data else p["data"] / "analysis-data.csv"
-    if not data_path.exists():
-        common.log_run(args, "03-regression/01-main-models", "blocked", [], f"缺少数据：{data_path}")
-        return 2
     df = common.load_data(data_path)
     roles = common.infer_roles(df, args.dict_path or p["data"] / "variable-dictionary.csv")
     table1 = common.describe_data(df, [roles.y, roles.x, *roles.controls], args.out_root)
@@ -45,7 +42,6 @@ def main() -> int:
         "Model Decision",
         {"主模型": "逐步 OLS：M1 仅 X，M2 加控制变量，M3 加固定效应。", "标准误": f"cluster={roles.cluster or 'HC1'}", "变量角色": str(roles)},
     )
-    common.log_run(args, "03-regression/01-main-models", "ok", [table1, table2, summary, decision], "已真实估计主回归。")
     return 0
 
 

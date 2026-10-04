@@ -25,7 +25,7 @@ templates <- c(
 args <- commandArgs(trailingOnly = TRUE)
 if ("--help" %in% args || "-h" %in% args) {
   cat("Usage: Rscript r-analysis-template.R [--list]\n")
-  cat("Run concrete subflow scripts with their common arguments: --data --plan --dict --out-root --run-log --slug --tasks\n")
+  cat("Run concrete subflow scripts with their common arguments: --data --plan --dict --out-root --slug --tasks\n")
   quit(status = 0)
 }
 

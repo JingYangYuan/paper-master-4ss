@@ -8,7 +8,6 @@ global OUT_ROOT "paper-workspace/04-analysis"
 global DATA "${OUT_ROOT}/data/analysis-data.dta"
 global PLAN "${OUT_ROOT}/reports/analysis-execution-plan.md"
 global DICT "${OUT_ROOT}/data/variable-dictionary.csv"
-global RUN_LOG "${OUT_ROOT}/reports/run-log-`c(current_date)'.md"
 
 capture mkdir "paper-workspace"
 capture mkdir "${OUT_ROOT}"
@@ -24,6 +23,9 @@ capture mkdir "${OUT_ROOT}/qual/memos"
 capture mkdir "${OUT_ROOT}/qual/anonymized"
 capture mkdir "${OUT_ROOT}/qual/reliability"
 
-file open flog using "${RUN_LOG}", write append
-file write flog "| `c(current_date)' | 01-init | ok | ${OUT_ROOT}/reports | 初始化 paper-workspace/04-analysis。 |" _n
-file close flog
+capture log close _all
+log using "${OUT_ROOT}/reports/init.log", replace text
+
+di "--> 已初始化 ${OUT_ROOT}"
+
+capture log close _all

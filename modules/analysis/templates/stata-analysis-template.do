@@ -11,7 +11,6 @@ if `"`: environment PROJECT_ROOT'"' != "" {
     local project_root "`: environment PROJECT_ROOT'"
 }
 global OUT_ROOT "`project_root'/paper-workspace/04-analysis"
-global RUN_LOG "${OUT_ROOT}/reports/run-log-`c(current_date)'.md"
 capture mkdir "`project_root'/paper-workspace"
 capture mkdir "`project_root'/paper-workspace/04-analysis"
 capture mkdir "${OUT_ROOT}/reports"
@@ -34,9 +33,3 @@ display "Copy/adapt concrete subflow scripts into paper-workspace/04-analysis/sc
 display "生产交付双总代码（默认架构）：01_clean_and_prepare_master.do + 02_empirical_analysis_master.do"
 display `"CSV 导出统一规范：esttab ... , substitute("=" "") nogaps compress replace"'
 display "机制默认江艇（2022）两步法；调节默认四列递进规范；高维固定效应统一 reghdfe/ivreghdfe。"
-
-capture file open flog using "${RUN_LOG}", write append
-if _rc == 0 {
-    file write flog "| `c(current_date)' | stata-analysis-template | index | - | 旧入口仅列出流程脚本；未运行模型，真实执行请调用子流程 .do。 |" _n
-    file close flog
-}

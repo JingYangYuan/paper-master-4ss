@@ -42,6 +42,3 @@ decision <- file.path(args$out_root, "reports", paste0("model-decision-", Sys.Da
 write_csv_safe(rows, csv_path)
 writeLines(paste0('{"plan":"', plan, '","variable_count":', dict_n, ',"cleaning_report":"', cleaning, '","note":"R 模板生成；JSON 详情可由 Python 版本重写。"}'), json_path)
 write_md(decision, "Model Decision", c("来源计划" = ifelse(is.na(plan), "未找到 analysis-execution-plan-[date].md", plan), "变量字典与清洗报告" = paste0("变量字典行数：", dict_n, "\n\n清洗报告：", ifelse(is.na(cleaning), "未找到 cleaning-report-[date].md", cleaning)), "模型派发" = paste(rows$task, rows$run, rows$evidence, collapse = "\n"), "阻断" = paste(rows$blocker[rows$blocker != ""], collapse = "\n")))
-status <- ifelse(nzchar(txt), "ok", "blocked")
-log_run(args, "03-regression/00-plan-dispatch", status, c(csv_path, json_path, decision), "不运行统计模型，只生成 dispatch。")
-if (status == "blocked") quit(status = 2)

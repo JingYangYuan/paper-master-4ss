@@ -11,4 +11,4 @@
 7. `06-robustness`: explicitly dispatched robustness, placebo, sensitivity, standard-error, model, sample, and variable alternatives.
 8. `07-regression-export`: aggregate products into `script-index.md`, figure index, missing-product report, and `regression-results-[date].md`.
 
-Each subflow has Python, R, and Stata templates. The templates write run-log entries and produce only the artifacts they actually create. Placeholder cells mean "not yet estimated"; they cannot be cited as statistical findings.
+Each subflow has Python, R, and Stata templates. The templates produce only the artifacts they actually create; execution commands, exit codes, and stdout/stderr are recorded by the agent in `run-log-[date].md`. Subflows that the plan does not require are deleted when adapting the script — templates never skip work at run time, so a missing variable or package fails loudly. Placeholder cells mean "not yet estimated"; they cannot be cited as statistical findings.

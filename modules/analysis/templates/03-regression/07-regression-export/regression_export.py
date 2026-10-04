@@ -50,7 +50,6 @@ def main() -> int:
         "Regression Results",
         {"可声称内容": "只声称 run-log 记录且产物存在的模型结果。", "缺失或阻断": "\n".join(f"- {x}" for x in missing) or "无缺失产物。"},
     )
-    common.log_run(args, "03-regression/07-regression-export", "ok" if not missing else "partial", [script_index, fig_index, missing_report, results], "未重新估计模型。")
     return 0
 
 

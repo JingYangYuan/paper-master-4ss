@@ -13,4 +13,3 @@ missing <- required[!file.exists(file.path(args$out_root, required))]
 script_index <- write_md(file.path(args$out_root, "reports", "script-index.md"), "Script Index", c("子流程" = "00-plan-dispatch -> 01-main-models -> 02-nonlinear -> 03-panel -> 04-causal -> 05-mechanism-heterogeneity -> 06-robustness -> 07-regression-export"))
 missing_report <- write_md(file.path(args$out_root, "reports", "missing-regression-products.md"), "Missing Regression Products", c("缺失产物" = ifelse(length(missing), paste(missing, collapse = "\n"), "无缺失产物。")))
 results <- write_md(file.path(args$out_root, "reports", paste0("regression-results-", Sys.Date(), ".md")), "Regression Results", c("可声称内容" = "只声称 run-log 记录且产物存在的模型结果。", "缺失或阻断" = ifelse(length(missing), paste(missing, collapse = "\n"), "无缺失产物。")))
-log_run(args, "03-regression/07-regression-export", ifelse(length(missing), "partial", "ok"), c(script_index, missing_report, results), "未重新估计模型。")

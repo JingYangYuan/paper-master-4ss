@@ -8,8 +8,7 @@ find_shared <- function() {
 }
 source(find_shared())
 args <- parse_common_args(); ensure_dirs(args$out_root)
-data_path <- if (!is.na(args$data) && file.exists(args$data)) args$data else file.path(args$out_root, "data", "analysis-data.csv")
-if (!file.exists(data_path)) { log_run(args, "03-regression/01-main-models", "blocked", "-", paste("缺少数据:", data_path)); quit(status = 2) }
+data_path <- if (is.na(args$data)) file.path(args$out_root, "data", "analysis-data.csv") else args$data
 df <- load_data(data_path)
 roles <- infer_roles(df, args$dict)
 table1 <- make_table1(df, c(roles$y, roles$x, roles$controls), args$out_root)
@@ -22,4 +21,3 @@ summary_path <- write_md(file.path(args$out_root, "reports", "main-models-result
                          c("M1" = paste(capture.output(summary(m1)), collapse = "\n"),
                            "M2" = paste(capture.output(summary(m2)), collapse = "\n"),
                            "M3" = paste(capture.output(summary(m3)), collapse = "\n")))
-log_run(args, "03-regression/01-main-models", "ok", c(table1, table2, summary_path), "已真实估计主回归。")

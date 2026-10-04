@@ -134,7 +134,7 @@ flowchart TD
 7. `06-robustness` 只执行 dispatch 中明确列出的替代变量、替代样本、替代模型、标准误/聚类、安慰剂和敏感性任务。
 8. `07-regression-export` 汇总表格、图形、`script-index.md`、缺失产物报告和 `regression-results-[date].md`；不重新估计模型。
 
-Stata 生产交付默认采用双总代码体系（`01_clean_and_prepare_master.do` 清洗与前置表 + `02_empirical_analysis_master.do` 全套回归与导出，见 `SKILL.md` §4.2），不得落盘为无分段的单一长脚本；子流程模板与派发表仍作为模块化构建与拆分依据，复杂并行项目可按子流程目录拆分执行。若某个子流程因变量缺失、数据结构不足或依赖不可用不能执行，必须写入 `run-log-[date].md`、`regression-dispatch.csv` 或缺失产物报告，不得静默跳过。
+Stata 生产交付默认采用双总代码体系（`01_clean_and_prepare_master.do` 清洗与前置表 + `02_empirical_analysis_master.do` 全套回归与导出，见 `SKILL.md` §4.2），不得落盘为无分段的单一长脚本；子流程模板与派发表仍作为模块化构建与拆分依据，复杂并行项目可按子流程目录拆分执行。子流程脚本直接报错而不静默跳过；失败原因、退出码与 stdout/stderr 路径由 agent 写入 `run-log-[date].md`，缺失产物写入 `regression-dispatch.csv` 或缺失产物报告。
 
 所有回归、扩展检验、因果识别和稳健性表默认写入 `paper-workspace/04-analysis/tables/*.csv`。CSV 不是长表字段摘要，必须采用论文宽表结构：首列为变量/统计项，后续列为模型编号 `(1)`、`(2)`、`(3)`、`(4)` 等；第二表头行写每列因变量或模型标签；每个变量两行，第一行是系数/边际效应和显著性星号，第二行是括号内 t/z 值；不适用的单元格用 `-`。所有控制变量必须逐行列报；固定效应用中文行名如“省份固定”“年份固定”“个体固定”汇总为“是/否”；表尾至少包含“观测值”，并在适用时包含 `R²`、`调整 R²`、`Pseudo R²`、`Within R²`。标准误类型、聚类层级、权重和显著性规则写入 CSV 末尾“注：”行。HTML、TeX、DOCX 只在用户要求、投稿整备或期刊格式需要时附加导出。
 

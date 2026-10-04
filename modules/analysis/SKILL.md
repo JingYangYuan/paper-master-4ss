@@ -153,7 +153,7 @@ Stata 生产交付默认采用双总代码体系：`paper-workspace/04-analysis/
 | 混合方法 | `templates/05-mixed/` | joint display 和整合解释 |
 | 导出门控 | `templates/06-export/` | 质量门控、可声称内容和产物追溯 |
 
-每个具体脚本都采用“配置块 + CLI 参数覆盖”：`--data`、`--plan`、`--dict`、`--out-root`、`--run-log`、`--slug`、`--tasks`。生产执行时，将需要的子流程脚本复制或改写到 `paper-workspace/04-analysis/scripts/` 后运行；若变量角色、依赖或软件许可不足，脚本必须记录阻断，不得输出虚构结果。
+每个具体脚本都采用“配置块 + CLI 参数覆盖”：`--data`、`--plan`、`--dict`、`--out-root`、`--run-log`、`--slug`、`--tasks`。生产执行时，将需要的子流程脚本复制或改写到 `paper-workspace/04-analysis/scripts/` 后运行；若变量角色、依赖或软件许可不足，脚本直接报错；阻断原因由 agent 记入 run-log-[date].md，不得输出虚构结果。
 
 Stata 执行入口固定为 statamcp：
 

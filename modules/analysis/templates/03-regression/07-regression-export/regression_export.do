@@ -7,20 +7,14 @@ clear all
 local project_root : env PROJECT_ROOT
 if "`project_root'" != "" cd "`project_root'"
 global OUT_ROOT "paper-workspace/04-analysis"
-global RUN_LOG "${OUT_ROOT}/reports/run-log-`c(current_date)'.md"
 global RESULTS "${OUT_ROOT}/reports/regression-results-`c(current_date)'.md"
 
 capture mkdir "paper-workspace"
 capture mkdir "${OUT_ROOT}"
 capture mkdir "${OUT_ROOT}/reports"
-capture confirm file "${RUN_LOG}"
-if _rc {
-    file open flog using "${RUN_LOG}", write replace
-    file write flog "# Analysis Run Log" _n _n
-    file write flog "| Date | Step | Status | Outputs | Note |" _n
-    file write flog "|---|---|---|---|---|" _n
-    file close flog
-}
+
+capture log close _all
+log using "${OUT_ROOT}/reports/regression_export.log", replace text
 
 file open fs using "${OUT_ROOT}/reports/script-index.md", write replace
 file write fs "# Script Index" _n _n
@@ -46,9 +40,7 @@ file close fm
 
 file open fr using "${RESULTS}", write replace
 file write fr "# Regression Results" _n _n
-file write fr "本导出脚本不重新估计模型，只汇总真实运行产物。所有可声称内容必须追溯到 ${RUN_LOG}。" _n
+file write fr "本导出脚本不重新估计模型，只汇总真实运行产物。所有可声称内容必须追溯到各子流程的 reports/*.log。" _n
 file close fr
 
-file open flog using "${RUN_LOG}", write append
-file write flog "| `c(current_date)' | 03-regression/07-regression-export | ok | script-index.md<br>${RESULTS} | 未重新估计模型。 |" _n
-file close flog
+capture log close _all

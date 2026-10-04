@@ -6,7 +6,7 @@
 
 | 流程 | 目录 | 产物 |
 |---|---|---|
-| 初始化与路由 | `01-init/` | 目录、run-log、候选数据、CLI 检查 |
+| 初始化与路由 | `01-init/` | 目录、候选数据、CLI 检查 |
 | 清洗与描述 | `02-clean-describe/` | `analysis-data.*`、`variable-dictionary.csv`、`sample-flow.csv`、`table1-descriptives.csv` |
 | 回归与扩展 | `03-regression/` | dispatch、模型决策、主回归、非线性、面板、因果、机制、稳健性、汇总导出 |
 | 质性分析 | `04-qual/` | 匿名化文本、分段数据、编码本、编码表、信度记录 |
@@ -30,4 +30,6 @@ Stata 脚本使用文件顶部宏配置，并保留等价参数说明；生产�
 #   working_dir=<.do 相对路径基准目录>, timeout=按需)
 ```
 
-所有脚本必须追加 `paper-workspace/04-analysis/reports/run-log-[date].md`，并且只能声称本脚本实际生成的产物。高级方法在变量、依赖或软件许可不足时写阻断，不写空表冒充结果。
+模板输出控制台日志：Stata 用 `log using "${OUT_ROOT}/reports/<子流程名>.log", replace text`；R/Python 由调用方重定向 stdout/stderr。markdown `run-log-[date].md` 由 agent 记录执行命令、退出码、stdout/stderr 路径、产物和失败信号，模板不再写它。
+
+模板不做运行时条件跳过：不适用的模型块在改写脚本时删除；变量、依赖或数据结构不满足时直接报错，不用 `capture`/`tryCatch`/`try-except` 静默跳过。模板只能声称本脚本实际生成的产物。

@@ -48,9 +48,7 @@ def main() -> int:
             "下一步": "运行 02-clean-describe 生成 analysis-data、variable-dictionary、sample-flow 和 Table 1。",
         },
     )
-    status = "ok" if checks["pandas"] == "ok" and checks["statsmodels"] == "ok" else "blocked"
-    common.log_run(args, "01-init", status, [report], "已创建目录并检查 Python/R/Stata 运行环境。")
-    return 0 if status == "ok" else 2
+    return 0
 
 
 if __name__ == "__main__":

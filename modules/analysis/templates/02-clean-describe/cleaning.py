@@ -26,10 +26,6 @@ def main() -> int:
     parser = common.add_common_args(argparse.ArgumentParser(description=__doc__))
     args = parser.parse_args()
     p = common.paths(args.out_root)
-    if not args.data or not Path(args.data).exists():
-        report = common.write_markdown(p["reports"] / f"cleaning-report-{date.today().isoformat()}.md", "Cleaning Report", {"阻断": "缺少 --data 或数据文件不存在。"})
-        common.log_run(args, "02-clean-describe", "blocked", [report], "缺少可执行数据输入。")
-        return 2
     raw = common.load_data(args.data)
     cleaned = common.clean_data(raw)
     roles = common.infer_roles(cleaned, args.dict_path)
@@ -49,8 +45,6 @@ def main() -> int:
             "清洗规则": "列名标准化、特殊缺失码转 NA、数值变量 1%/99% 缩尾、去重、删除 Y/X/control 缺失。",
         },
     )
-    outputs = [data_path, dict_path, sample_flow, table1, report, *(x for x in [corr] if x), *figs]
-    common.log_run(args, "02-clean-describe", "ok", outputs, "已真实读取、清洗并生成描述统计。")
     return 0
 
 

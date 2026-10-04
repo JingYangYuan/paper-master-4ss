@@ -4,7 +4,8 @@
 
 - 所有模板使用泛化变量名和 `variable-dictionary.csv` 的 `display_name`，不得固化具体项目变量。
 - 所有模板默认输出到 `paper-workspace/04-analysis/`。
-- 所有模板必须记录 run-log：命令、输入、输出、状态、阻断原因。
+- 模板输出控制台日志：Stata 用 `log using "${OUT_ROOT}/reports/<子流程名>.log", replace text`；R/Python 由调用方重定向 stdout/stderr。markdown `run-log-[date].md` 由 agent 记录执行命令、退出码、stdout/stderr 路径、产物和失败信号。
+- 模板不做运行时条件跳过：不适用的模型块在改写脚本时删除；变量、依赖或数据结构不满足时直接报错，不用 `capture` 静默跳过。
 - 未执行成功时，不得声称得到统计结论、质性主题或混合方法整合结论；模板不能只写空表冒充分析结果。
 
 ## 必备输出

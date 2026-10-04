@@ -8,9 +8,12 @@ clear all
 global OUT_ROOT "paper-workspace/04-analysis"
 global PLAN "${OUT_ROOT}/reports/analysis-execution-plan.md"
 global DISPATCH "${OUT_ROOT}/reports/regression-dispatch.csv"
-global RUN_LOG "${OUT_ROOT}/reports/run-log-`c(current_date)'.md"
 
 capture mkdir "${OUT_ROOT}/reports"
+
+capture log close _all
+log using "${OUT_ROOT}/reports/plan_dispatch.log", replace text
+
 file open fd using "${DISPATCH}", write replace
 file write fd "task,run,evidence,blocker" _n
 file write fd "main,blocked,Stata 模板不解析 Markdown,请根据 analysis-execution-plan 手动标记" _n
@@ -21,6 +24,4 @@ file write fd "mechanism_heterogeneity,blocked,中介 机制 调节 异质性 �
 file write fd "robustness,blocked,稳健性 安慰剂 敏感性,只执行 dispatch 明确任务" _n
 file close fd
 
-file open flog using "${RUN_LOG}", write append
-file write flog "| `c(current_date)' | 03-regression/00-plan-dispatch | template | ${DISPATCH} | 不运行统计模型；请根据 analysis-execution-plan 完成派发。 |" _n
-file close flog
+capture log close _all

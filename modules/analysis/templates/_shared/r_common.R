@@ -32,23 +32,6 @@ ensure_dirs <- function(out_root) {
   invisible(lapply(dirs, dir.create, recursive = TRUE, showWarnings = FALSE))
 }
 
-run_log_path <- function(args) {
-  if (!is.na(args$run_log) && nzchar(args$run_log)) return(args$run_log)
-  file.path(args$out_root, "reports", paste0("run-log-", Sys.Date(), ".md"))
-}
-
-log_run <- function(args, step, status, outputs = "-", note = "-") {
-  ensure_dirs(args$out_root)
-  p <- run_log_path(args)
-  if (!file.exists(p)) {
-    writeLines(c("# Analysis Run Log", "", "| Date | Step | Status | Outputs | Note |",
-                 "|---|---|---|---|---|"), p)
-  }
-  line <- paste0("| ", Sys.Date(), " | ", step, " | ", status, " | ",
-                 paste(outputs, collapse = "<br>"), " | ", note, " |")
-  write(line, p, append = TRUE)
-}
-
 write_csv_safe <- function(df, path) {
   dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
   utils::write.csv(df, path, row.names = FALSE, fileEncoding = "UTF-8")

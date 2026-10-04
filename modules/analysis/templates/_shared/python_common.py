@@ -82,16 +82,6 @@ def run_log_path(args) -> Path:
     return Path(args.out_root) / "reports" / f"run-log-{date.today().isoformat()}.md"
 
 
-def log_run(args, step: str, status: str, outputs: Iterable[str] = (), note: str = "") -> None:
-    p = run_log_path(args)
-    p.parent.mkdir(parents=True, exist_ok=True)
-    if not p.exists():
-        p.write_text("# Analysis Run Log\n\n| Date | Step | Status | Outputs | Note |\n|---|---|---|---|---|\n", encoding="utf-8")
-    output_text = "<br>".join(str(x) for x in outputs) if outputs else "-"
-    with p.open("a", encoding="utf-8") as fh:
-        fh.write(f"| {date.today().isoformat()} | {step} | {status} | {output_text} | {note or '-'} |\n")
-
-
 def write_csv(path: str | Path, rows: list[dict[str, object]], fieldnames: list[str] | None = None) -> Path:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)

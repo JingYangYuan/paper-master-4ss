@@ -8,17 +8,12 @@ find_shared <- function() {
 }
 source(find_shared())
 args <- parse_common_args(); ensure_dirs(args$out_root)
-data_path <- if (!is.na(args$data) && file.exists(args$data)) args$data else file.path(args$out_root, "data", "analysis-data.csv")
-if (!file.exists(data_path)) { log_run(args, "03-regression/05-mechanism-heterogeneity", "blocked", "-", paste("缺少数据:", data_path)); quit(status = 2) }
+data_path <- if (is.na(args$data)) file.path(args$out_root, "data", "analysis-data.csv") else args$data
 df <- load_data(data_path); roles <- infer_roles(df, args$dict)
-mods <- list(); blockers <- c()
-mods <- c(mods, tryCatch(run_mediation(df, roles), error = function(e) { blockers <<- c(blockers, paste("mediation:", e$message)); list() }))
-mods$moderation <- tryCatch(run_interaction(df, roles), error = function(e) { blockers <<- c(blockers, paste("moderation:", e$message)); NULL })
-mods <- mods[!vapply(mods, is.null, logical(1))]
-outputs <- c()
-if (length(mods)) {
-  outputs <- c(outputs, export_models(mods, file.path(args$out_root, "tables", "table3-mechanism-mediation-moderation.csv"), "Table 3 Mechanism Mediation Moderation", roles$controls, roles$fe, roles$cluster))
-}
+mods <- list()
+mods <- c(mods, run_mediation(df, roles))
+mods$moderation <- run_interaction(df, roles)
+outputs <- export_models(mods, file.path(args$out_root, "tables", "table3-mechanism-mediation-moderation.csv"), "Table 3 Mechanism Mediation Moderation", roles$controls, roles$fe, roles$cluster)
 if (!is.na(roles$heterogeneity)) {
   groups <- unique(stats::na.omit(df[[roles$heterogeneity]]))
   hmods <- list()
@@ -28,9 +23,3 @@ if (!is.na(roles$heterogeneity)) {
   }
   if (length(hmods)) outputs <- c(outputs, export_models(hmods, file.path(args$out_root, "tables", "table4-heterogeneity-threshold-nonlinear.csv"), "Table 4 Heterogeneity Threshold Nonlinear", roles$controls, roles$fe, roles$cluster))
 }
-if (!length(outputs)) {
-  report <- write_md(file.path(args$out_root, "reports", "mechanism-heterogeneity-blockers.md"), "Mechanism Heterogeneity Blockers", c("阻断" = paste(blockers, collapse = "\n")))
-  log_run(args, "03-regression/05-mechanism-heterogeneity", "blocked", report, "未配置机制/异质性角色。")
-  quit(status = 2)
-}
-log_run(args, "03-regression/05-mechanism-heterogeneity", "ok", outputs, "已运行可执行的机制/调节/异质性任务。")

@@ -44,7 +44,6 @@ def main() -> int:
             "结论边界": "只有 run-log 记录为 ok 且产物存在的结果可以进入论文结论。",
         },
     )
-    common.log_run(args, "06-export", "ok" if not missing else "partial", [report], "已执行质量门控。")
     return 0
 
 

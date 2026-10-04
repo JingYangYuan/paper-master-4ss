@@ -37,10 +37,6 @@ def main() -> int:
     p = common.paths(args.out_root)
     text_dir = Path(args.text_dir or args.data or ".")
     files = [x for pat in ("*.txt", "*.md") for x in text_dir.glob(pat)] if text_dir.is_dir() else ([text_dir] if text_dir.exists() else [])
-    if not files:
-        report = common.write_markdown(p["qual"] / "memos" / f"qual-blockers-{date.today().isoformat()}.md", "Qual Blockers", {"阻断": "缺少可读取的 .txt/.md 文本材料。"})
-        common.log_run(args, "04-qual", "blocked", [report], "未发现文本材料。")
-        return 2
     coded_rows = []
     for f in files:
         text = anonymize(f.read_text(encoding="utf-8", errors="ignore"))
@@ -52,7 +48,6 @@ def main() -> int:
     codebook = common.write_csv(p["qual"] / "codebooks" / f"codebook-{date.today().isoformat()}.csv", [{"code": "", "definition": "", "inclusion": "", "exclusion": "", "example": ""}])
     coded = common.write_csv(p["qual"] / "coded-data" / f"coded-excerpts-{date.today().isoformat()}.csv", coded_rows)
     reliability = common.write_markdown(p["qual"] / "reliability" / f"reliability-{date.today().isoformat()}.md", "Qualitative Reliability", {"复核": "已完成去标识化和分段；主题、信度和结论需由人工编码或复核后填写。"})
-    common.log_run(args, "04-qual", "ok", [codebook, coded, reliability], "已真实去标识化和分段，不伪造主题结论。")
     return 0
 
 

@@ -71,9 +71,13 @@ ssc install rddensity, replace
 ssc install psmatch2, replace
 ssc install pstest, replace
 ssc install outreg2, replace
+ssc install xtabond2, replace
+ssc install csdid, replace
 ```
 
 社区包在 statamcp 会话内安装一次即可（用 `stata_run_selection` 运行安装命令），后续所有会话共享同一 ado 路径。
+
+模板不再在运行期守卫依赖；上表社区包必须在执行分析前装好，缺失时 Stata 直接报 unrecognized command。
 
 ---
 

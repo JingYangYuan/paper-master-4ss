@@ -22,4 +22,3 @@ write_md(report, "Analysis Init", c(
   "输入" = paste0("data=", ifelse(is.na(args$data), "未指定", args$data), "\n\nplan=", ifelse(is.na(args$plan), "未指定", args$plan)),
   "下一步" = "进入 02-clean-describe，先完成变量发现、清洗报告和 analysis-data.*。"
 ))
-log_run(args, "01-init", "ok", report, "初始化分析输出目录。")

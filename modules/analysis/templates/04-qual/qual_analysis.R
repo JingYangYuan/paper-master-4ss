@@ -10,11 +10,6 @@ source(find_shared())
 args <- parse_common_args(); ensure_dirs(args$out_root)
 text_dir <- if (!is.na(args$data)) args$data else "."
 files <- if (dir.exists(text_dir)) list.files(text_dir, pattern = "\\.(txt|md)$", full.names = TRUE) else if (file.exists(text_dir)) text_dir else character()
-if (!length(files)) {
-  report <- write_md(file.path(args$out_root, "qual/memos", paste0("qual-blockers-", Sys.Date(), ".md")), "Qual Blockers", c("阻断" = "缺少可读取的 .txt/.md 文本材料。"))
-  log_run(args, "04-qual", "blocked", report, "未发现文本材料。")
-  quit(status = 2)
-}
 rows <- list()
 for (f in files) {
   txt <- paste(readLines(f, warn = FALSE, encoding = "UTF-8"), collapse = "\n")
@@ -28,4 +23,3 @@ for (f in files) {
 }
 coded <- write_csv_safe(do.call(rbind, rows), file.path(args$out_root, "qual/coded-data", paste0("coded-excerpts-", Sys.Date(), ".csv")))
 codebook <- write_csv_safe(data.frame(code = "", definition = "", inclusion = "", exclusion = "", example = ""), file.path(args$out_root, "qual/codebooks", paste0("codebook-", Sys.Date(), ".csv")))
-log_run(args, "04-qual", "ok", c(coded, codebook), "已真实去标识化和分段，不伪造主题结论。")
