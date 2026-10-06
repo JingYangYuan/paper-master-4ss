@@ -1,8 +1,7 @@
 ---
 name: paper-submission-journal-package-consultant
 description: 用于投稿整备阶段最终复核投稿包完整性、cover letter、response letter、伦理声明、数据可用性声明和回流修改项。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Journal Package Consultant

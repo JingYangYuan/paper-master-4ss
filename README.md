@@ -41,7 +41,7 @@
 git clone https://github.com/JingYangYuan/paper-master-4ss.git
 ```
 
-常见落点：Claude Code / Claude Desktop 的 skills 目录、Cursor 的 skills 目录、Oh My Pi 的 skill 目录。具体路径以宿主文档为准。
+落点就是**你的宿主的 skill/skills 目录**（例如 Claude Code 兼容层的 skills 目录、其他 agent 软件的 skill 目录或 skills-manager 的符号链接方案）。具体路径以宿主文档为准；本包不绑定任何单一宿主。
 
 首次在某个论文项目里使用时，先建工作区：
 
@@ -87,15 +87,18 @@ mkdir -p paper-workspace/{00-meta,01-design,02-literature,03-outline,04-analysis
 
 ## 宿主
 
-适配 Claude Code / Claude Desktop、Cursor、Oh My Pi、Windsurf，以及 OpenCode、Codex、ZCode、Antigravity（`agy` / Google Antigravity）。工具名以 `references/agent-software-adapters.md` 为准。
+**不预设宿主，也不需要宿主名单**：启动时按 `references/runtime-adapter.md` §5 探测当前环境的可用能力（文件读写、检索、shell、web、用户提问、子代理、浏览器控制、guard），把结果写入 `paper-workspace/_index/runtime-capabilities.md`，再按通用能力名执行。
 
-ZCode 不执行 skill frontmatter hooks。首次在 ZCode 里调用本包时运行：
+`references/agent-software-adapters.md` 只收录若干**已知宿主样例**（含 Claude Code 兼容叠加层）作为探测与映射的参考资料；样例之外的新宿主直接走通用回退，无需改包。
+
+本包不在 skill frontmatter 里声明 hooks。需要 auto guard 时用宿主无关注册器：
 
 ```bash
-python3 scripts/register_zcode_hooks.py
+python3 scripts/register_host_hooks.py --host auto    # 自动探测；无证据时不写任何文件
+python3 scripts/register_host_hooks.py --print         # 只看将写入/手工粘贴的配置
 ```
 
-查询 `--check`，撤销 `--remove`。
+查询 `--check`，撤销 `--remove`，显式指定宿主用 `--host <name>`。详情与各宿主配置样例见 `references/hooks-and-evaluation.md`。无论是否注册，分析命令后与交付前都可用两条手动命令兜底（见同文件第 4 节）。
 
 ## 导出独立包
 
@@ -141,9 +144,10 @@ paper-master-4ss/
 │   ├── write/
 │   ├── check/
 │   ├── submission/
+│   ├── mechanigraph/
 │   └── update/
 ├── references/              # 宿主适配、依赖、评分、顾问注册表
-├── scripts/                 # guard、ZCode hook 注册、导出、公开文档发布
+├── scripts/                 # guard、宿主 hook 注册、导出、公开文档发布
 └── docs/banner.svg
 ```
 

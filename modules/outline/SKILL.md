@@ -1,8 +1,8 @@
 ---
 name: paper-outline-4ss
 description: 将用户指定输入路径、master 输入登记表或当前目录候选材料转换为结构化论文撰写大纲。支持毕业论文（五章结构）和期刊论文（五要素紧凑结构）双轨输出，支持规范研究、实证研究、阐释研究、混合研究四种方法协议，以及社会学研究范式和管理世界案例研究范式两类发表风格。当用户需要从已有文献素材生成论文大纲、将材料转化为写作框架、或需要论文结构设计时使用。
-user-invocable: true
-argument-hint: "[研究主题] [可选: 学科, 目标期刊, 范式偏好]"
+invocable: true
+args_hint: "[研究主题] [可选: 学科, 目标期刊, 范式偏好]"
 ---
 
 # Paper Outline 4SS: 素材文献 → 论文大纲转换系统
@@ -82,7 +82,7 @@ find "$INPUT_PATH" -type f \( -name "*.md" -o -name "*.txt" -o -name "*.json" -o
 
 素材清单输出后，按以下顺序使用 `ask_user` 向用户确认：
 
-本节示例是 `paper-master-4ss` 的基准结构化样例；字段规范见 `references/ask-user-question-examples.md`。
+本节示例是 `paper-master-4ss` 的基准结构化样例；字段规范见 `references/user-question-examples.md`。
 
 **Step 0 — 论文目的（最先确认）**
 

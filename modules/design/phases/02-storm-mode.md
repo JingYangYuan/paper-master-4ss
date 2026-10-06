@@ -296,7 +296,7 @@ Agent 子进程无法直接访问本 skill 的 `frame/`、`references/` 目录�
 
 #### Agent 输入包
 
-通过 Agent 工具的 prompt 传递以下信息:
+通过 `spawn_agent` 的 prompt 传递以下信息:
 1. 研究主题和学科路由结果
 2. 理论定位矩阵 (Top 5 理论)
 3. 交叉扫描矩阵 (四维度)
@@ -319,7 +319,7 @@ Agent 子进程无法直接访问本 skill 的 `frame/`、`references/` 目录�
 
 #### Agent 并行派发
 
-仅当高风险、跨学科或投稿级设计需要多角色复核时，使用 Agent 工具并行派发所选角色：
+仅当高风险、跨学科或投稿级设计需要多角色复核时，使用 `spawn_agent`/`parallel_review` 并行派发所选角色（无并行能力时按顺序复核并记录 `sequential-review`）：
 
 ```
 Agent 1 (理论家):    "评估以下 15-20 个 RQ 的理论创新性和嫁接合理性..."

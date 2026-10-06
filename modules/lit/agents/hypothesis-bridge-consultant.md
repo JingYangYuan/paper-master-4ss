@@ -1,8 +1,7 @@
 ---
 name: paper-lit-hypothesis-bridge-consultant
 description: 用于文献综述加假设推导模式中检查空白、理论框架、机制链条和假设表述之间的桥接关系。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Hypothesis Bridge Consultant

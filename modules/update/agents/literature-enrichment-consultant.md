@@ -1,8 +1,7 @@
 ---
 name: paper-update-literature-enrichment-consultant
 description: 用于为学科知识、方法协议和文献策略类候选项补充文献证据、规范来源、争议状态和适用边界。
-model: inherit
-tools: Read, Grep, WebSearch, WebFetch
+capabilities: read_file, search_text, web_search, web_fetch
 ---
 
 # Literature Enrichment Consultant

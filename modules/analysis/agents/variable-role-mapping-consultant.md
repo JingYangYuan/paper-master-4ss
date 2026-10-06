@@ -1,8 +1,7 @@
 ---
 name: paper-analysis-variable-role-mapping-consultant
 description: 用于数据清洗前把候选变量映射到因变量、自变量、控制变量、固定效应、聚类、权重、ID、时间、机制、中介、调节、异质性、门槛、非线性、工具变量、处理、post、running 和 cutoff 角色。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Variable Role Mapping Consultant

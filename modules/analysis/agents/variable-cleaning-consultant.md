@@ -1,8 +1,7 @@
 ---
 name: paper-analysis-variable-cleaning-consultant
 description: 用于基于 variable-discovery-pack 复核变量清洗、样本筛选、缺失处理、异常值和变量字典。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Variable Cleaning Consultant

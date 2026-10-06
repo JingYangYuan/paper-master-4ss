@@ -1,8 +1,7 @@
 ---
 name: paper-analysis-mechanism-extension-code-writer
 description: 用于根据 design 变量蓝图撰写中介、机制、调节、异质性、门槛、非线性、交互和分组检验代码草案。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Mechanism Extension Code Writer

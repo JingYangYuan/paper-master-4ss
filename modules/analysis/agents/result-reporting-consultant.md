@@ -1,8 +1,7 @@
 ---
 name: paper-analysis-result-reporting-consultant
 description: 用于分析结果导出前复核表格、图形、统计报告、质性摘录呈现和中文结果段落。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Result Reporting Consultant

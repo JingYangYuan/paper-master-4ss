@@ -1,8 +1,7 @@
 ---
 name: paper-analysis-variable-quality-consultant
 description: 用于数据清洗前预判候选变量的缺失、类型、异常值、重复、特殊缺失码、面板唯一性和样本口径风险。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Variable Quality Consultant

@@ -1,8 +1,7 @@
 ---
 name: paper-lit-theory-map-consultant
 description: 用于文献景观地图和假设推导阶段梳理理论谱系、概念关系、争议脉络和知识空白。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Theory Map Consultant

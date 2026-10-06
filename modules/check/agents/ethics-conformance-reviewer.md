@@ -1,9 +1,7 @@
 ---
 name: paper-check-ethics-conformance-reviewer
 description: 引文注释和技术规范的独立顾问。
-tools:
-  - Read
-  - Grep
+capabilities: read_file, search_text
 ---
 
 # paper-check-ethics-conformance-reviewer

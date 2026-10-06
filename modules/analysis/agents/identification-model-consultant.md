@@ -1,8 +1,7 @@
 ---
 name: paper-analysis-identification-model-consultant
 description: 用于定量分析中复核模型选择、识别策略、固定效应、标准误、因果推断路径和替代解释处理。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Identification Model Consultant

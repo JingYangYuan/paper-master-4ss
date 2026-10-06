@@ -1,8 +1,7 @@
 ---
 name: paper-lit-screening-consultant
 description: 用于文献检索后复核论文纳入、排除、待核验分类，保证文献综述证据基础清楚。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Screening Consultant

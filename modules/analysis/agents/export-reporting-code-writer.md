@@ -1,8 +1,7 @@
 ---
 name: paper-analysis-export-reporting-code-writer
 description: 用于撰写默认 CSV 表格、图形、script-index、结果报告和质量门控导出代码草案。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Export Reporting Code Writer

@@ -1,17 +1,6 @@
 ---
 name: paper-master-4ss
 description: 中文社会科学论文总控工作流。用于统一管理 paper-workspace 输出区，登记任意输入路径，并在内部自包含模块之间路由：研究设计、文献综述、论文大纲、数据/质性分析、学术机制图、论文写作与润色、全流程审稿检查、投稿文件整备。适用于用户不知道下一步、想整理论文项目状态，或想串联设计-文献-大纲-分析-机制图-写作-审稿-投稿流程时。
-hooks:
-  PostToolUse:
-    - matcher: Bash
-      hooks:
-        - type: command
-          command: python3 scripts/paper_master_guard.py post-bash --workspace paper-workspace
-  Stop:
-    - matcher: ""
-      hooks:
-        - type: command
-          command: python3 scripts/paper_master_guard.py stop-check --workspace paper-workspace
 ---
 
 # Paper Master 4SS
@@ -22,16 +11,16 @@ hooks:
 
 - 输入路径开放：登记和引用用户给出的路径，不搬运材料。
 - 输出路径统一：默认写入 `paper-workspace/`。
-- 六宿主适配：Claude Code、OpenCode、Codex、ZCode、OMP（Oh My Pi / Pi coding agent）与 Antigravity（`agy` / Google Antigravity）调用本 skill 时，先读 `references/runtime-adapter.md` 与 `references/agent-software-adapters.md`，把宿主工具映射到通用能力名后再执行业务流程。
-- ZCode Hooks 自注册：ZCode 不执行 skill frontmatter hooks，只认 `~/.zcode/cli/config.json`（需 `hooks.enabled: true`）。ZCode 宿主首次调用本 skill 时，先运行 `python3 scripts/register_zcode_hooks.py`（幂等，写前自动备份，不触碰其他配置键），把 PostToolUse(Bash) 与 Stop 两个 guard hook 注册进用户配置；注册当次会话仍显式运行 guard 命令，后续会话由 config hooks 自动触发。查询状态用 `--check`，撤销用 `--remove`。
-- 项目规则优先：通过 `project_memory` 读取用户项目文件夹中的 paper-master 规则。Claude Code 使用 `CLAUDE.md` 标记块；Antigravity 使用项目根目录 `GEMINI.md` 或工作区 `AGENTS.md` 标记块；ZCode 使用工作区 `AGENTS.md` 标记块；OMP 使用 `.omp/AGENTS.md` 或工作区 `AGENTS.md` 标记块；OpenCode/Codex 使用宿主项目规则文件；均缺失时回落到 `paper-workspace/_index/project-rules.md`；不得写入 skill 包目录。
+- 宿主无关适配：不预设宿主，也不维护宿主名单。每次启动先按 `references/runtime-adapter.md` §5 探测当前环境的可用能力，把映射结果与缺失清单写入 `paper-workspace/_index/runtime-capabilities.md`，再按通用能力名（`read_file`、`search_text`、`write_file`、`run_shell`、`web_search`、`web_fetch`、`browser_control`、`ask_user`、`spawn_agent`、`parallel_review`、`guard_after_command`、`guard_before_finish`、`project_memory`）执行业务流程。`references/agent-software-adapters.md` 只提供已知宿主样例，不是名单；遇到新宿主无需改包。
+- 宿主 Hooks 注册（可选）：本包不在 skill frontmatter 声明 hooks。需要自动 guard 时运行 `python3 scripts/register_host_hooks.py --host auto`（幂等，写前备份，只追加本包所需项；`--print` 预览、`--check` 查询、`--remove` 撤销、`--host <name>` 指定宿主）。无明确证据、或检测到当前运行时自带 hook 层（preset/平台配置）时，它不写任何文件；未确认 hook 已生效的当次会话，仍显式运行 guard 命令兜底。完整规则与样例见 `references/hooks-and-evaluation.md`。
+- 项目规则优先：通过 `project_memory` 读取用户项目文件夹中的 paper-master 规则。优先使用当前宿主**已有**的项目规则文件（其 `<!-- paper-master-4ss:start -->` 标记块，维护纪律见 `references/project-rules-writing-layer.md`）；确认没有宿主规则文件时，才回落到 `paper-workspace/_index/project-rules.md`。不得写入 skill 包目录，也不得为某宿主凭空新建项目规则文件。
 - 渐进加载：先读项目级 `project_memory`（如有）与 `references/install-dependencies.md` 检查依赖，再读 `master/routing-matrix.md`、`master/agent-orchestration.md`、`master/output-protocol.md` 与 `master/user-journey.md`，确定主模块后再读对应 `modules/<module>/SKILL.md`；涉及文献综述准备或改写时，还必须读 `master/literature-review-protocol.md`。
 - 内部自包含：跨模块引用使用 `modules/...`。
 - 路径约定：本包任一文件中的 `modules/...`、`master/...`、`references/...` 默认相对于 `paper-master-4ss/` 根目录解析；同模块局部路径也可按当前文件目录解析。
 - 顾问调度：除必须由模块明确规定的执行链外，按任务的决策风险、材料复杂度和交接风险选择最少必要顾问；不得只因研究范式或模块名称自动派发。`design` 必须先确认 FRAME/STORM/DESIGN/FULL 模式，再确认研究取向。完整规则见 `master/agent-orchestration.md`，完整智能体注册表见 `references/agent-registry.md`。
-- Team 显式触发：只有用户明确要求 `agentteam`、`teamagent`、`Agent Team`、`teammate`、`团队智能体` 或“升格”时，才读取 `references/claude-team-config.md` 与 `references/team-routing.md`。Agent Teams/teammate 是 Claude Code 专属高级并行形态；ZCode 无此形态时用 Agent 工具并行派发 subagent 等价执行；OpenCode/Codex 若无等价能力，回退到普通顾问派发或 `sequential-review`。
+- Team 显式触发：只有用户明确要求 `agentteam`、`teamagent`、`Agent Team`、`teammate`、`团队智能体` 或“升格”时，才读取 `references/multiagent-team-config.md` 与 `references/team-routing.md`。Agent Teams/teammate 是 Claude Code 专属高级并行形态，属于可选兼容层；当前宿主无此形态时用 `spawn_agent`/`parallel_review` 能力并行派发 subagent 等价执行，无等价能力则回退到普通顾问派发或 `sequential-review`。
 - 统一输出：过程报告、顾问综合文件和最终回复默认使用中文 Markdown；机制链、因果链、阶段流程、模块交接、理论嫁接、假设推导、写作派发和 agent 调度链路必须使用 Mermaid。`write` 模块的 `manuscript*.md`、`revisions/styled*.md` 与 `literature-review.md` 属于论文正文净稿，只允许标题层级和自然段，不得使用报告式 Markdown 装饰。最终回复必须按 `master/user-journey.md` 用纯文字箭头标出论文路径和当前位置，避免终端无法渲染 Mermaid。完整规则见 `master/output-protocol.md`。
-- 机制层约束：分析执行后的命令必须通过 `guard_after_command` 审计 run-log、stdout/stderr、失败信号和输出存在性；会话停止或交付前必须通过 `guard_before_finish` 检查 `_index/project-state.md` 与 `_index/handoff-status.md` 是否已随最新产物更新。Claude Code 由 frontmatter Hook 自动触发；Antigravity 由 `.agents/hooks.json` 自动触发；ZCode 在 `register_zcode_hooks.py` 注册完成后由 config hooks 自动触发（注册当次会话仍显式运行）；OpenCode/Codex/OMP 显式运行 guard 命令。完整规则见 `references/hooks-and-evaluation.md`。
+- 机制层约束：分析执行后的命令必须通过 `guard_after_command` 审计 run-log、stdout/stderr、失败信号和输出存在性；会话停止或交付前必须通过 `guard_before_finish` 检查 `_index/project-state.md` 与 `_index/handoff-status.md` 是否已随最新产物更新。两个能力可由宿主 hook 自动触发（用 `scripts/register_host_hooks.py` 注册，见 `references/hooks-and-evaluation.md` 第 2 节），也可始终显式运行：分析命令后 `python3 scripts/paper_master_guard.py post-bash --workspace paper-workspace`（要把审计问题变成阻断时加 `--strict`），交付前 `python3 scripts/paper_master_guard.py stop-check --workspace paper-workspace`。无论是否注册，都不得省略这两个能力的执行与记录。
 - Rubric 评分：每次实质性模块执行后运行 `scripts/paper_master_guard.py score-project --workspace paper-workspace --json`，生成 `_index/quality-score.md` 与 `_index/quality-score.json`，同时报告阶段质量分和全流程成熟度。评分口径见 `references/evaluation-rubric.md`。
 
 ### 1.1 多智能体并行触发
@@ -40,7 +29,7 @@ hooks:
 
 总控层只做五类综合判断：选题方向、文献缺口、方法路径、写作顺序、质量风险。若当前环境不能真实并行，则按同一角色顺序复核，并在 `paper-workspace/_logs/agents/` 记录 `sequential-review`。轻量任务可跳过顾问，但必须记录 `agent-skip` 和跳过原因。所有顾问意见必须包含 `## 参考库回查`，列出已读取路径、采用框架、依据条款和参考缺口。
 
-若用户显式触发 Claude Code Agent Teams，先按 `references/claude-team-config.md` 检查配置参考，再按 `references/team-routing.md` 完成用户选择门槛、focal canonical agent 选择和辩论视角分配。未完成用户选择前不得创建 Team；Agent Teams 不可用、宿主不是 Claude Code 或用户选择不启用时，回退到 `master/agent-orchestration.md` 的普通顾问派发或顺序复核。
+若用户显式触发 Claude Code Agent Teams，先按 `references/multiagent-team-config.md` 检查配置参考，再按 `references/team-routing.md` 完成用户选择门槛、focal canonical agent 选择和辩论视角分配。未完成用户选择前不得创建 Team；当前宿主不提供 Agent Teams 或用户选择不启用时，回退到 `master/agent-orchestration.md` 的普通顾问派发或顺序复核。
 
 ## 2. 工作区
 
@@ -60,12 +49,12 @@ mkdir -p paper-workspace/{00-meta,01-design,02-literature,03-outline,04-analysis
 
 ## 3. 路由流程
 
-0. **宿主适配、项目规则、Guard 与依赖检查**：ZCode 宿主先运行 `python3 scripts/register_zcode_hooks.py --check` 查询 guard hooks 注册状态，未注册则执行注册（幂等，见“ZCode Hooks 自注册”原则）。随后读取 `references/runtime-adapter.md`、`references/agent-software-adapters.md`、项目级 `project_memory`（如有）、`references/hooks-and-evaluation.md`、`references/evaluation-rubric.md` 和 `references/install-dependencies.md`，按目标模块验收外部依赖。缺失时停止路由，引导用户安装。项目规则缺少 paper-master 标记块时，按当前宿主适配写入宿主项目规则文件或 `paper-workspace/_index/project-rules.md`；Claude Code 可按 `references/claude-md-writing-layer.md` 维护 `CLAUDE.md`，ZCode 维护工作区 `AGENTS.md` 标记块。
+0. **宿主能力探测、项目规则、Guard 与依赖检查**：读取 `references/runtime-adapter.md`，按其中 §5 探测当前宿主可用能力并把结果写入 `_index/runtime-capabilities.md`（`references/agent-software-adapters.md` 仅作样例对照）。需要自动 guard 时用 `python3 scripts/register_host_hooks.py --check` 查询注册状态，未注册且确认当前宿主可自动触发时再执行注册（`--host auto`，见 `references/hooks-and-evaluation.md` 第 2 节）。随后读取项目级 `project_memory`（如有）、`references/hooks-and-evaluation.md`、`references/evaluation-rubric.md` 和 `references/install-dependencies.md`，按目标模块验收外部依赖。缺失时停止路由，引导用户安装。项目规则缺少 paper-master 标记块时，按 `references/project-rules-writing-layer.md` 写入当前宿主**已有**的项目规则文件；确认没有宿主规则文件时才写 `paper-workspace/_index/project-rules.md`。
 1. 解析用户请求中的任务目标、研究主题、材料路径、目标期刊、方法偏好和阶段线索。
 2. 若用户提供路径，把路径登记到 `paper-workspace/_index/input-registry.md`。
-3. 读取 `master/routing-matrix.md` 选择主模块，并读取 `master/agent-orchestration.md`、`master/output-protocol.md` 与 `master/user-journey.md` 确定顾问派发强度、输出模式和用户层路径图。若显式 Team 请求，额外读取 `references/claude-team-config.md` 与 `references/team-routing.md`，先完成用户选择门槛。
+3. 读取 `master/routing-matrix.md` 选择主模块，并读取 `master/agent-orchestration.md`、`master/output-protocol.md` 与 `master/user-journey.md` 确定顾问派发强度、输出模式和用户层路径图。若显式 Team 请求，额外读取 `references/multiagent-team-config.md` 与 `references/team-routing.md`，先完成用户选择门槛。
 4. 读取对应模块入口和必要 phase/reference。
-5. 执行后更新 `_index/project-state.md`、`_index/handoff-status.md` 与 `_index/paper-roadmap.md`，登记 agent/Team 派发状态、关键风险、质量门控状态、不可声称内容、用户可理解的当前位置和下阶段建议。若模块执行过程中获得稳定用户选择，按 `project_memory` 规则写入当前宿主项目规则；Claude Code 可写入项目级 `CLAUDE.md`，OpenCode/Codex 缺少宿主规则文件时写入 `_index/project-rules.md`。
+5. 执行后更新 `_index/project-state.md`、`_index/handoff-status.md` 与 `_index/paper-roadmap.md`，登记 agent/Team 派发状态、关键风险、质量门控状态、不可声称内容、用户可理解的当前位置和下阶段建议。若模块执行过程中获得稳定用户选择，按 `project_memory` 规则写入当前宿主的项目规则文件标记块；没有宿主规则文件时写入 `_index/project-rules.md`。
 6. 运行 `python3 scripts/paper_master_guard.py score-project --workspace paper-workspace --json`，把 Rubric 分数、失败归因和修复建议写入 `_index/quality-score.md` 与 `_index/quality-score.json`。
 
 ## 4. 模块边界
@@ -84,7 +73,7 @@ mkdir -p paper-workspace/{00-meta,01-design,02-literature,03-outline,04-analysis
 
 ## 5. 参考文件
 
-`master/workspace-contract.md`、`master/routing-matrix.md`、`master/agent-orchestration.md`、`master/output-protocol.md`、`master/literature-review-protocol.md`、`master/user-journey.md`、`master/input-registry.md`、`master/handoff-checklists.md`、`references/runtime-adapter.md`、`references/agent-software-adapters.md`、`references/agent-registry.md`、`references/install-dependencies.md`、`references/hooks-and-evaluation.md`、`references/evaluation-rubric.md`、`references/ask-user-question-examples.md`、`references/claude-team-config.md`、`references/team-routing.md`、`references/claude-md-writing-layer.md`
+`master/workspace-contract.md`、`master/routing-matrix.md`、`master/agent-orchestration.md`、`master/output-protocol.md`、`master/literature-review-protocol.md`、`master/user-journey.md`、`master/input-registry.md`、`master/handoff-checklists.md`、`references/runtime-adapter.md`、`references/agent-software-adapters.md`、`references/agent-registry.md`、`references/install-dependencies.md`、`references/hooks-and-evaluation.md`、`references/evaluation-rubric.md`、`references/user-question-examples.md`、`references/multiagent-team-config.md`、`references/team-routing.md`、`references/project-rules-writing-layer.md`
 
 **项目内索引**（位于 `paper-workspace/_index/`）:
 - `agent-registry.md` — 智能体完整路径注册表（源自 `references/agent-registry.md`）
@@ -93,6 +82,7 @@ mkdir -p paper-workspace/{00-meta,01-design,02-literature,03-outline,04-analysis
 - `handoff-status.md` — 阶段交接状态
 - `paper-roadmap.md` — 用户层论文路径图、当前位置和下一步
 - `quality-score.md` / `quality-score.json` — Rubric 阶段质量分、全流程成熟度、失败归因和修复建议
-- `project-rules.md` — OpenCode/Codex 缺少宿主项目规则文件时的 `project_memory` 回退落点
+- `project-rules.md` — 当前宿主没有项目规则文件时的 `project_memory` 回退落点
+- `runtime-capabilities.md` — 本次会话的能力探测结果、宿主工具映射与缺失清单
 
 最终回复说明：论文路径图、当前位置、推荐下一步、需要用户决定的事项、路由模块、输入路径、输出位置、索引更新、guard 审计状态、质量分文件位置、阶段质量分、全流程成熟度和主要未通过项。

@@ -1,8 +1,7 @@
 ---
 name: paper-design-method-consultant
 description: 用于论文选题和研究设计阶段评估研究问题的可检验性、变量操作化、识别路径和资料可得性。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Method Consultant

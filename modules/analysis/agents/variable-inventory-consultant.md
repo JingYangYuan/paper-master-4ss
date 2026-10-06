@@ -1,8 +1,7 @@
 ---
 name: paper-analysis-variable-inventory-consultant
 description: 用于数据清洗前查找数据字段、变量标签、codebook、问卷和既有变量字典，生成候选变量清单。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Variable Inventory Consultant

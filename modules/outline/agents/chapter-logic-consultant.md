@@ -1,8 +1,7 @@
 ---
 name: paper-outline-chapter-logic-consultant
 description: 用于大纲质量复核时检查章节顺序、标题层级、论证递进和章节之间的承接关系。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Chapter Logic Consultant

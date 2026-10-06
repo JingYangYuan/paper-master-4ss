@@ -1,8 +1,7 @@
 ---
 name: paper-design-critical-review-consultant
 description: 用于跨学科头脑风暴和研究设计定稿前发现候选研究问题的致命缺陷、弱论证和不可执行环节。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Critical Review Consultant

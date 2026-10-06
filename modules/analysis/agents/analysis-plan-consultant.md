@@ -1,8 +1,7 @@
 ---
 name: paper-analysis-analysis-plan-consultant
 description: 用于回归前从 design、lit、outline、变量发现包和清洗报告中抽取完整分析蓝图与执行任务表。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Analysis Plan Consultant

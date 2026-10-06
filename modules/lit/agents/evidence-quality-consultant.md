@@ -1,8 +1,7 @@
 ---
 name: paper-lit-evidence-quality-consultant
 description: 用于文献综述和假设推导阶段评估证据等级、方法质量、结论稳健性和适用边界。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Evidence Quality Consultant

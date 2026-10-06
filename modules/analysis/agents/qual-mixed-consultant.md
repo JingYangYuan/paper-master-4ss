@@ -1,8 +1,7 @@
 ---
 name: paper-analysis-qual-mixed-consultant
 description: 用于质性编码、主题分析、内容分析、过程追踪和定量质性混合方法整合。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Qual Mixed Consultant

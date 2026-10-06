@@ -1,8 +1,7 @@
 ---
 name: paper-analysis-robustness-consultant
 description: 用于主回归和因果推断后复核稳健性检验、异质性检验、机制检验和安慰剂检验。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Robustness Consultant

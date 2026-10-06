@@ -1,8 +1,7 @@
 ---
 name: paper-update-review-gate-consultant
 description: 用于待审核更新包生成前复核来源、证据、目标位置、风险等级、self-update、验证命令、跨模块影响和 pending 状态。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Review Gate Consultant

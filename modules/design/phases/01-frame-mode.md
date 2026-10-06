@@ -26,12 +26,12 @@
 
 ### Step 1: 学科路由确认
 
-**Step 1a — WebSearch 关键词发散**：先使用 WebSearch 对研究主题进行至少 2 次搜索（学术概念视角 + 跨学科视角），从搜索结果中提取 5-10 个候选关键词，再筛选精简为 3-8 个最终检索关键词。筛选标准：优先学术概念词、覆盖至少 2 个学科视角、包含机制词和方法线索词。发散结果必须写入 process log。
+**Step 1a — `web_search` 关键词发散**：先使用 `web_search` 对研究主题进行至少 2 次搜索（学术概念视角 + 跨学科视角），从搜索结果中提取 5-10 个候选关键词，再筛选精简为 3-8 个最终检索关键词。筛选标准：优先学术概念词、覆盖至少 2 个学科视角、包含机制词和方法线索词。发散结果必须写入 process log。
 
-**Step 1b — Python frame 全文检索**：将 WebSearch 发散得到的关键词交给 `frame_locator.py`，在全部 14 个 frame 文件中做全文检索排序，确定主要学科、备选 frame 和建议精读行号区间。若用户已指定学科，也必须用脚本记录候选 frame、相关度分数和 `read_ranges`；若未指定，则根据脚本 Top 1-3 候选让主流程确认。
+**Step 1b — Python frame 全文检索**：将 `web_search` 发散得到的关键词交给 `frame_locator.py`，在全部 14 个 frame 文件中做全文检索排序，确定主要学科、备选 frame 和建议精读行号区间。若用户已指定学科，也必须用脚本记录候选 frame、相关度分数和 `read_ranges`；若未指定，则根据脚本 Top 1-3 候选让主流程确认。
 
 ```bash
-python3 scripts/frame_locator.py --topic "[研究主题]" --keywords "[WebSearch发散的关键词，用空格分隔]"
+python3 scripts/frame_locator.py --topic "[研究主题]" --keywords "[web_search发散的关键词，用空格分隔]"
 ```
 
 可选指定学科：
@@ -61,7 +61,7 @@ python3 scripts/frame_locator.py --topic "[研究主题]" --keywords "[AI提取�
 
 ### Step 2: 加载理论框架
 
-使用 Read 或 Bash 工具按 `frame_locator.py` 输出的 `read_ranges` 加载 Top 候选 frame 文件。两步加载策略:
+使用 `read_file`（或宿主等价的文件读取/按行读取能力；只提供 shell 时用 `run_shell` 读取指定行区间）按 `frame_locator.py` 输出的 `read_ranges` 加载 Top 候选 frame 文件。两步加载策略:
 
 1. **行号定位阅读**: 对每个 Top 候选 frame，先读取脚本返回的 3-8 个行号区间，建立候选理论条目索引。
 2. **必要扩展阅读**: 若行号区间缺少理论边界、竞争/替代理论、未解决问题或适用情境，再向相邻标题段落扩展阅读；不得在未读取 `read_ranges` 前直接整篇扫描 frame 文件。

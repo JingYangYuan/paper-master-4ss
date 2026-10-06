@@ -1,8 +1,7 @@
 ---
 name: paper-design-theory-consultant
 description: 用于论文选题、理论框架选择和跨学科头脑风暴中评估理论适配、机制链条和创新空间。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Theory Consultant

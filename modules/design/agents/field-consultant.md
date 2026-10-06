@@ -1,8 +1,7 @@
 ---
 name: paper-design-field-consultant
 description: 用于选题生成和研究设计阶段评估研究主题在具体学科领域中的文献位置、现实意义和领域贡献。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Field Consultant

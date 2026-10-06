@@ -1,8 +1,7 @@
 ---
 name: paper-update-purpose-routing-consultant
 description: 用于全包候选更新任务开始时区分学科知识、写作范式、方法协议、流程协议、工具模板、self-update 或 mixed，并确定候选更新路线。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Purpose Routing Consultant

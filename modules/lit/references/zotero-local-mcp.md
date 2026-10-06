@@ -98,7 +98,7 @@ MCP 工具不可用但 `zotero-cli` 可用时，可用 CLI 做等价操作（`zo
 
 ## 5. 摘要即时入库
 
-对每篇正式清单中相关度 H 或 M、且来自 CNKI / Scholar / WebSearch / 本地新发现的论文：抓取摘要后**立即**入库，禁止检索全部结束后批量补存。
+对每篇正式清单中相关度 H 或 M、且来自 CNKI / Scholar / `web_search` / 本地新发现的论文：抓取摘要后**立即**入库，禁止检索全部结束后批量补存。
 
 推荐调用：
 
@@ -194,7 +194,7 @@ flowchart LR
 
 ## 10. 不可替代规则
 
-- WebSearch、exa、顾问意见不得标记为 `Zotero MCP 正常`。
+- `web_search`、exa、顾问意见不得标记为 `Zotero MCP 正常`。
 - 空结果不是失败；连接错误、401/403、本地 API 未开启才是 `能力缺失`。
 - 本协议不改变 CNKI「浏览器控制 + Cookie/curl」下载铁律。
 - 无摘要条目不得因「已在 Zotero」而进入文献地图。

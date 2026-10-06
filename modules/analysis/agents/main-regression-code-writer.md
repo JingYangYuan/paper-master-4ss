@@ -1,8 +1,7 @@
 ---
 name: paper-analysis-main-regression-code-writer
 description: 用于根据 analysis-execution-plan 撰写描述统计、基准模型、主回归和基础诊断代码草案。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Main Regression Code Writer

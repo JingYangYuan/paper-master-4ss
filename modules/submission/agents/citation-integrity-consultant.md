@@ -1,8 +1,7 @@
 ---
 name: paper-submission-citation-integrity-consultant
 description: 用于投稿整备阶段复核正文引用、文后参考文献、题录缺口、GB/T 7714、APA 和中文社会学夹注体例一致性。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Citation Integrity Consultant

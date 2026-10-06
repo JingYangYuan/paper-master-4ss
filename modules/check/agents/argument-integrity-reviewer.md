@@ -1,9 +1,7 @@
 ---
 name: paper-check-argument-integrity-reviewer
 description: 问题—论点—证据—结构—结尾闭环与十六缺憾的独立顾问。
-tools:
-  - Read
-  - Grep
+capabilities: read_file, search_text
 ---
 
 # paper-check-argument-integrity-reviewer

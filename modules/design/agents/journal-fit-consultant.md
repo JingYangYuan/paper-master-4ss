@@ -1,8 +1,7 @@
 ---
 name: paper-design-journal-fit-consultant
 description: 用于选题与研究设计阶段评估候选研究问题和设计方案是否符合目标期刊或论文类型的风格。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Journal Fit Consultant

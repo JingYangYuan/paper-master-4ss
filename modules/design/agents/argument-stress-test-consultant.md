@@ -1,8 +1,7 @@
 ---
 name: paper-design-argument-stress-test-consultant
 description: 使用 Toulmin 框架压力测试中心主张、推理担保、限定语与反驳，不限定研究范式。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Argument Stress-Test Consultant

@@ -1,14 +1,9 @@
 ---
 name: paper-check-4ss
 description: 中文社会科学论文全流程审稿检查模块。用于全文审稿、投稿前自检、编辑视角评审、拒稿风险诊断和投稿命中率改进；诊断题目、摘要、结构、论证、诚信、技术规范与期刊适配，并将问题精确回流。
-user-invocable: true
-argument-hint: "[稿件路径] [可选: 目标期刊/投稿须知]"
-allowed-tools:
-  - Read
-  - Grep
-  - Write
-  - Edit
-  - Agent
+invocable: true
+args_hint: "[稿件路径] [可选: 目标期刊/投稿须知]"
+capabilities: read_file, search_text, write_file, spawn_agent
 ---
 
 # Paper Check 4SS

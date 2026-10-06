@@ -1,9 +1,7 @@
 ---
 name: paper-check-editorial-screening-reviewer
 description: 编辑首筛、创新可见度、题目/摘要/关键词/引言和期刊适配的独立顾问。
-tools:
-  - Read
-  - Grep
+capabilities: read_file, search_text
 ---
 
 # paper-check-editorial-screening-reviewer

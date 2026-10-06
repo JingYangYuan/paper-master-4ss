@@ -74,7 +74,7 @@ cat > "$SEARCH_LOG" << HEADER
 
 | 阶段/来源 | 用户选择 | 执行状态 | 说明 |
 |-----------|----------|----------|------|
-| WebSearch | 待确认 | 待执行 | 先行探路 |
+| web_search | 待确认 | 待执行 | 先行探路 |
 | 本地文献库 | 待确认 | 待执行 | Zotero/Mendeley/BibTeX/EndNote/PDF；可由用户暂缓 |
 | Zotero / Zotero MCP | 待确认 | 待执行 | 仅在保存题录/全文、本地库联动或读取附件全文时启用 |
 | Annual Reviews | 待确认 | 待执行 | 综述检查点 |
@@ -139,7 +139,7 @@ python3 modules/lit/scripts/literature_registry.py register \
 | `定向`、`聚焦`、`论文前言`、`targeted` | B | 4轮 | 15-30篇 | 1,000-3,000字 | 否 |
 | `快速`、`概览`、`初步`、`rapid` | C | 2轮 | 10-20篇 | 500-1,500字 | 否 |
 | `假设`、`hypothesis`、`推导` | D | 5轮+ | 30-60篇 | 2,000-5,000字 | 是 |
-| `知网`、`CNKI`、`中文` | E | CNKI 网页操纵为主；WebSearch 仅可做关键词准备 | 10-30篇 | 不写综述 | 否 |
+| `知网`、`CNKI`、`中文` | E | CNKI 网页操纵为主；`web_search` 仅可做关键词准备 | 10-30篇 | 不写综述 | 否 |
 
 **默认**：未检测到关键词时使用**模式A**。
 
@@ -162,7 +162,7 @@ python3 modules/lit/scripts/literature_registry.py register \
 
 确定搜索路线图前必须先 ask_user，询问本次是否启用以下阶段：
 
-1. WebSearch 先行探路
+1. `web_search` 先行探路
 2. 本地文献库 / 已有 PDF
 3. Zotero / Zotero MCP（保存题录、保存全文、读取附件全文时启用）
 4. Annual Reviews 综述检查点
@@ -170,13 +170,13 @@ python3 modules/lit/scripts/literature_registry.py register \
 6. CNKI 中文文献
 7. Google Scholar 英文文献
 
-结构化示例模块统一遵守 `references/ask-user-question-examples.md`。检索阶段预确认可使用以下示例：
+结构化示例模块统一遵守 `references/user-question-examples.md`。检索阶段预确认可使用以下示例：
 
 ```text
 question: "本次文献检索是否启用各阶段？CNKI 和 Google Scholar 不得默认跳过，Zotero 可按是否保存全文决定。"
 header: "检索阶段"
 options: [
-  {label: "在线全启用", description: "启用 WebSearch、Annual Reviews、引文链、CNKI 和 Google Scholar，Zotero 暂缓"},
+  {label: "在线全启用", description: "启用 web_search、Annual Reviews、引文链、CNKI 和 Google Scholar，Zotero 暂缓"},
   {label: "全部启用", description: "同时启用本地文献库和 Zotero/Zotero MCP，适合需要保存题录或全文的任务"},
   {label: "指定阶段", description: "用户逐项指定启用或暂缓的来源；CNKI/Scholar 只能由用户明确暂缓"}
 ]
@@ -187,7 +187,7 @@ options: [
 **状态记录规则**：
 
 - `已执行`：完成检索，且每篇拟纳入论文都有摘要或等价全文摘要信息。
-- `CNKI 已执行`：通过浏览器控制中的 CNKI（kns8s）网页完成专业检索/结果页/详情页摘要抓取；不得由 WebSearch、Google Scholar、普通搜索或代理结果替代。
+- `CNKI 已执行`：通过浏览器控制中的 CNKI（kns8s）网页完成专业检索/结果页/详情页摘要抓取；不得由 `web_search`、Google Scholar、普通搜索或代理结果替代。
 - `CNKI 页面未完成`：CNKI 页面加载、检索、详情页或摘要抓取未完成；不得写成 `已执行`。
 - `浏览器控制正常`：浏览器控制后端可列标签页/新建标签页/导航且检索页可达（ZCode 内置 browser-use；OMP pi-chrome 按 [pi-chrome-browser.md](modules/lit/references/pi-chrome-browser.md) §3 四项验收通过）；继续网页操纵。
 - `浏览器控制不可用`：工具抛错、无法列页/新建页/导航。立即停止 CNKI 阶段；ZCode 提示重启宿主会话，OMP 先 `/chrome doctor` 并重载伴生扩展；不得用其他来源替代 CNKI。
@@ -206,7 +206,7 @@ Step 0Q 选择启用 Zotero/Zotero MCP 后，在创建检索式或本地库搜�
 | 步骤 | 来源 | 模式A | 模式B | 模式C | 模式D | 模式E |
 |------|------|-------|-------|-------|-------|-------|
 | 0Q | ask_user：确认启用哪些检索阶段 | ✓ | ✓ | ✓ | ✓ | ✓ |
-| 1 | WebSearch 先行探路 | ✓ | ✓ | ✓ | ✓ | 可选 |
+| 1 | `web_search` 先行探路 | ✓ | ✓ | ✓ | ✓ | 可选 |
 | 1Q | ask_user：确认关键词/噪音/下一方向 | ✓ | ✓ | ✓ | ✓ | ✓ |
 | 2 | 知识图谱 | ✓ | ✓ | ✓ | ✓ | - |
 | 2Q | ask_user：确认理论/机制方向 | ✓ | ✓ | ✓ | ✓ | - |

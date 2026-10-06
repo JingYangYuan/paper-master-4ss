@@ -1,8 +1,7 @@
 ---
 name: paper-outline-structure-consultant
 description: 用于判断论文应采用毕业论文、期刊论文、实证、阐释、规范或文献综述结构。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Structure Consultant

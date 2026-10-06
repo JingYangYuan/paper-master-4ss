@@ -1,8 +1,7 @@
 ---
 name: paper-design-normative-argument-consultant
 description: 复核规范前提、原则冲突、反例和制度含义，不限定研究范式。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Normative Argument Consultant

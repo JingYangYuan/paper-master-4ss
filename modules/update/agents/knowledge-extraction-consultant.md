@@ -1,8 +1,7 @@
 ---
 name: paper-update-knowledge-extraction-consultant
 description: 用于从专著、教材、论文、课程材料、研究笔记、方法手册和工具日志中抽取理论、写作范式、方法协议、流程协议和工具模板候选项。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Knowledge Extraction Consultant

@@ -1,8 +1,7 @@
 ---
 name: paper-submission-format-check-consultant
 description: 用于投稿整备阶段复核 Word 导出、版式规范、模板适配、标题层级、摘要关键词、注释和附录格式风险。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Format Check Consultant

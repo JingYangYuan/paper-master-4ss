@@ -1,8 +1,7 @@
 ---
 name: paper-outline-gap-review-consultant
 description: 用于大纲定稿前复核章节缺口、材料缺口、论证缺口和后续写作风险。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Gap Review Consultant

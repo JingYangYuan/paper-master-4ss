@@ -17,7 +17,7 @@
 - 人工闸门（登录、验证码）由用户在可见浏览器中手动完成；自动化遇到闸门即停止询问。
 - 状态词表：`浏览器控制正常` / `浏览器控制不可用` / `浏览器页面未完成` / `CNKI 页面未完成` / `captcha_visible` / `captcha_preloaded_hidden` / `zero_results`。
 - 通用状态口径：每次检索动作记录 `status: "ok" | "zero_results" | "captcha" | "page_error"`，配合 `fallbackAction`。
-- 后端不可用时记录 `浏览器控制不可用`，停止 CNKI 阶段；不得用 WebSearch/Scholar/agents 冒充 CNKI 结果。
+- 后端不可用时记录 `浏览器控制不可用`，停止 CNKI 阶段；不得用 `web_search`/Scholar/agents 冒充 CNKI 结果。
 
 ---
 
@@ -322,7 +322,7 @@ Cookie 文本不得回传对话或写入日志。
 
 - 每段完成后向 `paper-workspace/_logs/process-log-lit-cnki-<日期>.md` 追加：时间、动作、后端（`ZCode` / `OMP pi-chrome` / `OMP eval`）、前置页、检索式/URL、status、命中/处理数、验证码状态、fallbackAction。人工点击的筛选在同表记「用户手动」并回读状态。
 - 三段全部完成才可写 `CNKI 已执行`；只完成①段写 `CNKI 检索已完成(仅题录)`。
-- 来源不可替代协议继续有效：CNKI 状态只能来自本协议的网页操纵结果，WebSearch/agents 只做关键词准备。
+- 来源不可替代协议继续有效：CNKI 状态只能来自本协议的网页操纵结果，`web_search`/agents 只做关键词准备。
 
 ## 7. 研究者确认点（overlay）
 

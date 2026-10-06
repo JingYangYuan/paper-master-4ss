@@ -93,7 +93,7 @@ rm -rf ~/.omp/plugins/node_modules/pi-chrome && omp install .
 | 4 | `chrome_evaluate`（**不带 targetId**）读 `location.href` | 返回 `about:blank` |
 
 四项全过 → 记录 `浏览器控制正常`，进入 CNKI 检索页。
-任一项失败 → 记录 `浏览器控制不可用`（含失败工具与错误文本），停止 CNKI 阶段；提示用户 `/chrome doctor`、检查伴生扩展是否启用、必要时 `/chrome authorize`。不得用 WebSearch/Scholar/顾问意见替代 CNKI 结果。
+任一项失败 → 记录 `浏览器控制不可用`（含失败工具与错误文本），停止 CNKI 阶段；提示用户 `/chrome doctor`、检查伴生扩展是否启用、必要时 `/chrome authorize`。不得用 `web_search`/Scholar/顾问意见替代 CNKI 结果。
 
 登录态检查（进入检索页后）：页头出现机构名（如"大学/学院名 + 手机号"）= 机构授权可用；未登录只能检索题录、不能下载全文，按闭环协议提示用户在可见标签中登录。
 

@@ -1,8 +1,7 @@
 ---
 name: paper-analysis-causal-robustness-code-writer
 description: 用于撰写 DiD、IV、RDD、PSM、面板、稳健性、异质性和安慰剂检验代码草案。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Causal Robustness Code Writer

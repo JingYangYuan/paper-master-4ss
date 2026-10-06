@@ -10,7 +10,7 @@
 文献识别
   本地Zotero/Mendeley搜索         → N₁ 条
   CNKI中文搜索                     → N_cnki 条
-  WebSearch多轮搜索                 → N₂ 条
+  web_search多轮搜索                 → N₂ 条
   Annual Reviews / 手册            → N₃ 条
   引文链扩展                       → N₄ 条
   总计识别                         → N₁+N_cnki+N₂+N₃+N₄
@@ -151,7 +151,7 @@ CNKI 正式检索默认且只默认专业检索页 `https://kns.cnki.net/starter
 
 ## 布尔搜索策略
 
-**适用范围**：本节布尔串主要用于 WebSearch、Google Scholar、Semantic Scholar、期刊站内搜索等支持自然布尔表达式的来源。CNKI 不得把这些检索式原样粘贴到基本检索框；CNKI 正式检索必须先转换为高级检索概念组。
+**适用范围**：本节布尔串主要用于 `web_search`、Google Scholar、Semantic Scholar、期刊站内搜索等支持自然布尔表达式的来源。CNKI 不得把这些检索式原样粘贴到基本检索框；CNKI 正式检索必须先转换为高级检索概念组。
 
 **基本结构**：
 ```
@@ -179,7 +179,7 @@ CNKI 的默认策略是“kns8s 专业检索 + 宽检索优先 + 概念组转换
 
 **默认入口**：CNKI 正式检索只默认 `https://kns.cnki.net/starter/advanced`（kns8s 专业检索）。基础检索框只允许单个自然短语、专名或站点可达性临时测试，不进入正式流程。
 
-**落地前置**：CNKI 概念组只是检索计划；真正执行前必须先完成浏览器控制可用性检查。检查未通过时，不得把概念组转换为专业检索式执行，不得把 WebSearch/Scholar 或 agent 输出写成 CNKI 结果。
+**落地前置**：CNKI 概念组只是检索计划；真正执行前必须先完成浏览器控制可用性检查。检查未通过时，不得把概念组转换为专业检索式执行，不得把 `web_search`/Scholar 或 agent 输出写成 CNKI 结果。
 
 | Web/Scholar 布尔意图 | CNKI 转换 |
 |---|---|
@@ -268,10 +268,10 @@ curl -s "https://api.crossref.org/works/$DOI" | python3 -m json.tool
 
 ## exa MCP 检索协议（英文文献首选通道，2026-09-05 实测修订）
 
-`web_search_exa` / `web_fetch_exa` 是英文文献检索的**主动首选**，不因 WebSearch 可用而跳过：
+`web_search_exa` / `web_fetch_exa` 是英文文献检索的**主动首选**，不因 `web_search` 可用而跳过：
 
-- **语义化查询**：exa 按页面语义而非关键词匹配，query 写成"理想文献描述"（如 `paper examining how government funding reshapes NGO autonomy in authoritarian China using resource dependence theory`），比布尔串命中更准；关键词布尔串留给 WebSearch。
-- **分工**：exa 负责（1）发现核心英文文献与其 OA 全文页，（2）`web_fetch_exa` 批量抓取摘要页/出版页内容（一次调用可传多个 URL，`maxCharacters` 设 3000–5000 拿摘要足够）；WebSearch 负责（1）中文内容与新闻线索，（2）交叉验证 exa 结果的引用数与年份。
+- **语义化查询**：exa 按页面语义而非关键词匹配，query 写成"理想文献描述"（如 `paper examining how government funding reshapes NGO autonomy in authoritarian China using resource dependence theory`），比布尔串命中更准；关键词布尔串留给 `web_search`。
+- **分工**：exa 负责（1）发现核心英文文献与其 OA 全文页，（2）`web_fetch_exa` 批量抓取摘要页/出版页内容（一次调用可传多个 URL，`maxCharacters` 设 3000–5000 拿摘要足够）；`web_search` 负责（1）中文内容与新闻线索，（2）交叉验证 exa 结果的引用数与年份。
 - **摘要铁律兼容**：exa fetch 返回的页面正文含摘要即视为【摘要已核】，来源记 `exa-fetch:<url>`。
-- **失败回退**：exa 超时/空结果时降级 WebSearch，并在搜索日志记录 `exa=不可用`；不得假装已用 exa。
+- **失败回退**：exa 超时/空结果时降级 `web_search`，并在搜索日志记录 `exa=不可用`；不得假装已用 exa。
 - 与 Step 9 衔接：exa fetch 抓到的 OA PDF 直链登记到 `paper-registry.csv` 对应条目的 `download_url`，再由 `download-plan` 子命令生成下载计划，走"外文 OA"下载路径。

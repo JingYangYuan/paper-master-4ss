@@ -1,8 +1,8 @@
 ---
 name: paper-submission-4ss
 description: 中文社会科学论文投稿文件整备模块。用于将 Markdown 成稿导出为 Word，按用户模板或内置社会学研究范式模板检查格式，整理正文引用与文后参考文献，生成投稿清单、cover letter 与 response letter。
-argument-hint: "[manuscript.md] [可选: --style sociological-research] [可选: --reference-doc template.docx]"
-user-invocable: true
+args_hint: "[manuscript.md] [可选: --style sociological-research] [可选: --reference-doc template.docx]"
+invocable: true
 ---
 
 # Paper Submission 4SS

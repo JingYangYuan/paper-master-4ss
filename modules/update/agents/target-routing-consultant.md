@@ -1,8 +1,7 @@
 ---
 name: paper-update-target-routing-consultant
 description: 用于读取 target registry 和模块 targets 文件，将候选更新项指向具体目标模块、目标面、目标文件和建议位置。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Target Routing Consultant

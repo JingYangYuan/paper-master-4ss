@@ -1,8 +1,7 @@
 ---
 name: paper-outline-evidence-map-consultant
 description: 用于大纲构建时把材料证据映射到章节论点，检查每个章节是否有足够支撑。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Evidence Map Consultant

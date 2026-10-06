@@ -1,8 +1,7 @@
 ---
 name: paper-outline-material-classification-consultant
 description: 用于大纲生成前将文献综述、设计方案、数据报告和用户材料归类到论文功能位置。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Material Classification Consultant

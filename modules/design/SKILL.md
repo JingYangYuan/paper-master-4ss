@@ -1,9 +1,9 @@
 ---
 name: paper-design-4ss
 description: 社会科学论文设计路由系统。保留 FRAME、STORM、DESIGN、FULL 的拆分版操作流程；模式确认后强制确认研究取向，并在原流程内支持实证、概念/解释理论、规范理论、思想史/文本阐释与混合设计。
-tools: Read, Bash, Write, WebSearch, WebFetch, Agent, Glob, Grep, ask_user
-argument-hint: "[frame|storm|design|full] [研究主题/关键词] [可选: 学科领域, 目标期刊, 数据来源] — e.g., 'storm 数字平台劳动治理' 或 'design 教育不平等 社会学 ASR' 或 'frame 公共管理 政策执行'"
-user-invocable: true
+capabilities: read_file, run_shell, write_file, web_search, web_fetch, spawn_agent, search_text, ask_user
+args_hint: "[frame|storm|design|full] [研究主题/关键词] [可选: 学科领域, 目标期刊, 数据来源] — e.g., 'storm 数字平台劳动治理' 或 'design 教育不平等 社会学 ASR' 或 'frame 公共管理 政策执行'"
+invocable: true
 ---
 
 # Paper Design 4SS: 社会科学论文设计路由系统
@@ -92,7 +92,7 @@ Agent 子进程运行在独立沙箱中，**无法直接访问本 skill 的 `fra
 
 解析完成后，按以下优先级使用 `ask_user` 工具向用户确认:
 
-结构化示例模块统一遵守 `references/ask-user-question-examples.md`；本节只保留 design 模块的局部业务选项。
+结构化示例模块统一遵守 `references/user-question-examples.md`；本节只保留 design 模块的局部业务选项。
 
 **Step 1 — 强制询问（研究主题缺失时）**
 
@@ -235,23 +235,23 @@ mkdir -p "${OUTPUT_ROOT}/01-design" "${OUTPUT_ROOT}/_logs"
 
 ## 第三层: 路由层
 
-### 3.0 WebSearch 关键词发散 + Python frame 全文检索
+### 3.0 `web_search` 关键词发散 + Python frame 全文检索
 
-模式确认和主题确认后，**必须使用 WebSearch 发散关键词**。关键词发散完成后，再交给 `frame_locator.py` 在全部 14 个 frame 文件中做全文检索排序。
+模式确认和主题确认后，**必须使用 `web_search` 能力发散关键词**（`web_search` 缺失时按 `references/runtime-adapter.md` 记录能力缺失并请用户提供关键词或改用可用检索来源，不得跳过发散步骤）。关键词发散完成后，再交给 `frame_locator.py` 在全部 14 个 frame 文件中做全文检索排序。
 
-#### Step 3.0a: WebSearch 关键词发散
+#### Step 3.0a: `web_search` 关键词发散
 
-对研究主题执行至少 2 次 WebSearch，从不同角度发散关键词：
+对研究主题执行至少 2 次搜索，从不同角度发散关键词（下面是**查询意图**，实际调用当前宿主的搜索工具，不要照抄为 shell 命令）：
 
-```bash
+```text
 # 搜索 1: 学术概念视角 — 该主题在社会科学中涉及哪些理论概念
-WebSearch “[研究主题] 理论框架 社会学 概念”
+query: "[研究主题] 理论框架 社会学 概念"
 
 # 搜索 2: 交叉学科视角 — 该主题跨越了哪些学科边界
-WebSearch “[研究主题] 跨学科 研究 综述”
+query: "[研究主题] 跨学科 研究 综述"
 
 # 搜索 3（可选）: 方法视角 — 该主题的典型研究方法
-WebSearch “[研究主题] 实证研究 方法 因果”
+query: "[研究主题] 实证研究 方法 因果"
 ```
 
 从搜索结果中提取 5-10 个候选关键词，再筛选精简为 **3-8 个最终检索关键词**。筛选标准：
@@ -261,34 +261,34 @@ WebSearch “[研究主题] 实证研究 方法 因果”
 - 关键词用空格分隔，支持中英文混合
 - 不得直接把完整研究题目原样当作唯一关键词
 
-**发散结果必须写入 process log**，记录：每次 WebSearch 的 query、提取的候选词、最终筛选结果及筛选理由。
+**发散结果必须写入 process log**，记录：每次 `web_search` 的 query、提取的候选词、最终筛选结果及筛选理由。
 
 #### Step 3.0b: Python frame 全文检索
 
-将 WebSearch 发散得到的关键词交给 `frame_locator.py`，在全部 14 个 frame 文件中做全文检索排序：
+将 `web_search` 发散得到的关键词交给 `frame_locator.py`，在全部 14 个 frame 文件中做全文检索排序：
 
 ```bash
-python3 scripts/frame_locator.py --topic “[研究主题]” --keywords “[WebSearch发散的关键词，用空格分隔]”
+python3 scripts/frame_locator.py --topic “[研究主题]” --keywords “[web_search发散的关键词，用空格分隔]”
 ```
 
 若用户指定学科，可追加（但**推荐先不加 discipline 做全库扫描**，仅在全库命中过多时才用 discipline 过滤）：
 
 ```bash
-python3 scripts/frame_locator.py --topic “[研究主题]” --keywords “[WebSearch发散的关键词]” --discipline “[学科key或中文名]”
+python3 scripts/frame_locator.py --topic “[研究主题]” --keywords “[web_search发散的关键词]” --discipline “[学科key或中文名]”
 ```
 
 **搜索策略建议**：
 1. **首轮必做**：不加 `--discipline` 全库扫描。若候选 frame ≥ 3 且最高分 ≥ 10，可直接进入 read_ranges。
-2. **分数过低时**（候选 < 3 或最高分 < 10）：重新 WebSearch 扩展关键词（加入同义词/英文对应词/机制词），再次全库扫描。
+2. **分数过低时**（候选 < 3 或最高分 < 10）：重新 `web_search` 扩展关键词（加入同义词/英文对应词/机制词），再次全库扫描。
 3. **命中过多时**（候选 > 10 个 frame 文件）：用 `--discipline` 限定学科。此时应在 process log 中记录被排除的学科及原因。
 4. **不论分数高低，脚本返回的 read_ranges 必须由主流程 Read 后得到实际内容，再注入到 agent prompt 中。**
 
-脚本输出必须写入 process log 或设计报告的”路由依据”部分，至少保留 WebSearch 发散关键词、候选 frame、相关度分数、命中词、建议精读行号区间和不确定性提示。该脚本只做初步定位；最终框架选择必须先按脚本给出的 `read_ranges` 行号区间读取候选 frame 内容，再由 design agents 复核。
+脚本输出必须写入 process log 或设计报告的”路由依据”部分，至少保留 `web_search` 发散关键词、候选 frame、相关度分数、命中词、建议精读行号区间和不确定性提示。该脚本只做初步定位；最终框架选择必须先按脚本给出的 `read_ranges` 行号区间读取候选 frame 内容，再由 design agents 复核。
 
 ### 3.1 全文检索路由
 
 ```
-研究主题 → WebSearch 发散 3-8 个关键词 → `frame_locator.py --keywords` 全文检索全部 14 个 frame/ → 候选 frame + read_ranges 排序 → 主流程确认 Top 1-3 学科 → 按行号读取相关区间 → 内容注入 agent prompt → design agents 复核
+研究主题 → web_search 发散 3-8 个关键词 → `frame_locator.py --keywords` 全文检索全部 14 个 frame/ → 候选 frame + read_ranges 排序 → 主流程确认 Top 1-3 学科 → 按行号读取相关区间 → 内容注入 agent prompt → design agents 复核
 ```
 
 读取 frame 时必须使用脚本返回的行号区间作为第一阅读入口，例如：
@@ -297,7 +297,7 @@ python3 scripts/frame_locator.py --topic “[研究主题]” --keywords “[Web
 sed -n '[start],[end]p' frame/theory-frameworks-[discipline].md
 ```
 
-只有当行号区间不足以解释理论边界、竞争理论或未解决问题时，才扩展阅读相邻区间或读取更多标题段落；不得在未运行 WebSearch 发散和 Python 全文检索前直接整篇扫描 frame 文件。
+只有当行号区间不足以解释理论边界、竞争理论或未解决问题时，才扩展阅读相邻区间或读取更多标题段落；不得在未运行 `web_search` 发散和 Python 全文检索前直接整篇扫描 frame 文件。
 
 **学科冗余度**: 公共管理—政治学 (高, 65%) 通常选其一；社会学—经济学 (低, 20%) 推荐组合；社会学—马克思主义 (中, 45%) 推荐组合；哲学—政治学 (高, 70%)；哲学—心理学 (中, 40%)；马克思主义—经济学 (高, 60%) 通常选其一；马克思主义—法学 (中, 50%) 推荐组合；法学—政治学 (高, 65%) 通常选其一；法学—哲学 (中, 45%)；新时代思想—马克思主义 (高, 70%) 推荐组合；新时代思想—公共管理 (中, 50%)；新时代思想—政治学 (高, 65%) 通常选其一；党史党建—马克思主义 (高, 70%) 推荐组合；党史党建—政治学 (高, 65%) 通常选其一；党史党建—新时代思想 (高, 75%) 推荐组合；国际政治—政治学 (高, 70%) 通常选其一；国际政治—经济学 (中, 40%) 推荐组合；国际政治—传播学 (中, 35%) 推荐组合；国际政治—法学 (中, 45%) 推荐组合；国际政治—社会学 (低, 25%) 推荐组合。
 

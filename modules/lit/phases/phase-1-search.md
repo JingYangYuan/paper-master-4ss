@@ -11,7 +11,7 @@
 ```
 Step 0a: 检索方向预确认             → ask_user 确认检索方向并映射中英文检索词
 Step 0Q: 检索阶段预确认             → ask_user 确认各阶段执行/暂缓
-Step 1: WebSearch 先行             → 识别关键词变体 + 核心文献 + 摘要总结
+Step 1: web_search 先行             → 识别关键词变体 + 核心文献 + 摘要总结
 Step 1Q: ask_user            → 确认关键词、噪音、下一步方向
 Step 2: 知识图谱（如有）            → 补充预提取的发现和关系
 Step 2Q: ask_user            → 确认理论、机制或人群方向
@@ -25,7 +25,7 @@ Step 6: CNKI/Scholar 可达性检查     → 两者都检查或记录用户明�
 Step 7: 浏览器控制最终精准补充     → 可达且未暂缓的 CNKI/Scholar 精准补缺口
 ```
 
-**核心逻辑**：先询问用户本次检索阶段是否全部启用；再用 WebSearch 摸清领域关键词和核心文献面貌；每完成一个搜索阶段，先让用户确认方向，避免无效堆积；再做本地匹配、综述检查和引文链；最后根据已确认的缺口，用 CNKI 和 Google Scholar 做精准补充。CNKI 和 Google Scholar 不再用于中段宽泛搜索，但不得被默认跳过。
+**核心逻辑**：先询问用户本次检索阶段是否全部启用；再用 `web_search` 摸清领域关键词和核心文献面貌；每完成一个搜索阶段，先让用户确认方向，避免无效堆积；再做本地匹配、综述检查和引文链；最后根据已确认的缺口，用 CNKI 和 Google Scholar 做精准补充。CNKI 和 Google Scholar 不再用于中段宽泛搜索，但不得被默认跳过。
 
 ## Step 0a：检索方向预确认（强制第一步）
 
@@ -51,7 +51,7 @@ options: [
 
 任何检索开始前，必须先调用 ask_user，询问本次是否启用以下阶段：
 
-1. WebSearch 先行探路
+1. `web_search` 先行探路
 2. 本地文献库 / 已有 PDF
 3. Zotero / Zotero MCP（保存题录、保存全文、读取附件全文时启用）
 4. Annual Reviews 综述检查点
@@ -67,13 +67,13 @@ options: [
 
 ### 开场问询模板
 
-结构化示例模块统一遵守 `references/ask-user-question-examples.md`。0Q 可使用以下 ask_user 示例：
+结构化示例模块统一遵守 `references/user-question-examples.md`。0Q 可使用以下 ask_user 示例：
 
 ```text
 question: "本次文献检索阶段如何安排？CNKI 和 Google Scholar 不得默认跳过，Zotero 可按是否保存全文决定。"
 header: "检索阶段"
 options: [
-  {label: "在线全启用", description: "启用 WebSearch、Annual Reviews、引文链、CNKI 和 Google Scholar，Zotero 暂缓"},
+  {label: "在线全启用", description: "启用 web_search、Annual Reviews、引文链、CNKI 和 Google Scholar，Zotero 暂缓"},
   {label: "全部启用", description: "同时启用本地文献库和 Zotero/Zotero MCP，适合保存题录、全文或读取附件"},
   {label: "指定阶段", description: "用户逐项指定启用或暂缓的来源；CNKI/Scholar 只能由用户明确暂缓"}
 ]
@@ -81,7 +81,7 @@ options: [
 
 ```
 本次文献检索将分阶段进行，避免无效堆积。请确认启用哪些阶段：
-- WebSearch：先摸清关键词、核心文献和摘要
+- web_search：先摸清关键词、核心文献和摘要
 - 本地文献库：检查已有文献/PDF；不使用本地库时可暂缓
 - Zotero/Zotero MCP：保存题录/全文、读取 Zotero 附件全文；不保存全文时可暂缓
 - Annual Reviews：检查经典综述脉络
@@ -168,11 +168,11 @@ paper-workspace/02-literature/stage-syntheses.md
 
 **Zotero 摘要存储约束**：每篇进入正式论文清单且相关度为 H 或 M 的论文，必须在抓取摘要后立即尝试存入 Zotero，保存内容必须包含 `abstractNote` 或等价摘要字段。当前宿主若暴露 Zotero MCP，则优先使用 Zotero MCP；若只有 Zotero Connector 或本地导出能力，则记录连接器保存状态；若 Zotero 不可用，写入 `paper-workspace/02-literature/abstracts-pending-zotero.md`，并在搜索日志中记录 `Zotero 不可用，摘要未保存`。不得等检索结束后再批量补存摘要。
 
-**浏览器控制可用性硬约束**：进入任何 CNKI 检索动作前，必须先完成 Step 6.0 的浏览器控制可用性检查：浏览器控制可列标签页/新建标签页/导航，能打开 `about:blank` 或 CNKI 首页并读取轻量页面状态。ZCode 用内置 browser-use；OMP 用 pi-chrome，四项验收命令与通过标准见 [pi-chrome-browser.md](references/pi-chrome-browser.md) §3。检查未通过时，不得进入 CNKI 检索页、不得执行任何 CNKI 页面脚本、不得写 `CNKI 已执行`。后端不可用时记录 `浏览器控制不可用`，停止 CNKI 阶段并按后端对应章节恢复（ZCode 提示重启宿主会话；OMP 先 `/chrome doctor` 并重载伴生扩展）；不得 kill 进程、不得用 WebSearch、Google Scholar、普通搜索、`cnki-researcher` 或 lit agents 替代 CNKI 检索结果。CNKI 需要登录、验证码或人工确认时，在用户可见的浏览器中完成。
+**浏览器控制可用性硬约束**：进入任何 CNKI 检索动作前，必须先完成 Step 6.0 的浏览器控制可用性检查：浏览器控制可列标签页/新建标签页/导航，能打开 `about:blank` 或 CNKI 首页并读取轻量页面状态。ZCode 用内置 browser-use；OMP 用 pi-chrome，四项验收命令与通过标准见 [pi-chrome-browser.md](references/pi-chrome-browser.md) §3。检查未通过时，不得进入 CNKI 检索页、不得执行任何 CNKI 页面脚本、不得写 `CNKI 已执行`。后端不可用时记录 `浏览器控制不可用`，停止 CNKI 阶段并按后端对应章节恢复（ZCode 提示重启宿主会话；OMP 先 `/chrome doctor` 并重载伴生扩展）；不得 kill 进程、不得用 `web_search`、Google Scholar、普通搜索、`cnki-researcher` 或 lit agents 替代 CNKI 检索结果。CNKI 需要登录、验证码或人工确认时，在用户可见的浏览器中完成。
 
 ---
 
-## Step 1：WebSearch 先行探路（所有模式）
+## Step 1：`web_search` 先行探路（所有模式）
 
 **目的**：快速识别领域核心关键词（含同义词/中英对照）、找到 5-10 篇核心文献、对摘要进行初步总结。为后续搜索提供方向校准。
 
@@ -204,7 +204,7 @@ paper-workspace/02-literature/stage-syntheses.md
 
 ### 1c. 摘要总结
 
-对前 5-10 篇高相关度论文，使用 WebFetch 获取摘要或全文信息。凡无法获得摘要的论文，只能列入待核验，不得进入种子论文。产出：
+对前 5-10 篇高相关度论文，使用 `web_fetch` 获取摘要或全文信息。凡无法获得摘要的论文，只能列入待核验，不得进入种子论文。产出：
 
 - **领域共识**：2-3 句话总结该领域已确立的发现
 - **核心争论**：1-2 个主要争议点
@@ -215,13 +215,13 @@ paper-workspace/02-literature/stage-syntheses.md
 **每次搜索后立即追加日志：**
 ```bash
 cat >> "$SEARCH_LOG" << ROW
-| [序号] | WebSearch | [精确检索式] | [返回数] | [有摘要保留数/待核验数] | [作者 年份; 摘要要点; 核心发现] |
+| [序号] | web_search | [精确检索式] | [返回数] | [有摘要保留数/待核验数] | [作者 年份; 摘要要点; 核心发现] |
 ROW
 ```
 
 ### 1Q. 用户方向确认
 
-完成 WebSearch 后必须 ask_user。重点让用户确认：
+完成 `web_search` 后必须 ask_user。重点让用户确认：
 
 - 哪些关键词是有效方向；
 - 哪些论文/子领域明显偏题；

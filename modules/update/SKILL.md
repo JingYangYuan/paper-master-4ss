@@ -1,7 +1,7 @@
 ---
 name: paper-update-4ss
 description: 社会科学论文技能包全包候选更新系统。用于从学术专著、教材、期刊论文、综述、课程材料、研究笔记、方法手册和本地经验中生成待人工审核的更新包，可指向 design、lit、outline、analysis、write、check、submission 与 update 自身。只输出到 paper-workspace/07-update/，不得直接修改任何核心模块文件。
-argument-hint: "[discipline-knowledge|writing-paradigm|method-protocol|workflow-protocol|tooling-template|self-update|mixed] [输入路径或主题] [可选: 目标模块, 目标文件, 目标期刊]"
+args_hint: "[discipline-knowledge|writing-paradigm|method-protocol|workflow-protocol|tooling-template|self-update|mixed] [输入路径或主题] [可选: 目标模块, 目标文件, 目标期刊]"
 ---
 
 # Paper Update 4SS

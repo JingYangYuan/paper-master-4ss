@@ -66,18 +66,29 @@ MASTER_FILES = [
 GOVERNANCE_REFS = [
     "agent-registry.md",
     "agent-software-adapters.md",
-    "ask-user-question-examples.md",
-    "claude-team-config.md",
-    "claude-md-writing-layer.md",
+    "user-question-examples.md",
+    "multiagent-team-config.md",
+    "project-rules-writing-layer.md",
     "evaluation-rubric.md",
     "hooks-and-evaluation.md",
     "install-dependencies.md",
     "runtime-adapter.md",
     "team-routing.md",
 ]
-SCRIPT_FILES = ["paper_master_guard.py", "register_zcode_hooks.py"]
+SCRIPT_FILES = ["paper_master_guard.py", "register_zcode_hooks.py", "register_host_hooks.py"]
 TEXT_SUFFIXES = {".md", ".py", ".do", ".R", ".sh", ".js", ".json"}
 SKIP_NAMES = {".env.kie", ".DS_Store"}
+
+# 宿主专属 frontmatter 键（Claude Code 兼容键）。总控包已不声明它们；
+# 导出时作为保险丝剥离，避免独立包继承宿主绑定。
+HOST_ONLY_FRONTMATTER_KEYS = {
+    "hooks",
+    "allowed-tools",
+    "tools",
+    "model",
+    "user-invocable",
+    "argument-hint",
+}
 
 CHECK_PREFIXES = [
     "references/",
@@ -93,6 +104,9 @@ CHECK_PREFIXES = [
     "examples/",
 ]
 
+# 这些脚本本身就在生成/校验其他仓与宿主配置路径，命中相对路径模式属误报。
+CHECK_SKIP_SCRIPTS = {"scripts/export_pi_chrome_repo.py"}
+
 # 随包分发的第三方依赖快照：不是本 skill 的文档，其自带 NEWS/README 会误触相对路径检查。
 VENDORED_PREFIXES = [
     "templates/_shared/stata-ado/",
@@ -106,6 +120,11 @@ NOTE_TEMPLATE = (
     "（`agents/`、`phases/`、`references/`、`master/` 等）相对本包根目录解析；跨模块路径 "
     "`paper-master-4ss/modules/<x>/...` 相对同级安装的 `paper-master-4ss/` 总控包解析。"
     "请勿直接编辑本包：修改总控模块后重新导出。\n"
+    ">\n"
+    "> **宿主无关约定**：本包不预设宿主，也不在 frontmatter 声明 `tools`/`hooks`/`model` 等"
+    "宿主专属键。启动时按 `references/runtime-adapter.md` §5 探测当前环境可用能力，"
+    "再按通用能力名（`read_file`、`search_text`、`web_search`、`run_shell`、`spawn_agent` 等）"
+    "执行；宿主样例见 `references/agent-software-adapters.md`（样例，非名单）。\n"
 )
 
 README_TEMPLATE = """{banner}# Paper {title} 4SS
@@ -196,7 +215,7 @@ Zotero 是可选增强。启用后按 `references/zotero-local-mcp.md` 做能力
 | D 综述+假设 | 5 轮以上，含假设推导 |
 | E 知网专项 | CNKI kns8s 闭环为主 |
 
-CNKI 依赖可见浏览器控制，后端二选一：ZCode 内置 browser-use（无需安装），或 OMP pi-chrome（一次性加载伴生 Chrome 扩展，见 `references/pi-chrome-browser.md`）。Google Scholar 用 WebFetch/WebSearch。
+CNKI 依赖可见浏览器控制（`browser_control`）：后端按宿主选取，常见样例为 ZCode 内置 browser-use（无需安装）与 OMP pi-chrome（一次性加载伴生 Chrome 扩展，见 `references/pi-chrome-browser.md`）。Google Scholar 检索用 `web_fetch`/`web_search` 能力。
 
 OMP 后端的插件本体与适配文档在同一发行仓：<https://github.com/JingYangYuan/pi-chrome-mirror>（由本包 `scripts/export_pi_chrome_repo.py` 同步导出，含完整插件与伴生扩展）。
 """,
@@ -299,7 +318,41 @@ def rewrite_paths(text: str, module: str) -> str:
     return text
 
 
+def strip_host_frontmatter(text: str) -> str:
+    """删除 frontmatter 中的宿主专属键（Claude Code 兼容键）。
+
+    总控包已不含这些键；这里是导出侧的保险丝：即使有人手工加回，
+    独立包也不会带着宿主专属 frontmatter 发布。
+    """
+    lines = text.splitlines(keepends=True)
+    if not lines or lines[0].strip() != "---":
+        return text
+    end = None
+    for i in range(1, len(lines)):
+        if lines[i].strip() == "---":
+            end = i
+            break
+    if end is None:
+        return text
+    kept: list[str] = [lines[0]]
+    dropping = False
+    for line in lines[1:end]:
+        if dropping:
+            # YAML 列表续行（以 - 开头且缩进）
+            if line[:1] in (" ", "\t") and line.lstrip().startswith("- "):
+                continue
+            dropping = False
+        m = re.match(r"^([A-Za-z][A-Za-z0-9_-]*)\s*:", line)
+        if m and m.group(1) in HOST_ONLY_FRONTMATTER_KEYS:
+            dropping = True
+            continue
+        kept.append(line)
+    kept.extend(lines[end:])
+    return "".join(kept)
+
+
 def insert_note(text: str, module: str) -> str:
+    text = strip_host_frontmatter(text)
     if "拆分版路径约定" in text:
         return text
     lines = text.splitlines(keepends=True)
@@ -352,8 +405,19 @@ def check_package(target: Path) -> list[str]:
         # 其自带的 NEWS/README 会命中本检查器的相对路径模式，属误报，整体跳过。
         if VENDORED_PREFIXES and any(str(rel).startswith(p) for p in VENDORED_PREFIXES):
             continue
+        # 宿主 hook 注册器内嵌各宿主的项目级配置路径（`.agents/hooks.json` 等），不是包内引用
+        if str(rel) == "scripts/register_host_hooks.py":
+            continue
         text = read_text(item)
-        for raw in re.findall(r"[A-Za-z0-9_*][A-Za-z0-9_./*-]*", text):
+        # 宿主专属 frontmatter 保险丝：独立包不得携带 Claude Code 兼容键
+        if item.suffix == ".md":
+            parts = text.split("---", 2)
+            if len(parts) >= 3 and parts[0].strip() == "":
+                for line in parts[1].splitlines():
+                    m = re.match(r"^([A-Za-z][A-Za-z0-9_-]*)\s*:", line)
+                    if m and m.group(1) in HOST_ONLY_FRONTMATTER_KEYS:
+                        broken.append(f"{rel}: frontmatter 含宿主专属键 {m.group(1)}:")
+        for raw in re.findall(r"(?<!\.)[A-Za-z0-9_*][A-Za-z0-9_./*-]*", text):
             token = raw.rstrip("./-")
             if not token or token.endswith(".") or token.endswith("/"):
                 continue
@@ -362,7 +426,8 @@ def check_package(target: Path) -> list[str]:
             if token.endswith(".env.kie"):
                 continue
             stem = token.split("*")[0].rstrip("/")
-            if not stem or stem == "scripts/export_pi_chrome_repo.py":
+            # 这些脚本本身就在生成/校验其他仓与宿主配置路径（如 .agents/hooks.json），不是包内相对路径
+            if not stem or stem in CHECK_SKIP_SCRIPTS:
                 continue
             candidates = [target / stem, item.parent / stem]
             if any(c.exists() for c in candidates):

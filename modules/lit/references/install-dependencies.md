@@ -10,7 +10,7 @@
 | 文献库联动 | 需要检查已有文献、去重、导入题录 | 浏览器控制后端 + Zotero Desktop/Connector | 启用 Zotero |
 | 全文保存/深读 | 需要保存 PDF、读取 Zotero 附件全文 | 浏览器控制后端 + Zotero Desktop/Connector + Zotero MCP | 启用 Zotero MCP |
 
-**选择铁律**：Phase 0/Step 0Q 必须询问用户是否启用 Zotero 和 Zotero MCP。用户不想保存全文或不使用本地库时，不得强制安装 Zotero；把本地文献库阶段记录为 `用户明确暂缓`，继续执行 WebSearch、CNKI、Google Scholar 和摘要核验。
+**选择铁律**：Phase 0/Step 0Q 必须询问用户是否启用 Zotero 和 Zotero MCP。用户不想保存全文或不使用本地库时，不得强制安装 Zotero；把本地文献库阶段记录为 `用户明确暂缓`，继续执行 `web_search`、CNKI、Google Scholar 和摘要核验。
 
 ## 强制依赖：浏览器控制（后端二选一）
 
@@ -47,12 +47,12 @@ chrome://extensions → 开发者模式 → 加载已解压的扩展程序 → �
 状态词表：
 
 - `浏览器控制正常`：可列页/新建页/导航且检索页可达。
-- `浏览器控制不可用`：工具抛错、无法列页/新建页/导航；停止 CNKI 阶段（ZCode 提示重启宿主会话；OMP 先 `/chrome doctor` 并重载伴生扩展），不得用 WebSearch/Scholar 替代。
+- `浏览器控制不可用`：工具抛错、无法列页/新建页/导航；停止 CNKI 阶段（ZCode 提示重启宿主会话；OMP 先 `/chrome doctor` 并重载伴生扩展），不得用 `web_search`/Scholar 替代。
 - `浏览器页面未完成` / `CNKI 页面未完成`：页面加载未完成或选择器失配；重试一次后仍失败即停止并记录。
 
 验证码与下载约定：验证码出现时停止自动化并请用户在可见浏览器中手动拖动完成（OMP 下用户切到 `Pi Session:` 分组标签）；PDF 下载不走浏览器下载管线（必弹 Save-As），使用 `modules/lit/scripts/cnki/kns8s-download.sh`（Cookie + curl）免弹窗下载；Cookie 获取 OMP 走回环 sink（`modules/lit/scripts/cnki/cookie_sink.py`），不得经对话回传。完整协议见 [cnki-kns8s-closed-loop.md](cnki-kns8s-closed-loop.md)。
 
-Google Scholar 阶段无需浏览器，用 WebFetch/WebSearch 直接访问即可。
+Google Scholar 阶段无需浏览器，用 `web_fetch`/`web_search` 直接访问即可。
 
 ## PDF 归档校验
 
@@ -117,11 +117,7 @@ zotero-cli --json config
 
 ### MCP 客户端配置
 
-常见配置文件：
-
-- Oh My Pi (OMP)：`~/.omp/agent/mcp.json`
-- Claude Desktop：macOS `~/Library/Application Support/Claude/claude_desktop_config.json`；Windows `%APPDATA%\Claude\claude_desktop_config.json`
-- Cursor：项目或用户 `.cursor/mcp.json`
+MCP 客户端的配置文件位置随宿主而异，**不要写死某一家**：按当前宿主文档找到其 MCP 配置入口（常见的用户级/项目级配置文件名如 `mcp.json`、`mcpServers` 节点），把下面的 `mcpServers` 片段合并进去。已知宿主样例（非名单）：Oh My Pi (OMP) 为 `~/.omp/agent/mcp.json`；Claude Desktop 为 macOS `~/Library/Application Support/Claude/claude_desktop_config.json`、Windows `%APPDATA%\Claude\claude_desktop_config.json`；Cursor 为项目或用户 `.cursor/mcp.json`。宿主没有 MCP 机制时记录 `zotero=能力缺失` 并回退 `paper-registry.csv`。
 
 ```json
 {
@@ -205,4 +201,4 @@ python3 modules/lit/scripts/cnki/cookie_sink.py --help
 - 如用户选择 Zotero：Zotero Desktop/Connector 可保存测试文献。
 - 如用户选择 Zotero MCP：所选 Zotero MCP 实现可完成条目检索、元数据读取；需要全文深读时还要能读取附件全文。
 
-未通过浏览器控制可用性检查时，不得正式检索 CNKI。CNKI 阶段不得由 WebSearch、Google Scholar、普通网页搜索或代理替代。未通过 Zotero/Zotero MCP 验收时，只影响本地库和全文保存阶段，不影响在线检索与摘要核验。
+未通过浏览器控制可用性检查时，不得正式检索 CNKI。CNKI 阶段不得由 `web_search`、Google Scholar、普通网页搜索或代理替代。未通过 Zotero/Zotero MCP 验收时，只影响本地库和全文保存阶段，不影响在线检索与摘要核验。

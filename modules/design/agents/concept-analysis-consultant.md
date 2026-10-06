@@ -1,8 +1,7 @@
 ---
 name: paper-design-concept-analysis-consultant
 description: 复核概念定义、边界、相邻概念和概念贡献，不限定研究范式。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Concept Analysis Consultant

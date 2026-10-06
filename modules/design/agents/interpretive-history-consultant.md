@@ -1,8 +1,7 @@
 ---
 name: paper-design-interpretive-history-consultant
 description: 复核文本材料、历史语境、理论谱系和竞争诠释，不限定研究范式。
-model: inherit
-tools: Read, Grep
+capabilities: read_file, search_text
 ---
 
 # Interpretive History Consultant
