@@ -4,139 +4,122 @@
 
 # Paper Master 4SS
 
-中文社会科学论文的总控 skill。它登记你给出的材料路径，判断当前该走哪一步，再路由到内部模块：研究设计、文献综述、大纲、数据分析、学术机制图、写作、全流程审稿检查、投稿。产物统一写进项目里的 `paper-workspace/`。
+中文社会科学论文全流程总控工作流。用于登记任意位置的输入材料、判断当前所处阶段，并调度内部自包含模块（研究设计、文献综述、论文大纲、数据与质性分析、学术机制图、正文写作与润色、全文审稿检查、投稿整备），将所有产物统一归档至 `paper-workspace/`。
 
-适用场景：不知道下一步、想整理论文项目状态，或要把设计—文献—大纲—分析—写作—审稿—投稿串成一条可交接的流程。
+适用场景：明确当前论文阶段与下一步任务、整理分散的论文项目状态，或串联「设计—文献—大纲—分析—制图—写作—审稿—投稿」全流程。
 
 ## 4SS 家族
 
-本仓库是**单一事实源**。九个业务模块可以单独安装，也可以只装总控（内部已自包含）。独立包由 `scripts/export_standalone.py` 导出，不要直接改独立仓库。
+本仓库为各模块唯一的源仓库。九个业务模块既可内置于总控包统一使用，也可通过 `scripts/export_standalone.py` 导出为独立仓库单独安装（请勿直接修改独立导出仓库）。
 
-| 包 | 职责 | 默认输出 |
+| 模块包 | 职责 | 默认输出目录 |
 |---|---|---|
-| **[paper-master-4ss](https://github.com/JingYangYuan/paper-master-4ss)** | 登记输入、选模块、维护索引与质量分 | `paper-workspace/_index/` |
-| [paper-design-4ss](https://github.com/JingYangYuan/paper-design-4ss) | 选题、框架路由、研究设计蓝图 | `01-design/` |
-| [paper-lit-4ss](https://github.com/JingYangYuan/paper-lit-4ss) | 中英文检索、文献地图、空白与假设 | `02-literature/` |
-| [paper-outline-4ss](https://github.com/JingYangYuan/paper-outline-4ss) | 素材转大纲、证据映射、缺口报告 | `03-outline/` |
-| [paper-analysis-4ss](https://github.com/JingYangYuan/paper-analysis-4ss) | 定量 / 质性 / 混合，Stata · R · Python | `04-analysis/` |
-| [paper-write-4ss](https://github.com/JingYangYuan/paper-write-4ss) | 章节写作、润色、语言扫描、正文净稿 | `05-writing/` |
-| [paper-check-4ss](https://github.com/JingYangYuan/paper-check-4ss) | 全文审稿、质量门控、问题矩阵与精确回流 | `05-writing/reviews/` |
-| [paper-submission-4ss](https://github.com/JingYangYuan/paper-submission-4ss) | Word 导出、体例、投稿清单与信函 | `06-submission/` |
-| [paper-mechanigraph-4ss](https://github.com/JingYangYuan/paper-mechanigraph-4ss) | 纯矢量学术机制图生成、拓扑匹配与视觉自检 | `paper-workspace/figures/` |
-| [paper-update-4ss](https://github.com/JingYangYuan/paper-update-4ss) | 待审核更新包，不直接改核心文件 | `07-update/` |
+| **[paper-master-4ss](https://github.com/JingYangYuan/paper-master-4ss)** | 输入登记、模块路由、索引维护与质量评分 | `paper-workspace/_index/` |
+| [paper-design-4ss](https://github.com/JingYangYuan/paper-design-4ss) | 选题定位、理论框架路由与研究设计蓝图 | `01-design/` |
+| [paper-lit-4ss](https://github.com/JingYangYuan/paper-lit-4ss) | 中英文检索、文献地图、空白识别与假设推导 | `02-literature/` |
+| [paper-outline-4ss](https://github.com/JingYangYuan/paper-outline-4ss) | 材料扫描、大纲构建、证据映射与缺口报告 | `03-outline/` |
+| [paper-analysis-4ss](https://github.com/JingYangYuan/paper-analysis-4ss) | 定量 / 质性 / 混合方法分析（Stata · R · Python） | `04-analysis/` |
+| [paper-write-4ss](https://github.com/JingYangYuan/paper-write-4ss) | 章节起草、润色改写、语言扫描与正文净稿 | `05-writing/` |
+| [paper-check-4ss](https://github.com/JingYangYuan/paper-check-4ss) | 全文审稿、交付前复核、问题矩阵与问题退回 | `05-writing/reviews/` |
+| [paper-submission-4ss](https://github.com/JingYangYuan/paper-submission-4ss) | Word 导出、体例核查、投稿清单与说明信函 | `06-submission/` |
+| [paper-mechanigraph-4ss](https://github.com/JingYangYuan/paper-mechanigraph-4ss) | 纯矢量学术机制图生成、拓扑匹配与渲染自检 | `paper-workspace/figures/` |
+| [paper-update-4ss](https://github.com/JingYangYuan/paper-update-4ss) | 生成待人工审核的更新包，不直接修改核心文件 | `07-update/` |
 
-用户层路径：
+标准用户流程：
 
 ```text
-定位选题 → 文献定位 → 结构成型 → 分析/材料验证（按需） → 正文写作 → 审稿质量门 → 投稿整备
+定位选题 -> 文献定位 -> 结构成型 -> 分析/材料验证（按需） -> 正文写作 -> 审稿复核 -> 投稿整备
 ```
 
-`analysis` 只在设计蓝图标明需要经验验证时进入。理论、规范或阐释路径从大纲直接进写作。
+仅当设计报告明确需要经验验证（`analysis_required: true`）时进入 `analysis`；理论、规范或阐释类研究从大纲直接进入写作。
 
-## 安装
+## 安装与初始化
 
-把本目录放到宿主的 skill 目录后即可调用。入口是 `SKILL.md`。
+将本仓库放置于所用 Agent 软件的 skills 目录，入口文件为 `SKILL.md`：
 
 ```bash
 git clone https://github.com/JingYangYuan/paper-master-4ss.git
 ```
 
-落点就是**你的宿主的 skill/skills 目录**（例如 Claude Code 兼容层的 skills 目录、其他 agent 软件的 skill 目录或 skills-manager 的符号链接方案）。具体路径以宿主文档为准；本包不绑定任何单一宿主。
-
-首次在某个论文项目里使用时，先建工作区：
+在论文项目根目录首次使用时，初始化输出工作区：
 
 ```bash
 mkdir -p paper-workspace/{00-meta,01-design,02-literature,03-outline,04-analysis,05-writing,05-writing/reviews,06-submission,07-update,figures,_logs,_logs/hook-audit,_index}
 ```
 
-依赖按目标模块验收，说明见 `references/install-dependencies.md`。缺依赖时停止路由，不假装已经跑通。
+### 模块外部依赖
+
+总控在路由前会检查目标模块的外部依赖（详见 `references/install-dependencies.md`），缺依赖时中止执行并提示安装：
 
 | 模块 | 外部依赖 |
 |---|---|
-| design / outline / update | 无强制外部依赖 |
-| lit | CNKI 需要可见浏览器控制；Zotero MCP 可选 |
-| analysis | 按所选语言：Stata / R / Python |
-| write | Python 3（扫描脚本） |
-| check | 无强制外部依赖 |
-| mechanigraph | Python 3；Google Chrome / Chromium（无头渲染 PNG 自检可选，支持无浏览器降级） |
-| submission | pandoc（Markdown → Word） |
+| design / outline / update / check | 无强制外部依赖 |
+| lit | 检索 CNKI 须具备可见浏览器控制能力（`ego-browser`）；Zotero MCP 为可选增强 |
+| analysis | 按选用语言配置 Stata / R / Python 环境（机器学习模式默认 Python） |
+| write | Python 3（运行扫描与复杂度分析脚本） |
+| mechanigraph | Python 3；Google Chrome / Chromium（用于无头渲染 PNG 自检，缺失时仍可生成 SVG） |
+| submission | Python 3；`pandoc`（Word 导出）；`python-docx`、`lxml`（格式校验） |
 
-## 它怎么工作
+## 工作机制
 
-总控只做三件事：登记材料、选择一个主模块、把交接写进索引。
+1. **能力探测**：读取 `references/runtime-adapter.md` §5，检测当前运行环境可用工具并映射为通用能力。
+2. **路由与编排**：读取 `master/routing-matrix.md` 选定主模块，读取 `master/agent-orchestration.md` 确定顾问派发档位。运行环境不支持并行时，按相同角色清单顺序复核并记录 `sequential-review`。
+3. **模块执行**：加载并执行 `modules/<module>/MODULE.md`。
+4. **索引与评分**：更新 `_index/project-state.md`、`handoff-status.md`、`paper-roadmap.md`，并执行 `scripts/paper_master_guard.py score-project` 生成质量评分。
 
-1. 读 `references/runtime-adapter.md`，把当前宿主工具映射成通用能力。
-2. 读 `master/routing-matrix.md` 选主模块；需要顾问时再读 `master/agent-orchestration.md`。
-3. 执行对应 `modules/<module>/SKILL.md`。
-4. 更新 `_index/project-state.md`、`handoff-status.md`、`paper-roadmap.md`。
-5. 跑 `scripts/paper_master_guard.py score-project`，写入质量分。
+## 工作区索引文件
 
-顾问按决策风险派发，不因模块名自动拉满名单。当前宿主不能并行时，按同一角色顺序复核，并记录 `sequential-review`。
-
-## 工作区索引
-
-| 文件 | 用途 |
+| 文件 | 维护内容 |
 |---|---|
-| `_index/project-state.md` | 主题、阶段、产物、缺口 |
-| `_index/input-registry.md` | 用户提供的路径（只登记，不搬运） |
-| `_index/handoff-status.md` | 阶段交接与未解决风险 |
-| `_index/paper-roadmap.md` | 给用户看的路径图和下一步 |
-| `_index/quality-score.md` | 阶段质量分与全流程成熟度 |
+| `_index/project-state.md` | 研究主题、当前阶段、产物清单与缺口 |
+| `_index/input-registry.md` | 外部输入路径登记（只登记不搬运） |
+| `_index/handoff-status.md` | 阶段交接检查项与未解决风险 |
+| `_index/paper-roadmap.md` | 论文全流程路径图与下一步建议 |
+| `_index/quality-score.md` / `.json` | 阶段质量分、成熟度评分与失败归因 |
 
-完整目录约定见 `master/workspace-contract.md`。
+完整工作区约定见 `master/workspace-contract.md`。
 
-## 宿主
+## 运行环境适配与 Hook 注册
 
-**不预设宿主，也不需要宿主名单**：启动时按 `references/runtime-adapter.md` §5 探测当前环境的可用能力（文件读写、检索、shell、web、用户提问、子代理、浏览器控制、guard），把结果写入 `paper-workspace/_index/runtime-capabilities.md`，再按通用能力名执行。
+本包不绑定特定运行环境。每次启动按 `references/runtime-adapter.md` §5 探测实际可用工具并写入 `paper-workspace/_index/runtime-capabilities.md`；`references/agent-software-adapters.md` 提供常见工具形态与 hook 配置格式的对照参考。
 
-`references/agent-software-adapters.md` 只收录若干**已知宿主样例**（含 Claude Code 兼容叠加层）作为探测与映射的参考资料；样例之外的新宿主直接走通用回退，无需改包。
-
-本包不在 skill frontmatter 里声明 hooks。需要 auto guard 时用宿主无关注册器：
+包内不在 skill frontmatter 中声明 hooks。如需启用命令后及交付前自动审计，可使用通用注册脚本（配置向导将答案保存至 `.paper-master/host-profile.json`）：
 
 ```bash
-python3 scripts/register_host_hooks.py --host auto    # 自动探测；无证据时不写任何文件
-python3 scripts/register_host_hooks.py --print         # 只看将写入/手工粘贴的配置
+python3 scripts/register_host_hooks.py --detect   # 列出含 hooks 键的候选 JSON 配置
+python3 scripts/register_host_hooks.py --setup    # 交互式配置目标文件、事件格式与 matcher
+python3 scripts/register_host_hooks.py --print    # 预览生成的配置片段
+python3 scripts/register_host_hooks.py --check    # 查询当前注册状态
 ```
 
-查询 `--check`，撤销 `--remove`，显式指定宿主用 `--host <name>`。详情与各宿主配置样例见 `references/hooks-and-evaluation.md`。无论是否注册，分析命令后与交付前都可用两条手动命令兜底（见同文件第 4 节）。
+无论是否配置自动 hook，均可在命令后与交付前手动运行审计脚本（见 `references/hooks-and-evaluation.md` 第 4 节）。
 
-## 导出独立包
+## 导出独立模块包
 
-修改任一模块、家族表、路由或协议后，必须从总控根目录**无参数导出全部模块**，再把本仓库与全部独立仓提交并 push。不要只导出改过的那一个：每个独立包 README 共用同一张 4SS 家族表。
+修改任一模块、家族表、路由或核心协议后，须从本仓库根目录执行全量导出，并将本仓库与各独立仓库同步推送（各独立仓库的 `README.md` 共用同一份家族表，避免仅导出单个模块）：
 
 ```bash
-python3 scripts/export_standalone.py            # 全部（默认）
-python3 scripts/export_standalone.py --check    # 只检查路径
+python3 scripts/export_standalone.py            # 全量导出至同级 ../paper-*-4ss/
+python3 scripts/export_standalone.py --check    # 校验已导出包内的路径引用
 ```
 
-无参数导出会同时刷新 `../pi-chrome-mirror/`（pi-chrome 离线发行仓：可离线安装的插件本体 + CNKI 适配文档，见下）。推送用：
+同步推送仓库：
 
 ```bash
-python3 scripts/publish_family.py               # 全部 10 个仓库（含发行仓）
+python3 scripts/publish_family.py               # 推送全部 10 个仓库
 python3 scripts/publish_family.py --dry-run
-python3 scripts/publish_family.py lit pi-chrome-mirror
+python3 scripts/publish_family.py lit
 ```
 
-导出结果写到与本包同级的 `paper-<module>-4ss/`。独立包里的 `master/`、部分 `references/` 是快照；跨模块路径仍指向同级安装的 `paper-master-4ss/`。随后同步 GitHub：`paper-master-4ss` 与 `paper-design-4ss`、`paper-lit-4ss`、`paper-outline-4ss`、`paper-analysis-4ss`、`paper-write-4ss`、`paper-check-4ss`、`paper-submission-4ss`、`paper-update-4ss`。
+独立包中的 `master/` 与治理类 `references/` 为导出时的快照，跨模块引用仍指向同级目录中的 `paper-master-4ss/`。
 
-## pi-chrome 离线发行仓（OMP + CNKI）
-
-**[github.com/JingYangYuan/pi-chrome-mirror](https://github.com/JingYangYuan/pi-chrome-mirror)** 是 OMP 侧 pi-chrome 的唯一受支持分发点，一个仓库同时提供：
-
-- **插件本体**：逐字节复制本机已验证可用的安装（`extensions/`、`package.json`、`LICENSE`），含 MV3 `offscreen` 保活的完整伴生 Chrome 扩展 → `git clone` 后 `omp install .`
-- **CNKI 适配文档与工具**：`pi-chrome-browser.md` 与 `scripts/cnki/cookie_sink.py`
-
-源是 `modules/lit/references/pi-chrome-browser.md`、`modules/lit/scripts/cnki/cookie_sink.py` 与本机 pi-chrome 安装目录，由 `scripts/export_pi_chrome_repo.py` 导出。两道闸门：完整性（缺 `offscreen` 权限/文件即拒绝）与**无上游官方安装通道**（生成物与 vendored 文件中出现包管理器形式的 pi-chrome 引用即拒绝，见脚本 `FORBIDDEN`）。
-
-> 为什么不走上游发布通道：上游 0.15.51 与本机可用构建同号不同构，缺 MV3 `offscreen` 保活，Chrome 回收 worker 后停止轮询 `127.0.0.1:17318`（"装了连不上"）。对照表见仓库 `NOTICE.md`。
-
-## 目录
+## 仓库目录结构
 
 ```text
 paper-master-4ss/
-├── SKILL.md                 # 总控入口
-├── master/                  # 路由、顾问、输出、工作区协议
-├── modules/
+├── SKILL.md                 # 总控工作流入口
+├── master/                  # 路由、顾问编排、输出、交接与工作区协议
+├── modules/                 # 九个自包含业务模块
 │   ├── design/
 │   ├── lit/
 │   ├── outline/
@@ -146,14 +129,10 @@ paper-master-4ss/
 │   ├── submission/
 │   ├── mechanigraph/
 │   └── update/
-├── references/              # 宿主适配、依赖、评分、顾问注册表
-├── scripts/                 # guard、宿主 hook 注册、导出、公开文档发布
+├── references/              # 运行环境适配、依赖验收、评分标准、顾问注册表与公共块
+├── scripts/                 # 审计脚本、hook 注册、独立包导出与发布脚本
 └── docs/banner.svg
 ```
-
-(同级目录 `pi-chrome-mirror/` 是 pi-chrome 离线发行仓，不属本包。)
-
-协议入口：`master/routing-matrix.md`、`master/agent-orchestration.md`、`master/output-protocol.md`、`master/user-journey.md`、`master/literature-review-protocol.md`。
 
 ## License
 

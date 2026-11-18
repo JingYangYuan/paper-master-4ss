@@ -8,7 +8,7 @@ update 模块负责生成待审核更新包。self-update 候选可以指向 upd
 
 | Target surface | Target files | 适用候选 | Risk tier |
 |---|---|---|---|
-| `self-update` | `modules/update/SKILL.md` | update 总入口、目的分类、工作流和硬规则 | high |
+| `self-update` | `modules/update/MODULE.md` | update 总入口、目的分类、工作流和硬规则 | high |
 | `self-update` | `modules/update/phases/*.md` | 目的路由、抽取、补强、目标路由、风险门控、审核包 | high |
 | `self-update` | `modules/update/agents/*.md` | update 顾问职责、参考库回查、输出格式 | high |
 | `self-update` | `modules/update/references/update-schema.md` | 候选 schema、字段、类型 | high |

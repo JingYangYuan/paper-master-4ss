@@ -1,5 +1,18 @@
 # 政治学理论框架目录
 
+<!-- section-index (auto-generated, do not edit by hand; re-run tool after edits) -->
+<!-- 分区索引：本文件较大，按下表行号定点读取，不要整读。行号含本索引块偏移。 -->
+<!-- L15: 一、比较政治学 (Comparative Politics) -->
+<!-- L179: 二、国际关系 (International Relations) -->
+<!-- L325: 三、政治行为与公众舆论 (Political Behavior & Public Opinion) -->
+<!-- L455: 四、政治制度 (Political Institutions) -->
+<!-- L543: 五、政治经济学 (Political Economy) -->
+<!-- L645: 六、政治学方法论 (Political Methodology) -->
+<!-- L733: 选择合适的理论框架 -->
+<!-- L760: 多框架组合建议 -->
+<!-- L784: 理论写作提示 -->
+
+
 ## 一、比较政治学 (Comparative Politics)
 
 ### 1.1 现代化理论 / Modernization Theory (Lipset 1959)

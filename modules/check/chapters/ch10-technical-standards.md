@@ -53,4 +53,4 @@
 ## Connects To
 - **ch09-notes-and-references.md**：圈码与注码不分。
 - **ch12-submission.md**：定稿技术核对。
-- **10维回流**：技术规范 → ethics-conformance-reviewer → submission。
+- **10维回流**：技术规范 → reviewer → submission。

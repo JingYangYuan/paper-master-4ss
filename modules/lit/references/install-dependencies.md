@@ -1,123 +1,87 @@
 # lit module 安装说明
 
-本发布包用于中英文文献综述、CNKI/Google Scholar 精准补充、本地文献库联动和假设推导。CNKI 检索依赖浏览器控制，后端按宿主二选一（ZCode 内置 browser-use，或 OMP pi-chrome）；Zotero 与 Zotero MCP 是可选增强，只有当用户希望保存论文、管理全文 PDF、检索本地库或深读已收藏文献时才要求启用。
+本模块用于中英文文献检索与批量落地（`lit-down` 管线）、本地文献库联动、PDF 全文化解析、文献景观地图与假设推导。
+
+- **英文检索/定位/下载与中文 NCPSSD 免登录定位**：仅需 Python 3 及标准库外少量 HTTP/PDF 包（`requests`、`httpx`、`pymupdf` 或 `pypdf`），无需浏览器即可运行；
+- **CNKI 全文取回与浏览器兜底（Turnstile / CDP `Page.getResourceContent` / `Page.printToPDF`）**：依赖可见浏览器控制后端 `ego-browser`（ego lite 浏览器 + `ego-browser` 命令，见 [browser.md](browser.md) 与 [cnki.md](cnki.md)）；
+- **Zotero 与 Zotero MCP**：可选增强，仅当用户希望保存题录、管理全文 PDF、检索本地库或深读已收藏文献时才要求启用。
 
 ## 安装模式
 
 | 模式 | 适用场景 | 必需依赖 | Zotero 状态 |
-|------|----------|----------|-------------|
-| 轻量检索 | 只需要在线检索、摘要筛选和综述写作，不保存全文 | 浏览器控制后端（ZCode 内置，或 OMP pi-chrome） | 可跳过，记录为 `用户明确暂缓` |
-| 文献库联动 | 需要检查已有文献、去重、导入题录 | 浏览器控制后端 + Zotero Desktop/Connector | 启用 Zotero |
-| 全文保存/深读 | 需要保存 PDF、读取 Zotero 附件全文 | 浏览器控制后端 + Zotero Desktop/Connector + Zotero MCP | 启用 Zotero MCP |
-
-**选择铁律**：Phase 0/Step 0Q 必须询问用户是否启用 Zotero 和 Zotero MCP。用户不想保存全文或不使用本地库时，不得强制安装 Zotero；把本地文献库阶段记录为 `用户明确暂缓`，继续执行 `web_search`、CNKI、Google Scholar 和摘要核验。
-
-## 强制依赖：浏览器控制（后端二选一）
-
-CNKI 阶段必须由浏览器控制完成，后端按宿主选择：
-
-| 后端 | 宿主 | 安装 | 适配文件 |
 |---|---|---|---|
-| `ZCode` | ZCode 桌面版 | 内置能力，**无需安装** | [cnki-kns8s-closed-loop.md](cnki-kns8s-closed-loop.md) §2.1 |
-| `OMP` | OMP（Oh My Pi / Pi coding agent） | 需一次性加载伴生 Chrome 扩展，约 10 分钟；发行仓 <https://github.com/JingYangYuan/pi-chrome-mirror>（自带完整插件，不使用上游官方安装通道） | **[pi-chrome-browser.md](pi-chrome-browser.md)** |
+| 英文/NCPSSD 免登录检索下载 | 英文 Crossref/OA/Sci-Hub/LibGen 下载、中文 NCPSSD 定位分级 | Python 3 + `requests`、`httpx`、`pymupdf`（或 `pypdf`） | 可跳过，记录为 `用户明确暂缓` |
+| 含 CNKI 全文取回 / 浏览器兜底 | 机构 IP 取知网全文、过 Turnstile、抓 403 内联 PDF | 上述 Python 包 + `ego-browser`（ego lite） | 可跳过，记录为 `用户明确暂缓` |
+| 文献库联动与深读 | 本地库去重、即时入库、保存 PDF、全文子笔记 | 上述依赖 + Zotero Desktop/Connector + `zotero-local-mcp` | 启用 Zotero / Zotero MCP |
 
-`ZCode` 后端：浏览器控制（browser-use，`mcp__node_repl__js` + browser client）由 ZCode 桌面版自带，浏览器面板对用户可见，验证码和登录由用户在面板中手动完成。
+**用不用 Zotero，先问用户**：Phase 0 / Step 0Q 必须询问用户是否启用 Zotero 和 Zotero MCP。用户暂缓时不得强制安装，继续执行在线检索与 `lit-down` 下载。
 
-`OMP` 后端：pi-chrome 通过伴生 Chrome 扩展驱动用户已登录的 Chrome profile，登录态与下载权限天然可用。安装源是本项目的离线发行仓（自带完整插件本体，含 MV3 `offscreen` 保活），安装与授权见 [pi-chrome-browser.md](pi-chrome-browser.md) §2：
+## 强制依赖 1：Python 环境与 `LITDOWN_EMAIL`
 
 ```bash
-git clone https://github.com/JingYangYuan/pi-chrome-mirror.git
-cd pi-chrome-mirror && omp install .   # 无外部下载通道；先 --dry-run 看计划
+# 核心包：requests（英文下载/Crossref/探活）、httpx（NCPSSD）、pymupdf/pypdf（四件套校验与切参考文献）
+python3 -m pip install requests httpx pymupdf pypdf
+# 可选（仅使用 cnki_captcha.py 自动点选腾讯验证码时需要）
+python3 -m pip install pillow numpy
 ```
 
-```text
-/chrome onboard                   # 显示伴生扩展目录路径
-chrome://extensions → 开发者模式 → 加载已解压的扩展程序 → 选该目录
-/chrome authorize                 # 或 /chrome authorize indefinite
-/chrome doctor                    # 应显示 ✓ Chrome is connected
+Crossref 与 Unpaywall 接口要求提供有效联系邮箱（`example.com` 会被 Unpaywall 直接拒绝并返回 422）：
+
+```bash
+export LITDOWN_EMAIL="you@university.edu"
 ```
 
-> 不使用上游官方安装通道：上游发布的 0.15.51 缺 `offscreen.html` / `offscreen.js` 与 manifest 的 `offscreen` 权限，MV3 worker 被回收后不再轮询 `127.0.0.1:17318`（"装了连不上"）。发行仓逐字节提供已实测可用的构建，附 `checksums.sha256` 与 `NOTICE.md` 对照表。
+## 强制依赖 2（仅 CNKI 取全文与浏览器兜底）：`ego-browser`
 
-安装后检查（每次 CNKI 阶段开始前执行可用性检查）：
+CNKI 全文取回（`cnki_fetch_batch.mjs`）与浏览器兜底（[browser.md](browser.md)）依赖 `ego-browser` 驱动可见的 ego lite 浏览器（机构登录态与 cookie 存在真实 profile 中）：
 
-1. 浏览器控制可列标签页/新建标签页/导航到 `about:blank` 或 `https://kns.cnki.net`，并读取 URL/title 轻量状态（OMP 四项验收命令见 [pi-chrome-browser.md](pi-chrome-browser.md) §3）。
-2. 打开 `https://kns.cnki.net/starter/advanced` 后检查页头机构信息（"大学/学院名 + 手机号"）确认机构授权；未登录时提示用户先完成机构登录，未登录只能检索题录、不能下载全文。
+| 后端 | 软件 | 安装 | 适配文件 |
+|---|---|---|---|
+| `ego-browser` | 任意 agent 宿主 | 装 ego lite 并完成 onboarding（Windows 从 <https://lite.ego.app/> 下载安装器；其余平台见 `ego-browser skill` 自带安装指南），之后 `ego-browser` 命令进入 PATH | **[browser.md](browser.md)**、**[cnki.md](cnki.md)** |
+
+每次浏览器任务前运行：
+
+```bash
+ego-browser skill
+```
+
+输出末尾应含 `[ego-browser:skill] end of guide`。
+
+CNKI 权限检查：用 ego lite 打开 `https://kns.cnki.net/kns8s/AdvSearch`，确认页面顶栏出现机构名称（未出现机构名即无机构下载权限，只能检索题录、不能取全文）。
 
 状态词表：
+- `浏览器控制正常`：任务空间与页面可建/复用、`goto`/`evaluate` 正常且 CNKI 可达；
+- `浏览器控制不可用`：`ego-browser` 缺失、ego lite 未运行或命令报错；停止 CNKI 取全文与 CDP 兜底阶段，不得用 `web_search` 替代 CNKI 状态。
 
-- `浏览器控制正常`：可列页/新建页/导航且检索页可达。
-- `浏览器控制不可用`：工具抛错、无法列页/新建页/导航；停止 CNKI 阶段（ZCode 提示重启宿主会话；OMP 先 `/chrome doctor` 并重载伴生扩展），不得用 `web_search`/Scholar 替代。
-- `浏览器页面未完成` / `CNKI 页面未完成`：页面加载未完成或选择器失配；重试一次后仍失败即停止并记录。
+## PDF 四件套校验依赖
 
-验证码与下载约定：验证码出现时停止自动化并请用户在可见浏览器中手动拖动完成（OMP 下用户切到 `Pi Session:` 分组标签）；PDF 下载不走浏览器下载管线（必弹 Save-As），使用 `modules/lit/scripts/cnki/kns8s-download.sh`（Cookie + curl）免弹窗下载；Cookie 获取 OMP 走回环 sink（`modules/lit/scripts/cnki/cookie_sink.py`），不得经对话回传。完整协议见 [cnki-kns8s-closed-loop.md](cnki-kns8s-closed-loop.md)。
-
-Google Scholar 阶段无需浏览器，用 `web_fetch`/`web_search` 直接访问即可。
-
-## PDF 归档校验
-
-项目内下载器在归档前必须实际解析 PDF。安装或确认以下任一工具可用：Python 包 pypdf、Poppler 的 pdfinfo，或 qpdf。当前环境缺少三者时，下载器会保留文件为未归档状态，而不会只根据 %PDF 文件头声称成功。
+`download.py`、`verify_content.py`、`manual_add.py`、`cnki_report.py` 与 `literature_registry.py` 在归档前必须实际解析 PDF 页数与前页文本（严禁正则数 `/Type /Page`）。确认至少具备 `pymupdf`（`fitz`）或 `pypdf`：
 
 ```bash
-python3 -c "import pypdf" || command -v pdfinfo || command -v qpdf
+python3 -c "import fitz; print(fitz.__doc__[:30])" || python3 -c "import pypdf; print(pypdf.__version__)"
 ```
 
-## 可选增强：Zotero Desktop / Connector
+## 可选增强：Zotero Desktop / Connector / Zotero MCP
 
-仅在用户选择保存题录、保存全文、本地库联动或 PDF 深读时安装。
+仅在用户选择保存题录、保存全文、本地库联动或 PDF 深读时安装。操作协议（检索、即时入库、全文深读、集合、状态词）见 **[zotero-local-mcp.md](zotero-local-mcp.md)**。
 
-官方入口：
+### 安装前提与入口
 
-- Zotero Desktop: [zotero.org/download](https://www.zotero.org/download/)
-- Zotero Connector: [Zotero Connector 文档](https://www.zotero.org/support/connector)
-- Better BibTeX: [Better BibTeX for Zotero](https://retorque.re/zotero-better-bibtex/index.html)
+- Zotero Desktop **10.0 及以上**：[zotero.org/download](https://www.zotero.org/download/)，并开启 设置 → 高级 → 「允许本机上的其他应用程序与 Zotero 通信」（端口 23119）。
+- Zotero Connector：[Zotero Connector 文档](https://www.zotero.org/support/connector)；如需 citekey 可装 [Better BibTeX](https://retorque.re/zotero-better-bibtex/index.html)。
+- `uv` / `uvx` 可用，且 Zotero Desktop 保持运行。
 
-安装顺序：
-
-1. 安装 Zotero Desktop。
-2. 安装浏览器对应的 Zotero Connector。
-3. 打开 Zotero Desktop，并保持运行。
-4. 在 Chrome 中确认 Zotero Connector 图标可用。
-5. 如需稳定 citation key，安装 Better BibTeX for Zotero。
-
-验收标准：
-
-- Zotero Desktop 能打开本地文献库。
-- Zotero Connector 能把当前论文页保存到 Zotero。
-- 测试条目包含标题、作者、年份、来源和 URL/DOI 中的多数元数据。
-- 如需全文保存，测试条目应能关联 PDF 附件。
-
-没有 Zotero 时，本地文献库阶段不得标记为 `已执行`；应记录为 `用户明确暂缓` 或 `能力缺失`，继续其他在线检索阶段。
-
-## 可选增强：Zotero MCP（已验证实现：zotero-local-mcp）
-
-Zotero MCP 只在用户需要 Agent 直接搜索 Zotero、写入题录/摘要、管理分类或读取附件全文时启用。本模块不假设宿主已经安装或暴露任何固定名称的 Zotero MCP；下方以 2026-09-09 实跑验证的 `zotero-local-mcp`（本地 Zotero 10 API，无需 Web API key）为推荐实现，其他实现仍按各自项目说明配置，但验收口径不变。
-
-**操作协议**（检索、即时入库、全文深读、集合、状态词）：[zotero-local-mcp.md](zotero-local-mcp.md)。本节只负责安装、授权、客户端配置与排障。
-
-### 安装前提
-
-1. Zotero Desktop **10.0 及以上**，且已开启 设置 → 高级 → 「允许本机上的其他应用程序与 Zotero 通信」（本地 HTTP API，端口 23119）。
-2. 本机已安装 uv（`uv`/`uvx` 可用）。
-3. Zotero Desktop 处于运行状态（本地授权与写入都依赖它）。
-
-### 安装与一次性授权
+### `zotero-local-mcp` 安装与一次性授权
 
 ```bash
-# 1. 安装/更新（升级版本用同一命令重装覆盖）
 uv tool install --force git+https://github.com/JingYangYuan/zotero-local-mcp.git
-
-# 2. 一次性本地授权：会触发 Zotero 授权弹窗，手动点 Always Allow
 pyzotero authorize --app-name "Zotero MCP Local"
-#    密钥落盘 ~/.config/pyzotero/local-api-key.json（含 server_id 与 key）
-
-# 3. 自检：应显示 ZOTERO_LOCAL: true
-zotero-cli --json config
+zotero-cli --json config   # 应显示 ZOTERO_LOCAL: true
 ```
 
 ### MCP 客户端配置
 
-MCP 客户端的配置文件位置随宿主而异，**不要写死某一家**：按当前宿主文档找到其 MCP 配置入口（常见的用户级/项目级配置文件名如 `mcp.json`、`mcpServers` 节点），把下面的 `mcpServers` 片段合并进去。已知宿主样例（非名单）：Oh My Pi (OMP) 为 `~/.omp/agent/mcp.json`；Claude Desktop 为 macOS `~/Library/Application Support/Claude/claude_desktop_config.json`、Windows `%APPDATA%\Claude\claude_desktop_config.json`；Cursor 为项目或用户 `.cursor/mcp.json`。宿主没有 MCP 机制时记录 `zotero=能力缺失` 并回退 `paper-registry.csv`。
+将以下片段合并至当前宿主的 MCP 配置（勿再配置旧 `ZOTERO_API_KEY` / `ZOTERO_LIBRARY_ID`）：
 
 ```json
 {
@@ -135,70 +99,42 @@ MCP 客户端的配置文件位置随宿主而异，**不要写死某一家**：
 }
 ```
 
-**不要**再配置 `ZOTERO_API_KEY` / `ZOTERO_LIBRARY_ID`：这两个是旧 Web/混合模式残留。残留时 MCP 写入会走错误路径并失败（典型症状见下文排障）。修改配置后必须重启宿主会话，新 env 才会作用于 MCP 进程。
+### 功能验收与排障要点
 
-### 功能验收
+- 读：`zotero_search_items` 返回条目或空结果；`zotero_get_pdf_outline` / `zotero_get_item_fulltext` 可读附件。
+- 写：`zotero_add_item` 能创建测试条目并返回 `item_key`，`zotero_attach_file` 能挂载 PDF（验收后移入回收站）。
+- 若报 `404 Not Found` on `/api/items/new...`：检查是否残留 `ZOTERO_API_KEY`/`ZOTERO_LIBRARY_ID`；兜底直写可用 Zotero 10 本地 API `POST /api/users/0/items`。
+- 中文文献导入注意点：中文作者单字段整串写入 `{"creatorType": "author", "name": "周黎安"}`；集刊用 `bookSection` + `bookTitle`；正式条目必带 `abstractNote`。
 
-- 读：按关键词检索条目；读取标题、作者、年份、DOI/URL、期刊等元数据；需要全文深读时能读取附件全文。
-- **写（本地模式必须验收）**：`zotero_add_item` 能创建测试条目并返回 item_key；`zotero_attach_file` 能挂上 PDF 附件；验收后删除测试条目。
-- 验收不过时记录 `能力缺失`；Zotero/Zotero MCP 只影响本地库与全文保存阶段，不影响在线检索与摘要核验。
-
-### 排障记录（2026-09-09 实测）
-
-- 症状：`zotero_add_item`（csl_json/bibtex）报 `conversion failed: Client error '404 Not Found' for url 'http://localhost:23119/api/items/new...'`。
-- 根因：宿主 env 残留 `ZOTERO_API_KEY`/`ZOTERO_LIBRARY_ID`，或 MCP 实现调用了 Zotero 本地 API 不存在的 `/api/items/new` 模板端点（本地 API 只提供 `/api/users/0/items` 等原生端点）。
-- 兜底直写方案（Zotero 10 本地写 API 三步，可用于脚本化导入）：
-  1. `curl -s -D - -o /dev/null http://localhost:23119/api/` 取响应头 `Zotero-Server-ID`；
-  2. 取授权 key：`~/.config/pyzotero/local-api-key.json` 已有则直接用，否则 `POST /api/local/authorize`（body 需含 `appName`）换新 key；
-  3. 带 `Authorization: Bearer <key>` 调 `POST /api/users/0/items`，条目 JSON 数组内直接写 `collections: ["<分类key>"]`、`tags`、`abstractNote`，一次请求完成创建、归类与摘要写入。
-
-### 中文文献导入注意点
-
-- 中文作者使用**单字段模式整串写入**：creators 写 `{"creatorType": "author", "name": "周黎安"}`（姓+名连写，不拆分 lastName/firstName；Zotero 以 fieldMode=1 存储，条目与引文中均显示完整中文姓名）。不要拆成 `lastName=姓`/`firstName=名` 两字段——中文姓名拆分依赖人工判断（复姓、双字姓），拆错会造成引文格式错误。
-- 集刊文献（如《清华社会科学》《中国非营利评论》）用 `bookSection` 类型，`bookTitle` 填集刊名；不要伪装成 journalArticle。
-- 每条正式条目必须带 `abstractNote`（呼应摘要存储铁律），并把返回的 item_key 记入搜索日志论文清单。
-
-本地 Zotero Connector 也可提供轻量保存能力，常见本地接口为：
-
-```text
-http://127.0.0.1:23119/connector/saveItems
-```
-
-**限制**：Zotero MCP 或 Connector 只解决保存、检索和全文读取；不能替代摘要准入规则。所有正式纳入论文仍必须有摘要或等价全文摘要信息。
-
-## 在 paper-master-4ss 中的位置
-
-本模块已经内置于 `paper-master-4ss/modules/lit/`。依赖检查只用于 CNKI、Google Scholar、Zotero 和本地浏览器能力。
-
-内置文件检查：
-
-```text
-paper-master-4ss/modules/lit/
-├── SKILL.md
-├── phases/
-├── references/
-└── scripts/cnki/
-```
-
-## 依赖验收
+## 在 `paper-master-4ss` 中的内置文件与验收命令
 
 ```bash
-test -f modules/lit/SKILL.md
+test -f modules/lit/MODULE.md
 test -f modules/lit/phases/phase-1-search.md
-test -f modules/lit/references/cnki-kns8s-closed-loop.md
-test -f modules/lit/references/pi-chrome-browser.md
-test -f modules/lit/scripts/cnki/kns8s-download.sh
-test -f modules/lit/scripts/cnki/cookie_sink.py
-python3 modules/lit/scripts/cnki/cookie_sink.py --help
+test -f modules/lit/references/channels.md
+test -f modules/lit/references/publishers.md
+test -f modules/lit/references/books.md
+test -f modules/lit/references/browser.md
+test -f modules/lit/references/ncpssd.md
+test -f modules/lit/references/cnki.md
+test -f modules/lit/scripts/probe_channels.py
+test -f modules/lit/scripts/refs_from_pdf.py
+test -f modules/lit/scripts/enrich_crossref.py
+test -f modules/lit/scripts/download.py
+test -f modules/lit/scripts/books_libgen.py
+test -f modules/lit/scripts/manual_add.py
+test -f modules/lit/scripts/verify_content.py
+test -f modules/lit/scripts/make_report.py
+test -f modules/lit/scripts/ncpssd.py
+test -f modules/lit/scripts/ncpssd_search.py
+test -f modules/lit/scripts/cnki_prepare.py
+test -f modules/lit/scripts/cnki_fetch_batch.mjs
+test -f modules/lit/scripts/cnki_captcha.py
+test -f modules/lit/scripts/cnki_report.py
+test -f modules/lit/scripts/literature_registry.py
+test -f modules/lit/scripts/citation_intersection.py
+test -f modules/lit/scripts/mineru/pdf2md.py
+python3 modules/lit/scripts/probe_channels.py --help >/dev/null
+python3 modules/lit/scripts/ncpssd_search.py --help >/dev/null
+python3 modules/lit/scripts/literature_registry.py --help >/dev/null
 ```
-
-人工确认：
-
-- 浏览器控制可列页/新建页/导航且页面可达（ZCode 内置 browser-use；OMP pi-chrome 按 [pi-chrome-browser.md](pi-chrome-browser.md) §3 四项验收通过）。
-- CNKI 检索页可打开；如遇验证码，用户能手动完成。
-- OMP 后端：`/chrome doctor` 显示已连接；Cookie 回环 sink 能落盘（0600）并只报告字节数/键数。
-- Google Scholar 页面完成可达性检查。
-- 如用户选择 Zotero：Zotero Desktop/Connector 可保存测试文献。
-- 如用户选择 Zotero MCP：所选 Zotero MCP 实现可完成条目检索、元数据读取；需要全文深读时还要能读取附件全文。
-
-未通过浏览器控制可用性检查时，不得正式检索 CNKI。CNKI 阶段不得由 `web_search`、Google Scholar、普通网页搜索或代理替代。未通过 Zotero/Zotero MCP 验收时，只影响本地库和全文保存阶段，不影响在线检索与摘要核验。

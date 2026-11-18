@@ -47,4 +47,4 @@
 ## Connects To
 - **ch04-abstract.md / ch05-keywords.md / ch06-introduction.md / ch07-body.md**：题摘关键词与正文必须互相兑现。
 - **ch12-submission.md**：比较标题用投稿篇「最确切、最鲜明、最简洁」。
-- **10维回流**：标题 → editorial-screening-reviewer → write。
+- **10维回流**：标题 → reviewer → write。

@@ -50,7 +50,7 @@ python -m pip install python-docx lxml
 ## 内置文件检查
 
 ```bash
-test -f modules/submission/SKILL.md
+test -f modules/submission/MODULE.md
 test -f modules/submission/scripts/export_docx.py
 test -f modules/submission/scripts/check_docx_format.py
 test -f modules/submission/scripts/sanitize_reference_docx.py

@@ -145,13 +145,13 @@
 
 **重点搜索**：中国社会科学、社会学研究、管理世界、社会、中国人口科学、经济研究、人口研究、中国农村经济、社会学评论、青年研究、公共管理学报、中国行政管理、心理学报、新闻与传播研究、教育研究、政治学研究
 
-CNKI 正式检索默认且只默认专业检索页 `https://kns.cnki.net/starter/advanced`（跳转 kns8s 后切「专业检索」）。第一轮用单一主概念的宽松检索式；当结果过大时，先点「学术期刊N」筛选，再按被引排序（`li#CF`）取高影响文献。若筛选后 0 条，回退宽检索。
+中文社科文献定位首选 `scripts/ncpssd_search.py`（免登录、内置上述 64 种 CSSCI 顶刊两轮分级置顶），再用 `scripts/cnki_prepare.py` + `scripts/cnki_fetch_batch.mjs`（专业检索 `TI='完整题名' AND AU='作者'` + 下载单直取）从知网机构出口取全文，详见 `references/ncpssd.md` 与 `references/cnki.md`。
 
 ---
 
 ## 布尔搜索策略
 
-**适用范围**：本节布尔串主要用于 `web_search`、Google Scholar、Semantic Scholar、期刊站内搜索等支持自然布尔表达式的来源。CNKI 不得把这些检索式原样粘贴到基本检索框；CNKI 正式检索必须先转换为高级检索概念组。
+**适用范围**：本节布尔串主要用于联网搜索、Google Scholar、Semantic Scholar、期刊站内搜索等支持自然布尔表达式的来源。CNKI 不得把这些检索式原样粘贴到基本检索框；CNKI 正式检索必须先转换为高级检索概念组。
 
 **基本结构**：
 ```
@@ -173,36 +173,23 @@ CNKI 正式检索默认且只默认专业检索页 `https://kns.cnki.net/starter
 - 不平等 = 差距 = 差异 = 分层
 - 社会资本 = 社会网络 = 关系
 
-### CNKI 高级检索转换
+### 中文检索与定位分流（NCPSSD → CNKI）
 
-CNKI 的默认策略是“kns8s 专业检索 + 宽检索优先 + 概念组转换”，而不是把多个中文关键词放进基础检索框。
+中文文献不再走“CNKI 基础框猜检索式”，而采用两跳分流（详见 `references/ncpssd.md` 与 `references/cnki.md`）：
 
-**默认入口**：CNKI 正式检索只默认 `https://kns.cnki.net/starter/advanced`（kns8s 专业检索）。基础检索框只允许单个自然短语、专名或站点可达性临时测试，不进入正式流程。
-
-**落地前置**：CNKI 概念组只是检索计划；真正执行前必须先完成浏览器控制可用性检查。检查未通过时，不得把概念组转换为专业检索式执行，不得把 `web_search`/Scholar 或 agent 输出写成 CNKI 结果。
-
-| Web/Scholar 布尔意图 | CNKI 转换 |
-|---|---|
-| `[主要概念] AND [机制] AND [人群]` | 先用 `[主要概念]` 在 `SU/TKA` 宽检索；结果过大且用户确认后，再追加机制或人群 |
-| `[同义词1 OR 同义词2 OR 同义词3]` | 同一概念组，优先在高级检索中用 `OR`，不得拆成 `AND` |
-| 多个空格分隔中文词 | 先拆概念组；不同概念分轮检索，同义/近义词用 `OR` |
-| 0 条结果 | 记录 `zero_results`，回退上一轮宽检索，不继续追加限制，不按验证码处理 |
-| 宽检索结果过长 | 若 `total > 200`，默认尝试 CSSCI → hx → CSSCI + hx 核心期刊筛选；每页显示尝试切到 50 条，失败只记录 `pageSizeState` |
-
-示例：
-
-```text
-用户词：社会资本 劳动力市场 流动 分层
-CNKI：先分别用“社会资本”“劳动力市场”做 SU/TKA 宽检索；“流动/分层”作为后续机制/结果概念组，必要时再筛。
-
-用户词：不平等 差距 分层
-CNKI：视为同一概念组，优先 OR 扩展。
-```
+1. **第一跳：NCPSSD 免登录定位（`scripts/ncpssd_search.py`）**：
+   - 多词空格分隔即按独立 OR 组再 AND 组合（短语整体匹配勿拆词）；
+   - `--order relevance` 找“这领域说了什么”，`--order recency` 找“最近谁在写”；
+   - `--issns` 定向单刊，`--tier1-only` 只搜内置 64 种 CSSCI 顶刊；批量扫库加 `--no-detail`；
+   - `--csv` 直接生成对齐 `cnki_prepare.py` 的清单（只保留第一作者，防知网 `AU=` 失配）。
+2. **第二跳：知网机构出口取全文（`scripts/cnki_prepare.py` → `scripts/cnki_fetch_batch.mjs`）**：
+   - 专业检索式：`TI='完整题名' AND AU='作者'`（模糊用 `%`），切忌使用无效的普通检索 URL 参数；
+   - 确认整刊是否入库用 `LY='刊名'`；
+   - 中文条目**严禁进 Crossref**，也不采信 NCPSSD 的 `pdfurl`（指向已停用的 `nssd.org`）。
 
 **时间过滤**：
-- 前沿：添加 `2022 OR 2023 OR 2024 OR 2025 OR 2026`
-- 经典：使用 JSTOR，筛选 pre-2000
-- Google Scholar 中使用 `after:YYYY`
+- 前沿：NCPSSD 使用 `--order recency`；英文使用 Crossref/OpenAlex `issued` 年份或 `web_search` 年份约束；
+- 经典：JSTOR / 英文老文献默认走 `download.py --order mirror-first`（在镜像入库截止年前为主）。
 
 ---
 
@@ -266,12 +253,12 @@ curl -s "https://api.crossref.org/works/$DOI" | python3 -m json.tool
 
 ---
 
-## exa MCP 检索协议（英文文献首选通道，2026-09-05 实测修订）
+## 英文文献定位、下载与 `web_search` 补位协议（`lit-down`）
 
-`web_search_exa` / `web_fetch_exa` 是英文文献检索的**主动首选**，不因 `web_search` 可用而跳过：
+英文文献发现与全文落地按以下优先级组合执行（详见 `phases/phase-1-search.md` 与 `references/channels.md`）：
 
-- **语义化查询**：exa 按页面语义而非关键词匹配，query 写成"理想文献描述"（如 `paper examining how government funding reshapes NGO autonomy in authoritarian China using resource dependence theory`），比布尔串命中更准；关键词布尔串留给 `web_search`。
-- **分工**：exa 负责（1）发现核心英文文献与其 OA 全文页，（2）`web_fetch_exa` 批量抓取摘要页/出版页内容（一次调用可传多个 URL，`maxCharacters` 设 3000–5000 拿摘要足够）；`web_search` 负责（1）中文内容与新闻线索，（2）交叉验证 exa 结果的引用数与年份。
-- **摘要铁律兼容**：exa fetch 返回的页面正文含摘要即视为【摘要已核】，来源记 `exa-fetch:<url>`。
-- **失败回退**：exa 超时/空结果时降级 `web_search`，并在搜索日志记录 `exa=不可用`；不得假装已用 exa。
-- 与 Step 9 衔接：exa fetch 抓到的 OA PDF 直链登记到 `paper-registry.csv` 对应条目的 `download_url`，再由 `download-plan` 子命令生成下载计划，走"外文 OA"下载路径。
+- **定位优先 Crossref（不用 Google Scholar 反查）**：通过 `scripts/enrich_crossref.py`（`parse` → `doi` → `--round2` → `audit --apply` → `merge`）获取 DOI 与 Elsevier PII，第二轮必须跑 `audit --apply` 过滤书评与同名综述误匹配。
+- **按年份决策顺序下载（`scripts/download.py`）**：先跑两遍 `scripts/probe_channels.py` 探测渠道并检查出口 IP；老文献（镜像截止年前为主）默认 `--order mirror-first`；新文为主或生物医学用 `--order oa-first` + `--probe-oa` 预探 Unpaywall。
+- **`web_search` 补位**：当 OA 链全空时，用 `web_search` 一次发 3 条查询（`"完整标题" pdf`、`"标题截断" 机构名 repository pdf`）挖机构库副本、作者主页与课程阅读页（宿主 `google_search` 报错时直接改用 `web_search`）；对 `requests` 报 403 但浏览器可内联打开的机构库走 `references/browser.md` §7 CDP `Page.getResourceContent`；慢速站点用 `curl -m 600` 落盘后走 `scripts/manual_add.py`。
+- **专著书轮**：无 DOI 的专著单开 `scripts/books_libgen.py`（必带 `topics[]=l`），并按 `references/books.md` 防范书评陷阱。
+- **四件套内容校验与登记**：落盘 PDF 经 `scripts/verify_content.py`（魔数 + >20KB + `fitz`/`pypdf` 页数 + 双通道 `autojunk=False` 内容比对 + 书评拦截）后，通过 `scripts/literature_registry.py register` 与 `mark-download` 写入唯一事实源 `02-literature/paper-registry.csv`。

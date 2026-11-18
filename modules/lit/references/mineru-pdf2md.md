@@ -30,7 +30,7 @@ python3 modules/lit/scripts/mineru/pdf2md.py <PDF目录> --split-long --output <
 python3 modules/lit/scripts/mineru/pdf2md.py <单文件.pdf> --agent --output <输出目录>
 ```
 
-- Token 来源优先级：`--token` 参数 → 目标目录/父目录 `.env.kie` → `~/.config/mineru/.env.kie` 等用户级 → `modules/lit/scripts/mineru/.env.kie`。
+- Token 来源优先级：`--token` 参数 → 目标目录/父目录 `.env.kie` → 用户配置目录下的 `.env.kie`（具体位置以该工具文档为准）→ `modules/lit/scripts/mineru/.env.kie`。
 - Token 是 JWT（`eyJ` 开头），在 mineru.net 注册获取；格式：`MINERU_PIPELINE_ID=<jwt>`。
 - 注册表模式输出结构：`<输出目录>/<paper_id>/document.md` + `<paper_id>/images/<论文名>/*`，MD 内为相对路径，可直接渲染。未使用注册表时保留旧的单目录输出行为。
 

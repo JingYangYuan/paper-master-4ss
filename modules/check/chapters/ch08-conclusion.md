@@ -45,4 +45,4 @@
 ## Connects To
 - **ch06-introduction.md / ch07-body.md / ch04-abstract.md**：提出—证明—压缩—回收。
 - **ch01-outline-selection-design-writing.md**：共情感。
-- **10维回流**：结尾 → argument-integrity-reviewer → write。
+- **10维回流**：结尾 → reviewer → write。

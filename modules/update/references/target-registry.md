@@ -7,8 +7,8 @@
 | Target surface | 目录或文件 | 风险等级 | 说明 |
 |---|---|---|---|
 | `knowledge-reference` | `frame/`, `chapters/`, `references/`, `resources/`, `examples/` | low | 知识条目、写作范式、方法协议、格式规范、范文说明 |
-| `workflow-protocol` | `SKILL.md`, `phases/`, `agents/` | medium | 入口规则、phase 流程、agent 职责和质量门控 |
-| `output-contract` | `master/output-protocol.md`, `master/workspace-contract.md`, `master/literature-review-protocol.md`, `modules/outline/references/output-formats.md`, `modules/write/SKILL.md`, `modules/write/scripts/assemble_drafts.py` | high | 段落级大纲、正文净稿、综述净稿落点和投稿前置稿的跨模块输出契约 |
+| `workflow-protocol` | `SKILL.md`, `phases/`, `agents/` | medium | 入口规则、phase 流程、agent 职责和交付前检查 |
+| `output-contract` | `master/output-protocol.md`, `master/workspace-contract.md`, `master/literature-review-protocol.md`, `modules/outline/references/output-formats.md`, `modules/write/MODULE.md`, `modules/write/scripts/assemble_drafts.py` | high | 段落级大纲、正文净稿、综述净稿落点和投稿前置稿的跨模块输出契约 |
 | `tooling-template` | `scripts/`, `templates/` | high | 可执行脚本、代码模板、Word 模板、命令协议 |
 | `self-update` | `modules/update/**` | high | update 模块自身协议、schema、agent、目标注册和审核门控 |
 | `master-routing` | `master/routing-matrix.md`, `master/agent-orchestration.md`, `master/handoff-checklists.md`, `master/user-journey.md`, `references/agent-registry.md`, 包根 `SKILL.md` | medium | 总控路由、顾问编排、交接清单、用户路径与跨模块矩阵；不得指向 `scripts/` |
@@ -22,7 +22,7 @@
 | outline | `modules/update/references/targets/outline-targets.md` | `writing-paradigm`, `workflow-protocol` | `knowledge-reference` | 大纲模板、证据映射、质量检查 |
 | analysis | `modules/update/references/targets/analysis-targets.md` | `method-protocol`, `tooling-template`, `workflow-protocol` | `knowledge-reference` | 量化、质性、混合方法、三语言模板 |
 | write | `modules/update/references/targets/write-targets.md` | `writing-paradigm`, `workflow-protocol`, `tooling-template` | `knowledge-reference` | 章节标准、范文、写作扫描与路由 |
-| check | `modules/update/references/targets/check-targets.md` | `writing-paradigm`, `method-protocol`, `workflow-protocol` | `knowledge-reference` | 全流程审稿知识库、质量门、顾问与阶段协议 |
+| check | `modules/update/references/targets/check-targets.md` | `writing-paradigm`, `method-protocol`, `workflow-protocol` | `knowledge-reference` | 全流程审稿知识库、交付前检查、顾问与阶段协议 |
 | submission | `modules/update/references/targets/submission-targets.md` | `method-protocol`, `workflow-protocol`, `tooling-template` | `knowledge-reference` | 投稿样式、引用规则、Word 导出 |
 | mechanigraph | `modules/update/references/targets/mechanigraph-targets.md` | `method-protocol`, `workflow-protocol`, `tooling-template` | `knowledge-reference` | 学术机制图构型、设计系统、渲染与自检脚本（兼容 mechanismgraph 别名） |
 | update | `modules/update/references/targets/update-targets.md` | `self-update` | `self-update` | update 自身更新，必须双重审核 |

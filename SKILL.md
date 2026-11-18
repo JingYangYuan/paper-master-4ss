@@ -5,84 +5,124 @@ description: 中文社会科学论文总控工作流。用于统一管理 paper-
 
 # Paper Master 4SS
 
-你是中文社会科学论文项目的总控代理。职责只有三项：登记输入材料、选择内部模块、把输出写入项目内 `paper-workspace/`。本包是自包含论文工作流，所有子能力都在 `modules/` 内部。
+本技能包负责论文项目的输入登记、阶段路由、产物归档与状态校验。学术观点与研究结论由研究者决定，本包确保各阶段产物路径统一、引用可回溯、交接有记录。
 
-## 1. 核心原则
+## 1. 核心规则
 
-- 输入路径开放：登记和引用用户给出的路径，不搬运材料。
-- 输出路径统一：默认写入 `paper-workspace/`。
-- 宿主无关适配：不预设宿主，也不维护宿主名单。每次启动先按 `references/runtime-adapter.md` §5 探测当前环境的可用能力，把映射结果与缺失清单写入 `paper-workspace/_index/runtime-capabilities.md`，再按通用能力名（`read_file`、`search_text`、`write_file`、`run_shell`、`web_search`、`web_fetch`、`browser_control`、`ask_user`、`spawn_agent`、`parallel_review`、`guard_after_command`、`guard_before_finish`、`project_memory`）执行业务流程。`references/agent-software-adapters.md` 只提供已知宿主样例，不是名单；遇到新宿主无需改包。
-- 宿主 Hooks 注册（可选）：本包不在 skill frontmatter 声明 hooks。需要自动 guard 时运行 `python3 scripts/register_host_hooks.py --host auto`（幂等，写前备份，只追加本包所需项；`--print` 预览、`--check` 查询、`--remove` 撤销、`--host <name>` 指定宿主）。无明确证据、或检测到当前运行时自带 hook 层（preset/平台配置）时，它不写任何文件；未确认 hook 已生效的当次会话，仍显式运行 guard 命令兜底。完整规则与样例见 `references/hooks-and-evaluation.md`。
-- 项目规则优先：通过 `project_memory` 读取用户项目文件夹中的 paper-master 规则。优先使用当前宿主**已有**的项目规则文件（其 `<!-- paper-master-4ss:start -->` 标记块，维护纪律见 `references/project-rules-writing-layer.md`）；确认没有宿主规则文件时，才回落到 `paper-workspace/_index/project-rules.md`。不得写入 skill 包目录，也不得为某宿主凭空新建项目规则文件。
-- 渐进加载：先读项目级 `project_memory`（如有）与 `references/install-dependencies.md` 检查依赖，再读 `master/routing-matrix.md`、`master/agent-orchestration.md`、`master/output-protocol.md` 与 `master/user-journey.md`，确定主模块后再读对应 `modules/<module>/SKILL.md`；涉及文献综述准备或改写时，还必须读 `master/literature-review-protocol.md`。
-- 内部自包含：跨模块引用使用 `modules/...`。
-- 路径约定：本包任一文件中的 `modules/...`、`master/...`、`references/...` 默认相对于 `paper-master-4ss/` 根目录解析；同模块局部路径也可按当前文件目录解析。
-- 顾问调度：除必须由模块明确规定的执行链外，按任务的决策风险、材料复杂度和交接风险选择最少必要顾问；不得只因研究范式或模块名称自动派发。`design` 必须先确认 FRAME/STORM/DESIGN/FULL 模式，再确认研究取向。完整规则见 `master/agent-orchestration.md`，完整智能体注册表见 `references/agent-registry.md`。
-- Team 显式触发：只有用户明确要求 `agentteam`、`teamagent`、`Agent Team`、`teammate`、`团队智能体` 或“升格”时，才读取 `references/multiagent-team-config.md` 与 `references/team-routing.md`。Agent Teams/teammate 是 Claude Code 专属高级并行形态，属于可选兼容层；当前宿主无此形态时用 `spawn_agent`/`parallel_review` 能力并行派发 subagent 等价执行，无等价能力则回退到普通顾问派发或 `sequential-review`。
-- 统一输出：过程报告、顾问综合文件和最终回复默认使用中文 Markdown；机制链、因果链、阶段流程、模块交接、理论嫁接、假设推导、写作派发和 agent 调度链路必须使用 Mermaid。`write` 模块的 `manuscript*.md`、`revisions/styled*.md` 与 `literature-review.md` 属于论文正文净稿，只允许标题层级和自然段，不得使用报告式 Markdown 装饰。最终回复必须按 `master/user-journey.md` 用纯文字箭头标出论文路径和当前位置，避免终端无法渲染 Mermaid。完整规则见 `master/output-protocol.md`。
-- 机制层约束：分析执行后的命令必须通过 `guard_after_command` 审计 run-log、stdout/stderr、失败信号和输出存在性；会话停止或交付前必须通过 `guard_before_finish` 检查 `_index/project-state.md` 与 `_index/handoff-status.md` 是否已随最新产物更新。两个能力可由宿主 hook 自动触发（用 `scripts/register_host_hooks.py` 注册，见 `references/hooks-and-evaluation.md` 第 2 节），也可始终显式运行：分析命令后 `python3 scripts/paper_master_guard.py post-bash --workspace paper-workspace`（要把审计问题变成阻断时加 `--strict`），交付前 `python3 scripts/paper_master_guard.py stop-check --workspace paper-workspace`。无论是否注册，都不得省略这两个能力的执行与记录。
-- Rubric 评分：每次实质性模块执行后运行 `scripts/paper_master_guard.py score-project --workspace paper-workspace --json`，生成 `_index/quality-score.md` 与 `_index/quality-score.json`，同时报告阶段质量分和全流程成熟度。评分口径见 `references/evaluation-rubric.md`。
+### 1.1 输入与输出路径
 
-### 1.1 多智能体并行触发
+- **输入开放**：用户提供的材料保持原路径，仅登记到 `paper-workspace/_index/input-registry.md`，不移动、重命名或复制原文件。
+- **输出集中**：所有阶段产物统一写入项目根目录下的 `paper-workspace/`（目录结构见 `master/workspace-contract.md`）。
+- **包内引用**：`modules/...`、`master/...`、`references/...` 均相对于本技能包根目录解析；模块内部引用也可相对于当前文件所在目录解析。
 
-当用户请求全流程论文规划、研究主题模糊、材料复杂，或需要同时推进设计、文献、大纲、分析、写作、审稿、投稿时，先完成总控路由，再按 `master/agent-orchestration.md` 确定派发强度。目标模块按本模块 agent 列表处理；必要时追加相邻模块顾问做风险预判。
+### 1.2 运行环境适配
 
-总控层只做五类综合判断：选题方向、文献缺口、方法路径、写作顺序、质量风险。若当前环境不能真实并行，则按同一角色顺序复核，并在 `paper-workspace/_logs/agents/` 记录 `sequential-review`。轻量任务可跳过顾问，但必须记录 `agent-skip` 和跳过原因。所有顾问意见必须包含 `## 参考库回查`，列出已读取路径、采用框架、依据条款和参考缺口。
+- 本包不绑定特定运行环境，也不维护固定软件名单。
+- 每次会话启动时，按 `references/runtime-adapter.md` §5 探测当前可用能力（读写文件、全文检索、命令执行、联网检索、网页抓取、可见浏览器控制、选项提问、子代理派发、并行执行等），结果写入 `paper-workspace/_index/runtime-capabilities.md`。
+- 协议文本使用 `references/runtime-adapter.md` §1 定义的通用能力名；`references/agent-software-adapters.md` 仅作工具形态与 hook 配置格式的对照参考。能力缺失时按对应回退方案执行，并在日志或回复中明确说明，不得虚构执行结果。
+- 如需自动触发审计脚本，可执行 `python3 scripts/register_host_hooks.py --detect` 查看候选配置，通过 `--setup` 生成 `.paper-master/host-profile.json` 并注册（`--print` 预览、`--check` 查询、`--remove` 撤销，规则见 `references/hooks-and-evaluation.md`）。若无法确认本次会话 hook 已实际生效，仍须手动执行审计命令。
 
-若用户显式触发 Claude Code Agent Teams，先按 `references/multiagent-team-config.md` 检查配置参考，再按 `references/team-routing.md` 完成用户选择门槛、focal canonical agent 选择和辩论视角分配。未完成用户选择前不得创建 Team；当前宿主不提供 Agent Teams 或用户选择不启用时，回退到 `master/agent-orchestration.md` 的普通顾问派发或顺序复核。
+### 1.3 项目规则优先级
 
-## 2. 工作区
+- 执行前先检查项目根目录是否存在本包的规则标记块（`<!-- paper-master-4ss:start -->` 至 `<!-- paper-master-4ss:end -->`）。若存在，读取并仅维护该标记块内部。
+- 仅在确认项目内不存在任何规则文件时，回退使用 `paper-workspace/_index/project-rules.md`。
+- 不得向本技能包目录写入项目规则，也不得为未确认使用的运行环境新建专用规则文件（维护规范见 `references/project-rules-writing-layer.md`）。
 
-默认输出结构见 `master/workspace-contract.md`。每次启动项目工作时，确保以下目录存在：
+### 1.4 按需加载顺序
+
+1. 读取项目规则（如存在）；
+2. 读取 `references/install-dependencies.md` 检查目标模块依赖（缺依赖则停止并提示安装）；
+3. 读取 `master/routing-matrix.md`、`master/agent-orchestration.md`、`master/output-protocol.md`、`master/user-journey.md` 确定主模块与协作规范；
+4. 读取目标模块入口 `modules/<module>/MODULE.md`；涉及文献综述成稿或改写时，同时读取 `master/literature-review-protocol.md`。
+
+### 1.5 顾问（子代理）派发规则
+
+- **按风险按需派发**：依据当前步骤的决策风险、材料复杂度和交接跨度决定是否派发及派发数量，不得因研究类型或模块名称套用固定名单。档位划分（L0 不派发 / L1 单顾问 / L2 串联复核）见 `master/agent-orchestration.md` §1.6。
+- **结果等待门槛**：派发顾问后，须等待其返回实质结果或确认失败，方可继续后续步骤。
+- **能力缺失回退**：运行环境不支持子代理或并行执行时，按同一角色清单顺序复核，并在汇总中标注 `sequential-review` 及缺失能力；轻量任务跳过顾问时，须记录 `agent-skip` 及原因。
+- **`design` 模块前置确认**：须先确认工作模式（FRAME / STORM / DESIGN / FULL），再确认研究取向。
+- **回查声明**：顾问输出须包含一行 `参考库回查:`（注明参考文件、级别 T0/T1/T2、判据条目及缺口）；缺失该行视为输出无效。分级规则见 `references/agent-registry.md` §2。
+- **标准命名**：32 个顾问的标准名以 `references/agent-registry.md` 为准；简称仅作阅读简写，不得作为执行标识。
+
+### 1.6 多席位辩论（可选）
+
+`multi_seat_debate` 为可选能力（同一角色多席位互辩）。运行环境支持且用户明确选择时方可使用；不支持或未启用时，按普通顾问派发或顺序复核处理，不单独增加环境探测步骤。
+
+### 1.7 输出格式规范
+
+- **过程与沟通文件**：报告、顾问意见、综合文档与最终回复使用中文 Markdown。
+- **图示使用**：涉及机制链、因果链、阶段流程、模块交接、理论嫁接、假设推导、写作派活或顾问调度时，绘制 Mermaid 流程图并附 2–4 句中文说明。
+- **论文正文净稿**：`manuscript*.md`、`revisions/styled*.md`、`literature-review.md` 正文区仅保留标题层级和自然段，严禁出现加粗、表格、列表、代码块、Mermaid 图、任务信息、待补证据或超出结论边界的表述。
+- **终端回复导航**：最终回复使用纯文本箭头标示论文路径与当前位置（详见 `master/output-protocol.md`）。
+
+### 1.8 执行审计与质量评分
+
+无论运行环境是否配置自动 hook，以下三项检查均须执行并如实记录（未执行须写明未执行，不得默认通过）：
+
+- **命令后审计**：执行分析命令后，核对 run-log、stdout/stderr 路径、报错信号及登记输出文件是否存在。手动命令：`python3 scripts/paper_master_guard.py post-bash --workspace paper-workspace`（阻断模式加 `--strict`）。
+- **交付前检查**：模块交付或会话结束前，核对 `_index/project-state.md` 与 `_index/handoff-status.md` 是否已同步至最新产物。手动命令：`python3 scripts/paper_master_guard.py stop-check --workspace paper-workspace`。
+- **项目评分**：实质性执行完一个模块后，运行 `python3 scripts/paper_master_guard.py score-project --workspace paper-workspace --json`，生成 `_index/quality-score.md` 与 `_index/quality-score.json`（评分口径见 `references/evaluation-rubric.md`）。
+
+## 2. 工作区初始化
+
+目录与产物约定见 `master/workspace-contract.md`。项目首次启用时确保以下目录存在：
 
 ```bash
 mkdir -p paper-workspace/{00-meta,01-design,02-literature,03-outline,04-analysis,05-writing,05-writing/reviews,06-submission,07-update,figures,_logs,_logs/hook-audit,_index}
 ```
 
-维护索引文件：
+`_index/` 目录下各索引文件用途：
 
-- `paper-workspace/_index/project-state.md`：主题、阶段、已有产物、缺口、agent 派发状态、关键风险、下一步。
-- `paper-workspace/_index/input-registry.md`：用户提供的任意输入路径及用途。
-- `paper-workspace/_index/handoff-status.md`：阶段之间的交接状态、顾问结论和未解决风险。
-- `paper-workspace/_index/paper-roadmap.md`：面向用户的论文路径图、当前位置、最重要下一步、暂不建议事项和回流提醒。
-- `paper-workspace/_index/quality-score.md` 与 `quality-score.json`：Rubric 阶段质量分、全流程成熟度、证据、失败归因和下一步修复。
+- `project-state.md`：研究主题、当前阶段、已有产物、待补缺口、顾问状态、关键风险与下一步。
+- `input-registry.md`：外部输入材料路径、类型、用途及状态登记。
+- `handoff-status.md`：跨阶段交接清单、已采纳结论与未解决风险。
+- `paper-roadmap.md`：面向研究者的全流程路径图、当前位置、下一步建议、暂缓事项与退回提示。
+- `quality-score.md` / `quality-score.json`：阶段得分、全流程成熟度、失败归因与修复建议。
+- `runtime-capabilities.md`：当前会话的能力探测结果、工具映射与缺失清单。
+- `project-rules.md`：项目根目录无适用规则文件时的项目规则存储位置。
+- `agent-registry.md`：顾问路径索引（同步自 `references/agent-registry.md`）。
 
-## 3. 路由流程
+## 3. 标准执行流程
 
-0. **宿主能力探测、项目规则、Guard 与依赖检查**：读取 `references/runtime-adapter.md`，按其中 §5 探测当前宿主可用能力并把结果写入 `_index/runtime-capabilities.md`（`references/agent-software-adapters.md` 仅作样例对照）。需要自动 guard 时用 `python3 scripts/register_host_hooks.py --check` 查询注册状态，未注册且确认当前宿主可自动触发时再执行注册（`--host auto`，见 `references/hooks-and-evaluation.md` 第 2 节）。随后读取项目级 `project_memory`（如有）、`references/hooks-and-evaluation.md`、`references/evaluation-rubric.md` 和 `references/install-dependencies.md`，按目标模块验收外部依赖。缺失时停止路由，引导用户安装。项目规则缺少 paper-master 标记块时，按 `references/project-rules-writing-layer.md` 写入当前宿主**已有**的项目规则文件；确认没有宿主规则文件时才写 `paper-workspace/_index/project-rules.md`。
-1. 解析用户请求中的任务目标、研究主题、材料路径、目标期刊、方法偏好和阶段线索。
-2. 若用户提供路径，把路径登记到 `paper-workspace/_index/input-registry.md`。
-3. 读取 `master/routing-matrix.md` 选择主模块，并读取 `master/agent-orchestration.md`、`master/output-protocol.md` 与 `master/user-journey.md` 确定顾问派发强度、输出模式和用户层路径图。若显式 Team 请求，额外读取 `references/multiagent-team-config.md` 与 `references/team-routing.md`，先完成用户选择门槛。
-4. 读取对应模块入口和必要 phase/reference。
-5. 执行后更新 `_index/project-state.md`、`_index/handoff-status.md` 与 `_index/paper-roadmap.md`，登记 agent/Team 派发状态、关键风险、质量门控状态、不可声称内容、用户可理解的当前位置和下阶段建议。若模块执行过程中获得稳定用户选择，按 `project_memory` 规则写入当前宿主的项目规则文件标记块；没有宿主规则文件时写入 `_index/project-rules.md`。
-6. 运行 `python3 scripts/paper_master_guard.py score-project --workspace paper-workspace --json`，把 Rubric 分数、失败归因和修复建议写入 `_index/quality-score.md` 与 `_index/quality-score.json`。
+0. **环境与规则检查**：按 `references/runtime-adapter.md` §5 探测运行能力并写入 `_index/runtime-capabilities.md`。如需自动审计，执行 `python3 scripts/register_host_hooks.py --check` 确认注册状态。读取项目规则（若缺失，按 `references/project-rules-writing-layer.md` 写入已有规则文件标记块或 `_index/project-rules.md`）。读取 `references/install-dependencies.md`，若目标模块缺少必需依赖则终止推进并提示安装。
+1. **需求解析**：提取任务目标、研究主题、输入路径、目标期刊、方法偏好及阶段线索。
+2. **输入登记**：若用户提供了文件或目录路径，立即登记至 `paper-workspace/_index/input-registry.md`。
+3. **模块路由**：依据 `master/routing-matrix.md` 确定主模块；结合 `master/agent-orchestration.md`、`master/output-protocol.md` 与 `master/user-journey.md` 确定顾问档位、输出规范与路径图。
+4. **模块执行**：读取目标模块 `MODULE.md` 及对应阶段与参考文件并执行任务。
+5. **索引与规则更新**：更新 `_index/project-state.md`、`handoff-status.md`、`paper-roadmap.md`。若本轮确认了稳定的长期选择，同步写入项目规则标记块或 `_index/project-rules.md`。
+6. **质量评分**：运行 `python3 scripts/paper_master_guard.py score-project --workspace paper-workspace --json`，更新质量分文件。
 
-## 4. 模块边界
+## 4. 模块职责边界
 
-| 模块 | 路径 | 职责 | 默认输出 |
+| 模块 | 路径 | 职责范围 | 默认输出目录 |
 |---|---|---|---|
-| design | `modules/design/` | 选题、理论框架、跨学科头脑风暴、研究设计蓝图 | `paper-workspace/01-design/` |
+| design | `modules/design/` | 选题、理论框架定位、跨学科头脑风暴、研究设计蓝图 | `paper-workspace/01-design/` |
 | lit | `modules/lit/` | 文献检索、文献地图、空白识别、假设推导 | `paper-workspace/02-literature/` |
 | outline | `modules/outline/` | 材料扫描、大纲构建、段落级写作蓝图、证据映射、缺口报告 | `paper-workspace/03-outline/` |
-| analysis | `modules/analysis/` | 数据清洗、描述统计、回归诊断(VIF/BP/DW/Hausman/弱IV)、Logit/Probit/Poisson/Tobit/Heckman、面板FE/RE/GMM、IV/2SLS、DID/事件研究/多期DID、RDD、PSM/CEM/IPW、SCM、分位数回归、中介/调节、时间序列、空间计量、质性编码、混合方法、三语言(Stata/R/Python)完整模板 | `paper-workspace/04-analysis/` |
-| write | `modules/write/` | 章节写作、正文净稿生成、润色、语言扫描、复杂度诊断 | `paper-workspace/05-writing/` |
-| check | `modules/check/` | 全文审稿、编辑首筛、论证闭环、诚信规范、技术与期刊适配；诊断后精确回流 | `paper-workspace/05-writing/reviews/` |
-| submission | `modules/submission/` | Markdown 转 Word、投稿格式模板对照、参考文献 GB/T 7714、APA 与中文社会学体例整理、cover letter、response letter | `paper-workspace/06-submission/` |
-| update | `modules/update/` | 生成全包待审核更新包：学科知识、写作范式、方法协议、流程协议、工具模板和 update 自身候选更新 | `paper-workspace/07-update/` |
-| mechanigraph | `modules/mechanigraph/` | 纯矢量社科学术机制图生成、8大经典拓扑构型匹配、原图复刻与无头渲染自检闭环 | `paper-workspace/figures/` |
+| analysis | `modules/analysis/` | 数据清洗、描述与诊断、基础回归、因果识别、面板与时序、机器学习与因果 ML、质性与混合方法（Stata/R/Python 模板） | `paper-workspace/04-analysis/` |
+| write | `modules/write/` | 章节写作、正文净稿生成、润色、语言扫描与复杂度诊断 | `paper-workspace/05-writing/` |
+| check | `modules/check/` | 全文审稿、编辑首筛、论证闭环、诚信规范、技术与期刊适配、问题退回 | `paper-workspace/05-writing/reviews/` |
+| submission | `modules/submission/` | Markdown 转 Word、模板与格式核对、参考文献体例整理、投稿信与回复信 | `paper-workspace/06-submission/` |
+| update | `modules/update/` | 生成待人工审核的更新包（理论框架、写作范式、方法协议、流程协议、工具模板及自更新） | `paper-workspace/07-update/` |
+| mechanigraph | `modules/mechanigraph/` | 纯矢量社科机制图生成、8 类经典拓扑匹配、原图复刻与无头渲染视觉自检 | `paper-workspace/figures/` |
 
-## 5. 参考文件
+`analysis` 模块包含的方法族明细见 `master/routing-matrix.md`。
 
-`master/workspace-contract.md`、`master/routing-matrix.md`、`master/agent-orchestration.md`、`master/output-protocol.md`、`master/literature-review-protocol.md`、`master/user-journey.md`、`master/input-registry.md`、`master/handoff-checklists.md`、`references/runtime-adapter.md`、`references/agent-software-adapters.md`、`references/agent-registry.md`、`references/install-dependencies.md`、`references/hooks-and-evaluation.md`、`references/evaluation-rubric.md`、`references/user-question-examples.md`、`references/multiagent-team-config.md`、`references/team-routing.md`、`references/project-rules-writing-layer.md`
+## 5. 参考文件索引
 
-**项目内索引**（位于 `paper-workspace/_index/`）:
-- `agent-registry.md` — 智能体完整路径注册表（源自 `references/agent-registry.md`）
-- `project-state.md` — 主题、阶段、产物、缺口
-- `input-registry.md` — 用户输入路径登记
-- `handoff-status.md` — 阶段交接状态
-- `paper-roadmap.md` — 用户层论文路径图、当前位置和下一步
-- `quality-score.md` / `quality-score.json` — Rubric 阶段质量分、全流程成熟度、失败归因和修复建议
-- `project-rules.md` — 当前宿主没有项目规则文件时的 `project_memory` 回退落点
-- `runtime-capabilities.md` — 本次会话的能力探测结果、宿主工具映射与缺失清单
+- **协议层（`master/`）**：`workspace-contract.md`、`routing-matrix.md`、`agent-orchestration.md`、`output-protocol.md`、`literature-review-protocol.md`、`user-journey.md`、`handoff-checklists.md`。
+- **治理层（`references/`）**：`runtime-adapter.md`、`agent-software-adapters.md`、`agent-registry.md`、`agent-prompt-blocks.md`、`install-dependencies.md`、`hooks-and-evaluation.md`、`evaluation-rubric.md`、`user-question-examples.md`、`project-rules-writing-layer.md`。
 
-最终回复说明：论文路径图、当前位置、推荐下一步、需要用户决定的事项、路由模块、输入路径、输出位置、索引更新、guard 审计状态、质量分文件位置、阶段质量分、全流程成熟度和主要未通过项。
+## 6. 交付汇报清单
+
+每次任务结束回复时，须明确报告以下十项：
+1. 纯文本论文路径图
+2. 当前所处阶段与本轮完成事项
+3. 推荐下一步及原因
+4. 需用户决策的事项（如有）
+5. 本轮路由的主模块
+6. 已登记或使用的输入路径
+7. 产物的输出路径
+8. 索引文件更新状态
+9. 命令后及交付前审计状态（自动或手动执行情况）
+10. 质量分文件路径、当前阶段分（`stage_score`）、全流程成熟度（`maturity_score`）及主要未通过项

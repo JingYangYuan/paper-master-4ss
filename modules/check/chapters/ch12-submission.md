@@ -45,4 +45,4 @@
 ## Connects To
 - **ch02-title.md**：两组「三最」分列。
 - **ch01 / ch04 / ch06 / ch07 / ch09 / ch10**：六问与十环节回收各章。
-- **10维回流**：投稿 → editorial-screening-reviewer → submission；仅投稿包 → submission。
+- **10维回流**：投稿 → reviewer → submission；仅投稿包 → submission。

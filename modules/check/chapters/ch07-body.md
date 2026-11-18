@@ -54,4 +54,4 @@
 - **ch06-introduction.md / ch08-conclusion.md**：引言提问、正文证明、结尾回收。
 - **ch01-outline-selection-design-writing.md**：沉浸感与论文人身体。
 - **ch09-notes-and-references.md**：「抄」与引文核验接口。
-- **10维回流**：正文 → argument-integrity-reviewer → outline/analysis/write。
+- **10维回流**：正文 → reviewer → outline/analysis/write。

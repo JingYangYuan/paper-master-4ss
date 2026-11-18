@@ -15,17 +15,19 @@ lit 模块负责文献检索、文献景观地图、研究空白识别、理论�
 | `knowledge-reference` | `modules/lit/references/mineru-pdf2md.md`、`modules/lit/references/install-dependencies.md`、`modules/lit/references/zotero-local-mcp.md` | PDF 全文化协议、依赖安装说明、Zotero 本地 MCP 操作协议 | low |
 | `workflow-protocol` | `modules/lit/phases/*.md` | 检索顺序、用户确认闸门、景观地图和写作阶段 | medium |
 | `workflow-protocol` | `modules/lit/agents/*.md` | 检索、筛选、理论地图、证据质量、假设桥接顾问职责 | medium |
-| `workflow-protocol` | `modules/lit/SKILL.md` | 模式路由、依赖验收、CNKI/Scholar 规则 | medium |
-| `workflow-protocol` | `modules/lit/references/cnki-kns8s-closed-loop.md` | CNKI 检索→分析→下载闭环协议（后端中立：页面层 + 后端层） | high |
-| `workflow-protocol` | `modules/lit/references/pi-chrome-browser.md` | OMP pi-chrome 后端的安装、授权、能力映射与失败恢复 | high |
-| `tooling-template` | `modules/lit/scripts/cnki/kns8s-download.sh`、`modules/lit/scripts/cnki/cookie_sink.py`、`modules/lit/scripts/mineru/pdf2md.py`、`modules/lit/scripts/literature_registry.py` | 免弹窗下载器、Cookie 回环 sink、全文化解析器、文献注册表工具 | high |
+| `workflow-protocol` | `modules/lit/MODULE.md` | 模式路由、依赖验收、CNKI/Scholar 规则 | medium |
+| `workflow-protocol` | `modules/lit/references/cnki.md` | 知网机构出口协议：专业检索、下载单+Referer 直取、验证码冷却规律 | high |
+| `workflow-protocol` | `modules/lit/references/ncpssd.md` | 中文定位入口 NCPSSD、64 种顶刊分级、限流退避与 iCloudWAF 处置 | high |
+| `workflow-protocol` | `modules/lit/references/channels.md`、`modules/lit/references/publishers.md`、`modules/lit/references/books.md`、`modules/lit/references/browser.md` | 英文渠道与假信号诊断、出版社直链、LibGen 专著书轮与书评陷阱、ego-browser 兜底（Turnstile/CDP） | high |
+| `tooling-template` | `modules/lit/scripts/probe_channels.py`、`refs_from_pdf.py`、`enrich_crossref.py`、`download.py`、`books_libgen.py`、`manual_add.py`、`verify_content.py`、`make_report.py`、`ncpssd.py`、`ncpssd_search.py`、`cnki_prepare.py`、`cnki_fetch_batch.mjs`、`cnki_captcha.py`、`cnki_report.py`、`mineru/pdf2md.py`、`literature_registry.py`、`citation_intersection.py` | 探活、切参考文献、Crossref 定位审核、并发下载、LibGen 书轮、手工补录、四件套校验、清单统计、NCPSSD 检索、知网建队/直取/点选/核验、MinerU 全文化、注册表、共引滚雪球 | high |
 
 ## 路由提示
 
-- CNKI 或 Scholar 操作经验优先进入 `references/cnki-kns8s-closed-loop.md`（kns8s 浏览器控制轨道）；若涉及下载逻辑，再更新 `scripts/cnki/kns8s-download.sh` 候选。
-- 浏览器后端经验分流：页面级判据（检索式、点击、验证码几何、结果解析、下载）进 `cnki-kns8s-closed-loop.md`；后端级调用面（工具名、目标选择、Cookie 落盘、超时与恢复）进对应适配文件，OMP 为 `references/pi-chrome-browser.md`，新增后端时同步在闭环协议 §2 增量表登记。
+- CNKI 机构出口取全文经验（专业检索 `TI`/`AU`/`LY`、下载单+Referer 直取、验证码冷却与断点续跑）优先进入 `references/cnki.md`；涉及 NCPSSD 检索、64 种 CSSCI 顶刊清单与限流退避的经验进 `references/ncpssd.md`。
+- 英文文献渠道状态、假信号判据、出版社直链、LibGen 专著书轮与书评陷阱分流进入 `references/channels.md`、`publishers.md`、`books.md`。
+- `ego-browser` 浏览器兜底经验（脚本形态、TaskSpace、Turnstile、CDP `Page.getResourceContent` / `Page.printToPDF`）进 `references/browser.md`。
 - 文献综述结构经验优先进入 `synthesis-guide.md`；涉及 lit 与 write 交接规则（证据表、净稿落点）的候选指向 `master/literature-review-protocol.md`（output-contract 面）。
 - 假设推导经验优先进入 `gap-to-hypothesis.md`。
 - Zotero / 本地文献库操作经验优先进入 `references/zotero-local-mcp.md`；安装命令、授权和排障留在 `install-dependencies.md`。
-- 所有工具候选必须说明浏览器可见性（ZCode 面板或 OMP `Pi Session:` 标签）、验证码几何判据和页面可达性验证方式。Zotero MCP 候选必须说明能力检查方式、摘要准入和不替代 CNKI 的边界。
-- pi-chrome 后端版本的完整性判据（`offscreen` 权限、`offscreen.html`/`offscreen.js`、service worker 保活）属 `tooling-template` 面：源改动落到本机安装目录后，由 `scripts/export_pi_chrome_repo.py` 重导离线发行仓 <https://github.com/JingYangYuan/pi-chrome-mirror>（同时同步 `pi-chrome-browser.md` 与 `cookie_sink.py`）。导出脚本带两道闸门：完整性，以及生成物不得出现上游官方安装通道。
+- 所有工具候选必须说明浏览器可见性（ego lite 窗口）与页面可达性验证方式，并区分知网验证码闸门冷却策略与点选提示判据。Zotero MCP 候选必须说明能力检查方式、摘要准入和不替代 CNKI 的边界。
+- 浏览器兜底经验属 `workflow-protocol` 面：优先更新 `modules/lit/references/browser.md`。

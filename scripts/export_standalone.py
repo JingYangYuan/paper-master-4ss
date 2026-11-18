@@ -21,10 +21,6 @@ Usage:
 Sync rule: after changing any module, family table, routing, or protocol, re-export
 ALL modules (no args) and push paper-master-4ss plus every paper-*-4ss GitHub repo.
 Do not export only the module you edited; sibling READMEs share one family table.
-The same run also refreshes ../pi-chrome-mirror/ — the offline pi-chrome distribution
-repo (installable plugin + lit module's OMP backend doc + cookie sink). Push it too when
-it changes: upstream's published 0.15.51 build lacks the MV3 offscreen keepalive, which
-goes dormant on newer Chrome, so the repo is the sole supported install channel.
 """
 
 from __future__ import annotations
@@ -36,7 +32,6 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import export_pi_chrome_repo as pi_chrome_repo  # noqa: E402
 
 PKG_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = PKG_ROOT.parent
@@ -56,7 +51,6 @@ MODULE_TITLES = {
 MASTER_FILES = [
     "agent-orchestration.md",
     "handoff-checklists.md",
-    "input-registry.md",
     "literature-review-protocol.md",
     "output-protocol.md",
     "routing-matrix.md",
@@ -65,25 +59,26 @@ MASTER_FILES = [
 ]
 GOVERNANCE_REFS = [
     "agent-registry.md",
+    "agent-prompt-blocks.md",
     "agent-software-adapters.md",
     "user-question-examples.md",
-    "multiagent-team-config.md",
     "project-rules-writing-layer.md",
     "evaluation-rubric.md",
     "hooks-and-evaluation.md",
     "install-dependencies.md",
     "runtime-adapter.md",
-    "team-routing.md",
 ]
-SCRIPT_FILES = ["paper_master_guard.py", "register_zcode_hooks.py", "register_host_hooks.py"]
+SCRIPT_FILES = ["paper_master_guard.py", "register_host_hooks.py"]
 TEXT_SUFFIXES = {".md", ".py", ".do", ".R", ".sh", ".js", ".json"}
 SKIP_NAMES = {".env.kie", ".DS_Store"}
 
-# 宿主专属 frontmatter 键（Claude Code 兼容键）。总控包已不声明它们；
+# 插件式宿主的 frontmatter 兼容键。总控包已不声明它们；
 # 导出时作为保险丝剥离，避免独立包继承宿主绑定。
 HOST_ONLY_FRONTMATTER_KEYS = {
     "hooks",
     "allowed-tools",
+    "invocable",
+    "args_hint",
     "tools",
     "model",
     "user-invocable",
@@ -104,15 +99,12 @@ CHECK_PREFIXES = [
     "examples/",
 ]
 
-# 这些脚本本身就在生成/校验其他仓与宿主配置路径，命中相对路径模式属误报。
-CHECK_SKIP_SCRIPTS = {"scripts/export_pi_chrome_repo.py"}
+# 不随包复制的目录（相对 modules/<m>/）：第三方运行库快照改走 runtime Release 通道。
+# 防快照被手工 rsync 回源树后又被导出；python-env 是"清单+脚本"形态样板，保留随包。
+EXCLUDE_DIRS = {"templates/_shared/r-lib", "templates/_shared/stata-ado"}
 
-# 随包分发的第三方依赖快照：不是本 skill 的文档，其自带 NEWS/README 会误触相对路径检查。
-VENDORED_PREFIXES = [
-    "templates/_shared/stata-ado/",
-    "templates/_shared/r-lib/",
-    "templates/_shared/python-env/",
-]
+# python-env 的安装脚本/锁文件含外部路径与包名，不是包内相对引用，检查时跳过。
+CHECK_SKIP_PREFIXES = {"templates/_shared/python-env/"}
 
 NOTE_TEMPLATE = (
     "> **拆分版路径约定**：本包由 `paper-master-4ss/scripts/export_standalone.py` 从 "
@@ -201,7 +193,7 @@ MODULE_README_EXTRA = {
     "lit": """
 ## 它做什么
 
-按固定检索顺序做中英文文献综述：方向确认 → WebSearch → 本地库 / Zotero MCP（可选）→ Annual Reviews → 引文链 → CNKI / Google Scholar 精准补充 → 文献地图。模式 D 才推导假设。
+集成 `lit-down` 文献检索下载管线与文献综述流程：方向确认 → 探活与出口 IP 检查 → 定位分流（中文走 NCPSSD 免登录定位与 64 种 CSSCI 顶刊分级；英文走 Crossref + audit）→ 下载落地（英文按年份分流 `mirror-first` / `oa-first` + `web_search` 补位 + LibGen 专著书轮；中文走知网专业检索 + 下载单直取）→ 四件套内容校验 → 注册表归档与 MinerU 全文化 → 文献地图与假设推导（模式 D）。
 
 Zotero 是可选增强。启用后按 `references/zotero-local-mcp.md` 做能力检查、本地库检索、摘要即时入库和全文深读；未启用不得强制安装。
 
@@ -209,15 +201,13 @@ Zotero 是可选增强。启用后按 `references/zotero-local-mcp.md` 做能力
 
 | 模式 | 用途 |
 |---|---|
-| A 完整地图 | 6 轮以上检索，40–80 篇 |
-| B 定向综述 | 4 轮，15–30 篇 |
-| C 快速概览 | 2 轮，10–20 篇 |
-| D 综述+假设 | 5 轮以上，含假设推导 |
-| E 知网专项 | CNKI kns8s 闭环为主 |
+| A 完整地图 | 6 轮以上双语检索落地，40–80 篇 |
+| B 定向综述 | 4 轮核心检索落地，15–30 篇 |
+| C 快速概览 | 2 轮快速检索，10–20 篇 |
+| D 综述+假设 | 5 轮以上检索落地，含假设推导 |
+| E 检索与下载专项 | 中文 NCPSSD→CNKI / 英文 Crossref→镜像/OA/LibGen 批量落地 |
 
-CNKI 依赖可见浏览器控制（`browser_control`）：后端按宿主选取，常见样例为 ZCode 内置 browser-use（无需安装）与 OMP pi-chrome（一次性加载伴生 Chrome 扩展，见 `references/pi-chrome-browser.md`）。Google Scholar 检索用 `web_fetch`/`web_search` 能力。
-
-OMP 后端的插件本体与适配文档在同一发行仓：<https://github.com/JingYangYuan/pi-chrome-mirror>（由本包 `scripts/export_pi_chrome_repo.py` 同步导出，含完整插件与伴生扩展）。
+CNKI 取全文与浏览器 CDP 兜底依赖可见浏览器控制（`browser_control`）：统一走 `ego-browser` 后端（见 `references/browser.md` 与 `references/cnki.md`）；纯英文 HTTP 渠道与中文 NCPSSD 定位无需浏览器即可执行。
 """,
     "outline": """
 ## 它做什么
@@ -235,7 +225,7 @@ OMP 后端的插件本体与适配文档在同一发行仓：<https://github.com
     "analysis": """
 ## 它做什么
 
-把结构化数据、面板、访谈/田野/开放题文本和政策档案转成可复现的清洗脚本、估计结果、质性编码和论文结果素材。内置 Stata、R、Python 三语言模板。
+把结构化数据、面板、访谈/田野/开放题文本和政策档案转成可复现的清洗脚本、估计结果、质性编码和论文结果素材。内置 Stata、R、Python 三语言模板；`ml` 模式另备四子流程机器学习模板（监督学习、PDS／DML／IV 选择、CATE／GATES／BLP、ML 宽表与方法说明），配套 `references/ml-causal-ml-methods.md` 单文件方法库（含判据 C24–C31）。
 
 不替代 design 的识别策略裁决；结果声称边界交给 write。Stata MCP / 本地 Stata 按 `references/install-dependencies.md` 验收。
 """,
@@ -312,6 +302,8 @@ def rewrite_paths(text: str, module: str) -> str:
 
     text = text.replace(f"paper-master-4ss/modules/{module}/", "")
     text = text.replace(f"modules/{module}/", "")
+    # 主包内模块入口叫 MODULE.md，独立包内已重命名为 SKILL.md；链接同步改写，避免悬空。
+    text = text.replace("MODULE.md", "SKILL.md")
     text = text.replace("paper-master-4ss/master/", "master/")
     text = text.replace("paper-master-4ss/references/", "references/")
     text = text.replace("paper-master-4ss/scripts/", "scripts/")
@@ -319,7 +311,7 @@ def rewrite_paths(text: str, module: str) -> str:
 
 
 def strip_host_frontmatter(text: str) -> str:
-    """删除 frontmatter 中的宿主专属键（Claude Code 兼容键）。
+    """删除 frontmatter 中的宿主专属键（插件式宿主的兼容键）。
 
     总控包已不含这些键；这里是导出侧的保险丝：即使有人手工加回，
     独立包也不会带着宿主专属 frontmatter 发布。
@@ -371,6 +363,9 @@ def copy_tree(src: Path, dst: Path) -> None:
         if item.name == ".env.kie":
             continue
         rel = item.relative_to(src)
+        rel_pos = rel.as_posix()
+        if any(rel_pos == p or rel_pos.startswith(p + "/") for p in EXCLUDE_DIRS):
+            continue
         target = dst / rel
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(item, target)
@@ -399,17 +394,17 @@ def check_package(target: Path) -> list[str]:
         rel = item.relative_to(target)
         # master/ 协议与治理 references 是导出快照，保留总控包上下文，不做严格检查；
         # update 的 targets/ 是外部模块命名空间映射，按设计指向其他包
-        if rel.parts[0] == "master" or item.name in GOVERNANCE_REFS or "targets/" in str(rel):
+        # （用 rel.parts 匹配，避免 Windows 反斜杠路径下 "targets/" in str(rel) 失效）
+        if rel.parts[0] == "master" or item.name in GOVERNANCE_REFS or "targets" in rel.parts:
             continue
-        # 随包分发的第三方依赖快照（Stata ado 库、R 包库、Python 锁文件）不是本 skill 的文档，
-        # 其自带的 NEWS/README 会命中本检查器的相对路径模式，属误报，整体跳过。
-        if VENDORED_PREFIXES and any(str(rel).startswith(p) for p in VENDORED_PREFIXES):
+        # python-env 的安装脚本/锁文件含外部路径与包名，不是包内相对引用
+        if any(str(rel).startswith(p) for p in CHECK_SKIP_PREFIXES):
             continue
-        # 宿主 hook 注册器内嵌各宿主的项目级配置路径（`.agents/hooks.json` 等），不是包内引用
+        # 宿主 hook 注册器由用户回填配置路径，不含包内相对引用
         if str(rel) == "scripts/register_host_hooks.py":
             continue
         text = read_text(item)
-        # 宿主专属 frontmatter 保险丝：独立包不得携带 Claude Code 兼容键
+        # 宿主专属 frontmatter 保险丝：独立包不得携带插件式宿主的兼容键
         if item.suffix == ".md":
             parts = text.split("---", 2)
             if len(parts) >= 3 and parts[0].strip() == "":
@@ -426,8 +421,7 @@ def check_package(target: Path) -> list[str]:
             if token.endswith(".env.kie"):
                 continue
             stem = token.split("*")[0].rstrip("/")
-            # 这些脚本本身就在生成/校验其他仓与宿主配置路径（如 .agents/hooks.json），不是包内相对路径
-            if not stem or stem in CHECK_SKIP_SCRIPTS:
+            if not stem:
                 continue
             candidates = [target / stem, item.parent / stem]
             if any(c.exists() for c in candidates):
@@ -484,6 +478,12 @@ def export(module: str) -> tuple[list[str], int, int]:
 
     copy_tree(src, target)
 
+    # 主包内模块入口叫 MODULE.md（避免宿主递归发现把 9 个模块注册成独立 skill）；
+    # 独立包内恢复为 SKILL.md 作为唯一入口。
+    module_md = target / "MODULE.md"
+    if module_md.is_file():
+        module_md.rename(target / "SKILL.md")
+
     master_dst = target / "master"
     master_dst.mkdir(exist_ok=True)
     for name in MASTER_FILES:
@@ -513,24 +513,25 @@ def export(module: str) -> tuple[list[str], int, int]:
 
     rewritten = rewrite_text_files(target, module)
     make_readme(target, module)
+    if module == "analysis":
+        (target / "RUNTIME.md").write_text(
+            "# 运行期依赖获取\n\n"
+            "本包不随包分发第三方编译产物（R site-library 与 Stata ado 快照）。三种获取方式：\n\n"
+            "1. 默认：在线安装——R 用 `install.packages()`（见 `references/r-ecosystem-setup.md` §3），"
+            "Stata 用 `ssc install`（包清单 `templates/_shared/stata-packages.txt`，见 "
+            "`references/stata-ecosystem-setup.md` §4）。\n"
+            "2. 复现：R 用 `renv` 锁文件；Stata 按包清单逐包安装。\n"
+            "3. 离线：从 runtime 仓库 Release 下载快照 zip，解压到 `<skill>/runtime/`，加载方式见 "
+            "`templates/_shared/runtime-README.md`。\n",
+            encoding="utf-8",
+        )
     (target / ".gitignore").write_text(
-        ".DS_Store\n__pycache__/\n*.py[cod]\n*$py.class\n*.log\n.env\n.env.*\n",
+        ".DS_Store\n__pycache__/\n*.py[cod]\n*$py.class\n*.log\n.env\n.env.*\n"
+        "runtime/\nrenv/library/\n*.tar.gz\n",
         encoding="utf-8",
     )
     broken = check_package(target)
     return broken, rewritten, sum(1 for _ in target.rglob("*") if _.is_file())
-
-
-def export_pi_chrome_repo() -> None:
-    """刷新离线发行仓：插件本体 + CNKI 适配文档。"""
-    source = pi_chrome_repo.DEFAULT_SOURCE
-    if not source.is_dir():
-        print(f"[pi-chrome-mirror] 跳过：未找到本机 pi-chrome 安装（{source}）")
-        return
-    files = pi_chrome_repo.build(source)
-    pi_chrome_repo.write_target(files)
-    vendored = len([k for k in files if k in pi_chrome_repo.VENDOR_FILES])
-    print(f"[pi-chrome-mirror] 导出完成: {pi_chrome_repo.TARGET}（vendored {vendored} + 生成 {len(files) - vendored} 文件）")
 
 
 def main() -> int:
@@ -555,8 +556,6 @@ def main() -> int:
                     print(f"  - {b}")
             else:
                 print(f"[{m}] 路径自检通过")
-        if not args.modules:
-            export_pi_chrome_repo()
         return 0
 
     failed = False
@@ -574,19 +573,6 @@ def main() -> int:
                 print(f"  - {b}")
         else:
             print(f"[{m}] 路径自检通过: {target}")
-    if not args.modules:
-        source = pi_chrome_repo.DEFAULT_SOURCE
-        if not source.is_dir():
-            print(f"[pi-chrome-mirror] 跳过：未找到本机 pi-chrome 安装（{source}）")
-        else:
-            drift = pi_chrome_repo.check_target(pi_chrome_repo.build(source))
-            if drift:
-                failed = True
-                print(f"[pi-chrome-mirror] 未同步（{len(drift)} 处）:")
-                for item in drift[:10]:
-                    print(f"  - {item}")
-            else:
-                print(f"[pi-chrome-mirror] 已同步: {pi_chrome_repo.TARGET}")
     return 1 if failed else 0
 
 

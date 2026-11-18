@@ -41,4 +41,4 @@
 ## Connects To
 - **ch07-body.md**：「抄」「隔」与引文质量。
 - **ch10-technical-standards.md / ch12-submission.md**：格式与核对。
-- **10维回流**：引文注释 → ethics-conformance-reviewer → lit/submission。
+- **10维回流**：引文注释 → reviewer → lit/submission。

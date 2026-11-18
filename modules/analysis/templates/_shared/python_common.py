@@ -131,6 +131,44 @@ def find_latest_report(out_root: str | Path, prefix: str) -> Path | None:
     return matches[-1] if matches else None
 
 
+def task_table(out, base: str, task: str) -> Path:
+    """任务级表路径：`tables/<base>-<task>.csv`。
+
+    一个子流程里多个 `--tasks` 会写同一张表时，先用本函数落任务级副本，
+    再用 `merge_task_tables` 合并成主表；不这么做后跑的任务会默默盖掉前一个任务的结果。
+    """
+    return out["tables"] / f"{base}-{task}.csv"
+
+
+def merge_task_tables(out, base: str, fields: list[str] | None = None) -> Path | None:
+    """把 `tables/<base>-*.csv` 合并为 `tables/<base>.csv`（列取并集，缺列留空）。
+
+    无任务级副本时返回 None，不生成空主表。`fields` 给定则固定列序，未列出的列排在后面。
+    """
+    import pandas as pd
+
+    tables = out["tables"]
+    parts = sorted(p for p in tables.glob(f"{base}-*.csv"))
+    frames = []
+    for path in parts:
+        frame = pd.read_csv(path, encoding="utf-8-sig")
+        frame.insert(0, "任务", path.stem[len(base) + 1 :])
+        frames.append(frame)
+    if not frames:
+        return None
+    merged = pd.concat(frames, ignore_index=True, sort=False)
+    order = list(fields or [])
+    order = [c for c in order if c in merged.columns] + [c for c in merged.columns if c not in order]
+    merged = merged.loc[:, order]
+    merged = merged.astype(object).where(merged.notna(), "")
+    target = tables / f"{base}.csv"
+    with target.open("w", newline="", encoding="utf-8-sig") as fh:
+        writer = csv.DictWriter(fh, fieldnames=list(merged.columns))
+        writer.writeheader()
+        writer.writerows(merged.to_dict("records"))
+    return target
+
+
 def task_enabled(args, name: str) -> bool:
     raw = getattr(args, "tasks", "") or ""
     if not raw:

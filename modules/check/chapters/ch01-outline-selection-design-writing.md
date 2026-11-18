@@ -54,4 +54,4 @@
 ## Connects To
 - **ch02-title.md / ch04-abstract.md / ch05-keywords.md / ch06-introduction.md / ch07-body.md / ch08-conclusion.md / ch12-submission.md**：五感与论文人各部位交叉验收。
 - **ch09-notes-and-references.md**：服饰=注释，规范意识接口。
-- **10维回流**：选题/创新 → argument-integrity-reviewer → design/lit。
+- **10维回流**：选题/创新 → reviewer → design/lit。

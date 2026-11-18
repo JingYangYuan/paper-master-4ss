@@ -1,5 +1,20 @@
 # 公共管理学理论框架目录
 
+<!-- section-index (auto-generated, do not edit by hand; re-run tool after edits) -->
+<!-- 分区索引：本文件较大，按下表行号定点读取，不要整读。行号含本索引块偏移。 -->
+<!-- L17: 一、公共管理经典理论 (Classical Public Administration) -->
+<!-- L133: 二、新公共管理 (New Public Management, NPM) -->
+<!-- L221: 三、新公共治理 (New Public Governance, NPG) -->
+<!-- L342: 四、公共政策理论 -->
+<!-- L444: 五、公共选择理论 (Public Choice Theory) -->
+<!-- L532: 六、新公共服务 (New Public Service, NPS) -->
+<!-- L620: 七、数字政府与电子政务 (Digital Government & E-Government) -->
+<!-- L708: 八、危机管理与韧性治理 (Crisis Management & Resilience Governance) -->
+<!-- L797: 选择合适的理论框架 -->
+<!-- L820: 多框架组合建议 -->
+<!-- L840: 理论写作提示 -->
+
+
 ## 一、公共管理经典理论 (Classical Public Administration)
 
 ### 1.1 官僚制理论 / Bureaucracy Theory (Weber 1922)

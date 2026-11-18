@@ -1,84 +1,27 @@
-# Phase 02: 社会科学候选抽取
+# Phase 02：社会科学候选条目抽取
 
-## 顾问派发闸门
+## 顾问派发门控
 
-候选抽取前，必须派发 `modules/update/agents/knowledge-extraction-consultant.md`。该顾问必须读取 `modules/update/references/source-types.md`、`modules/update/references/update-schema.md` 和本 phase。意见写入 `paper-workspace/_logs/agents/update-[YYYY-MM-DD]/knowledge-extraction-consultant.md`。
+抽取候选前须派发 `modules/update/agents/extraction-consultant.md`（须读取 `modules/update/references/source-types.md`、`modules/update/references/update-schema.md` 及本阶段文件）。意见写入 `paper-workspace/_logs/agents/update-[YYYY-MM-DD]/extraction-consultant.md`。
 
 ## 目标
 
-将来源材料拆解为可审核、可路由、可验证的候选更新项。候选项可以是理论知识、写作范式、方法协议、流程协议、工具模板或 self-update，但都必须保留来源、证据等级、适用边界和风险。
+将输入材料拆解为可审核、可路由、可验证的结构化候选条目，完整保留来源路径、证据等级、适用边界与风险提示。
 
-## 来源类型
+## 来源定级与抽取模板
 
-按 `modules/update/references/source-types.md` 判断来源类型和风险。不得把普通摘要直接作为候选条目；必须抽取可迁移结构。
+依据 `modules/update/references/source-types.md` 评估来源类型与可信度，提取可迁移结构而非整段摘要复制：
 
-## 抽取字段
+- **学科知识**：概念定义、理论谱系、核心主张、机制链条、边界条件、操作化与测量、代表文献与证据、争议与竞争理论、适用场景；
+- **写作范式**：适用章节/环节、写作功能、论证动作、材料组织、段落/结构模板、常见失败、交付门槛、可迁移示例；
+- **方法协议**：适用方法/场景、前置条件、操作步骤、诊断/门槛、报告规范、常见失败、验证材料；
+- **流程协议**：影响入口或阶段、现有流程问题、建议流程、顾问影响、输出协议影响、跨模块影响、兼容性风险；
+- **工具模板**：目标脚本或模板、建议行为、输入/输出样例、人工验证命令、失败处理/回滚提示、依赖与兼容性风险；
+- **`self-update`**：目标 `update` 文件、自更新理由、保留 `pending` 审核说明、目标路由与审核门控双重复核要求、静态一致性验证方式。
 
-### 学科知识
+## 输出格式
 
-- 概念定义
-- 理论谱系
-- 核心主张
-- 机制链条
-- 边界条件
-- 操作化与测量
-- 代表文献与证据
-- 争议与竞争理论
-- 适用研究场景
-
-### 写作范式
-
-- 适用章节或环节
-- 写作功能
-- 论证动作
-- 材料组织方式
-- 段落或结构模板
-- 常见失败模式
-- 质量门槛
-- 可迁移示例
-
-### 方法协议
-
-- 适用方法或场景
-- 前置条件
-- 操作步骤
-- 诊断或质量门槛
-- 报告规范
-- 常见失败模式
-- 验证材料
-
-### 流程协议
-
-- 影响入口或 phase
-- 现有流程问题
-- 建议流程
-- agent 影响
-- 输出协议影响
-- 跨模块影响
-- 兼容性风险
-
-### 工具模板
-
-- 目标脚本或模板
-- 建议行为
-- 输入样例
-- 输出样例
-- 人工验证命令
-- 失败处理或回滚提示
-- 依赖或兼容性风险
-
-### Self-update
-
-- 目标 update 文件
-- 为什么需要自更新
-- 不绕过 pending 审核的说明
-- 目标路由复核要求
-- 审核门控复核要求
-- 模拟路由或静态一致性验证方式
-
-## 输出
-
-在 `paper-workspace/07-update/evidence/` 中保存来源摘要或证据摘录，在后续 proposed-diffs 中使用 `Candidate ID` 引用。
+在 `paper-workspace/07-update/evidence/` 保存来源摘录并分配稳定 `Candidate ID`供后续引用：
 
 ```markdown
 # Source Extraction
@@ -95,9 +38,9 @@
 |---|---|---|---|---|---|---|
 ```
 
-## 反模式
+## 禁止事项
 
-- 不得把整篇材料原样摘抄为候选。
-- 不得把单个案例经验直接提升为通用规则。
-- 不得把脚本变更写成已实现功能。
-- 不得把 self-update 候选写成可自动合并。
+- 不得整篇原文照搬充当候选；
+- 不得将单一案例经验直接上升为通用强制规则；
+- 不得将尚未实现的脚本变更表述为已完成功能；
+- 不得将 `self-update` 候选标记为可自动合并。

@@ -12,7 +12,7 @@ outline 模块负责把已有材料转换为论文大纲、证据映射和缺口
 | `knowledge-reference` | `modules/outline/references/output-formats.md` | 大纲、证据映射、缺口报告格式 | low |
 | `workflow-protocol` | `modules/outline/phases/*.md` | 素材扫描、大纲构建、质量检查流程 | medium |
 | `workflow-protocol` | `modules/outline/agents/*.md` | 结构、素材分类、章节逻辑、证据映射、缺口复核顾问职责 | medium |
-| `workflow-protocol` | `modules/outline/SKILL.md` | 问询顺序、门控规则、双轨路由 | medium |
+| `workflow-protocol` | `modules/outline/MODULE.md` | 问询顺序、门控规则、双轨路由 | medium |
 
 ## 路由提示
 

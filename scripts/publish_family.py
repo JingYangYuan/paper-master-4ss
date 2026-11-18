@@ -4,13 +4,13 @@
 对应 `export_standalone.py` 头部写的同步纪律：改任一模块后，无参数重新导出全部
 独立包，再 push 全部 GitHub 仓——本脚本负责后半段。
 
-每个仓库使用一个常驻缓存克隆（`~/.skills-manager/.publish-cache/<repo>`），
+每个仓库使用一个常驻缓存克隆（位于用户主目录下的 `.skills-manager/.publish-cache/<repo>`，由本工具自建自用），
 用 rsync `--delete` 使工作区与导出目录完全一致（保留 `.git`）。无差异则跳过，
 不产生空提交。
 
 用法：
     python3 scripts/publish_family.py                 # 同步并推送全部
-    python3 scripts/publish_family.py lit pi-chrome-mirror  # 只推送指定仓库
+    python3 scripts/publish_family.py lit           # 只推送指定仓库
     python3 scripts/publish_family.py --dry-run       # 只显示将发生的变化
 """
 
@@ -39,10 +39,9 @@ TARGETS = [
     ("submission", "paper-submission-4ss", "paper-submission-4ss"),
     ("update", "paper-update-4ss", "paper-update-4ss"),
     ("mechanigraph", "paper-mechanigraph-4ss", "paper-mechanigraph-4ss"),
-    ("pi-chrome-mirror", "pi-chrome-mirror", "pi-chrome-mirror"),
 ]
 
-COMMIT_MESSAGE = "sync: 重导独立包与 pi-chrome 离线发行仓（github.com/{owner}/pi-chrome-mirror）"
+COMMIT_MESSAGE = "sync: 重导独立包（paper-4ss 家族）"
 
 
 def run(cmd: list[str], cwd: Path | None = None, check: bool = True) -> subprocess.CompletedProcess[str]:
@@ -83,7 +82,6 @@ def sync_and_push(local: Path, repo: str, dry_run: bool, message: str) -> str:
         run([
             rsync, "-a", "--delete",
             "--exclude", ".git/",
-            "--exclude", ".zcode/",
             "--exclude", ".DS_Store",
             "--exclude", "__pycache__/",
             f"{local}/", f"{clone}/",

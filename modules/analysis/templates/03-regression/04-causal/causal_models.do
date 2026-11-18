@@ -1,5 +1,6 @@
 * Paper Analysis 4SS - 03 regression / 04 causal models executable Stata template.
-* 按 analysis-execution-plan 保留需要的块并删除不适用的方法块；本模板不做运行时条件跳过。
+* 按 analysis-execution-plan 保留需要的块并删除不适用的方法块；主回归块不做运行时条件跳过，
+* 唯一例外是末尾的识别诊断钩子（causal_diagnostics.do）：缺包/缺变量时写 SKIP 行并继续。
 * ivreghdfe 的回归量不得含与吸收的个体固定效应共线的时不变控制变量；如报 rc=504，删除或替换该控制变量后重跑。
 * 恰好识别时删除表A1a 的 estat overid 行（报 invalid subcommand）。
 * 表A1c 的 bacondecomp 需要至少 2 个处理时点组，否则报 r(3301)。
@@ -221,5 +222,10 @@ file open fr using "${OUT_ROOT}/reports/causal-results.md", write replace
 file write fr "# Causal Results" _n _n
 file write fr "已运行 IV/2SLS/LIML/GMM、IV 诊断、2×2 与 TWFE DID、2×2 双重稳健 DID、事件研究（csdid/did_imputation/eventstudyinteract/did2s/stackedev/jwdid）、Bacon 分解与 honestdid 平行趋势敏感性、RDD（带宽与安慰剂断点）、PSM/CEM/熵平衡/IPW/AIPW 与合成控制。可声称内容以生成的表格和 .log 为准。" _n
 file close fr
+
+di "--> 表A1g：识别诊断钩子（五个 F / AR / RD 回退 / SKIP 表）"
+* 把 causal_diagnostics.do 复制到项目脚本目录，或用 PM_DIAG 指定路径；缺包/缺变量只写 SKIP，不阻断。
+if "${PM_DIAG}" == "" global PM_DIAG "paper-workspace/04-analysis/scripts/causal_diagnostics.do"
+capture noisily do "${PM_DIAG}"
 
 capture log close _all

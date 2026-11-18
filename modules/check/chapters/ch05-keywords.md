@@ -43,4 +43,4 @@
 
 ## Connects To
 - **ch02-title.md / ch04-abstract.md**：题摘词一致。
-- **10维回流**：关键词 → editorial-screening-reviewer → write。
+- **10维回流**：关键词 → reviewer → write。

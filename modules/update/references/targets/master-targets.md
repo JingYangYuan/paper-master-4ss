@@ -11,7 +11,7 @@ update 只能在 `paper-workspace/07-update/` 生成待审核候选，禁止直�
 | Target surface | Target files | 适用候选 | Risk tier |
 |---|---|---|---|
 | `master-routing` | `master/routing-matrix.md` | 用户意图消歧、主模块选择 | medium |
-| `master-routing` | `master/agent-orchestration.md` | 顾问派发强度与跨模块默认链路 | medium |
+| `master-routing` | `master/agent-orchestration.md` | 顾问派活强度与跨模块默认链路 | medium |
 | `master-routing` | `master/handoff-checklists.md` | 阶段交接清单 | medium |
 | `master-routing` | `master/user-journey.md` | 用户层论文路径图 | medium |
 | `master-routing` | `references/agent-registry.md` | 跨模块并行触发矩阵与路径说明 | medium |

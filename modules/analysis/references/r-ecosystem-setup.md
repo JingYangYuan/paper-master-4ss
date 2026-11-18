@@ -49,7 +49,7 @@ writeLines(capture.output(sessionInfo()), "paper-workspace/04-analysis/reports/r
 
 ### 持久配置（推荐）
 
-在 `~/.Rprofile` 中添加：
+在用户级 R 配置文件（`<主目录>/.Rprofile`）中添加：
 
 ```r
 options(repos = c(CRAN = "https://mirrors.tuna.tsinghua.edu.cn/CRAN/"))
@@ -69,6 +69,14 @@ options(BioC_mirror = "https://mirrors.tuna.tsinghua.edu.cn/bioconductor")
 
 ## 3. 关键依赖安装
 
+获取路径三选一（默认走第 1 条）：
+
+| 路径 | 适用 | 命令要点 |
+|------|------|----------|
+| ① CRAN/PPM 二进制（默认） | 联网环境；Windows 直接 `win.binary`，macOS 用 Posit Package Manager 二进制 | `install.packages(pkgs)`（Windows 自动二进制；macOS 可 `options(repos = c(CRAN = "https://packagemanager.posit.co/cran/__linux__/latest"))`） |
+| ② renv 锁文件（复现） | 论文复现、可追溯 | `renv::snapshot()` / `renv::restore()` |
+| ③ Release 资产（离线兑底） | 断网；仅 R 4.6.x + macOS arm64 可直接加载 | 见 §3.5 |
+
 包安装优先级：
 
 1. 已安装包直接复用，不自动升级破坏项目。
@@ -77,16 +85,27 @@ options(BioC_mirror = "https://mirrors.tuna.tsinghua.edu.cn/bioconductor")
 4. 空间包失败优先使用二进制包、Rocker geospatial 镜像或系统库补齐。
 5. 开发版只用于明确需要新特性时。
 
+模板硬依赖（与 `templates/_shared/r_common.R` 的 `requireNamespace` 实测一致）：
+
 ```r
 required <- c(
-  "tidyverse", "haven", "readxl", "arrow", "janitor",
-  "fixest", "marginaleffects", "modelsummary", "broom",
-  "ggplot2", "patchwork", "cowplot", "ggrepel", "scales",
-  "viridis", "ggthemes", "ggridges", "ggdist", "ggeffects",
-  "showtext"
+  "haven", "readxl",                       # 读数据
+  "fixest", "plm", "lmtest", "sandwich",     # 面板/高维FE/推断
+  "AER", "sampleSelection",                  # ivreg / tobit / Heckman
+  "did", "Synth",                            # DID / 合成控制
+  "MatchIt", "WeightIt",                     # PSM / IPW
+  "sensemakr", "robomit",                    # 敏感性分析
+  "rdrobust",                                # 断点回归
+  "marginaleffects", "fwildclusterboot"      # 边际效应 / wild bootstrap
 )
 missing <- required[!vapply(required, requireNamespace, logical(1), quietly = TRUE)]
 if (length(missing) > 0) install.packages(missing)
+```
+
+`MASS`、`nnet`、`survival` 随 R 本体安装（recommended 包），不需单独装。文档示例（非模板硬依赖）另用 `modelsummary`、`ggplot2` 系绘图包，用到时按需安装：
+
+```r
+extras <- c("modelsummary", "ggplot2", "patchwork", "cowplot", "ggrepel", "scales", "viridis", "showtext")
 ```
 
 `03-regression` 模型扩展所需的包：
@@ -126,21 +145,17 @@ spatial <- c("sf", "tmap", "leaflet", "ggspatial")
 interactive <- c("plotly", "htmlwidgets", "DT")
 ```
 
-### 随包分发的 R 包库快照（免安装路径）
+### 3.5 离线安装（Release 资产，仅 R 4.6.x + macOS arm64）
 
-本 skill 在 `templates/_shared/r-lib/4.6/` 下附带了一份本地 `site-library` 的完整快照
-（179 包 / 21871 文件 / 495 MB，R 4.6.0 + macOS arm64），用于在**无法联网或不想逐个编译**的环境里
-让 `03-regression` 的 R 模板开箱即用：
+无法联网且机器匹配快照平台时，从 runtime 仓库 Release 下载 `r-lib-4.6-macos-arm64.zip`，解压到 `<skill>/runtime/r-lib/4.6`，然后：
 
 ```r
-.libPaths(c("<skill 根目录>/modules/analysis/templates/_shared/r-lib/4.6", .libPaths()))
+.libPaths(c("<skill>/runtime/r-lib/4.6", .libPaths()))
 ```
 
-- 两种方式**二选一**：已用 `install.packages` 装好依赖时不要再加载本目录，避免版本混用。
-- 快照含编译产物（`.so`/`.dylib`），**只在 R 4.6.x + macOS arm64 可直接加载**；其它版本/平台请用上面的清单方式。
-- 不含 R 随附的 recommended/base 包（`MASS`、`nnet`、`survival`、`boot`、`Matrix` 等），它们随 R 本体安装。
-- 不含 `spdep`/`spatialreg`/`splm`（依赖链 `sf` → GDAL 不可得）；R 空间计量由 base R 实现承载。
-- 详见 `templates/_shared/r-lib/README.md`。
+验收：`for (p in c("fixest","readxl")) cat(p, requireNamespace(p, quietly=TRUE), "\n")` 两行均为 `TRUE`。
+
+注意：快照不含 `MASS`/`nnet`/`survival` 等 recommended 包（随 R 本体）；不含 `spdep`/`spatialreg`/`splm`（R 空间计量由 `r_common.R` 的 base R 实现承载）。已用 `install.packages` 装好依赖时不要再加载快照目录，避免版本混用。获取方式总览与维护流程见 [runtime-README.md](../templates/_shared/runtime-README.md)。
 
 版本锁定（论文复现）：
 
@@ -218,12 +233,13 @@ Rscript "script.R"
 ### 描述统计图
 
 ```r
-plot_distribution <- function(df, var, group = NULL) {
+plot_distribution <- function(df, var, group = NULL, out_root = "paper-workspace/04-analysis") {
+  dir.create(file.path(out_root, "figures"), showWarnings = FALSE, recursive = TRUE)
   p <- ggplot(df, aes(x = .data[[var]], fill = if (!is.null(group)) .data[[group]] else NULL)) +
     geom_histogram(bins = 30, alpha = 0.75, color = "white") +
-    theme_paper() +
+    theme_minimal(base_size = 12) +
     labs(x = var, y = "Count", fill = group)
-  save_plot_pair(p, paste0("dist-", var))
+  ggsave(file.path(out_root, "figures", paste0("dist-", var, ".pdf")), p, device = cairo_pdf)
   p
 }
 ```
@@ -231,12 +247,14 @@ plot_distribution <- function(df, var, group = NULL) {
 ### 回归系数图
 
 ```r
-plot_model_coefficients <- function(models, coef_omit = "Intercept|^factor|^C\\(") {
+plot_model_coefficients <- function(models, out_root = "paper-workspace/04-analysis",
+                                    coef_omit = "Intercept|^factor") {
+  dir.create(file.path(out_root, "figures"), showWarnings = FALSE, recursive = TRUE)
   p <- modelsummary::modelplot(models, coef_omit = coef_omit) +
     geom_vline(xintercept = 0, linetype = "dashed") +
-    theme_paper() +
+    theme_minimal(base_size = 12) +
     labs(x = "Estimate", y = NULL)
-  save_plot_pair(p, "coefplot-main")
+  ggsave(file.path(out_root, "figures", "coefplot-main.pdf"), p, device = cairo_pdf)
   p
 }
 ```
@@ -254,13 +272,15 @@ plot_event_study_fixest <- function(model) {
 ### 地图
 
 ```r
-plot_choropleth <- function(sf_data, fill_var) {
+plot_choropleth <- function(sf_data, fill_var, out_root = "paper-workspace/04-analysis") {
+  dir.create(file.path(out_root, "figures"), showWarnings = FALSE, recursive = TRUE)
   p <- ggplot(sf_data) +
     geom_sf(aes(fill = .data[[fill_var]]), color = "white", linewidth = 0.1) +
     scale_fill_viridis_c(option = "C", na.value = "grey90") +
     theme_void(base_size = 12) +
     labs(fill = fill_var)
-  save_plot_pair(p, paste0("map-", fill_var), width = 7, height = 6)
+  ggsave(file.path(out_root, "figures", paste0("map-", fill_var, ".pdf")), p,
+        device = cairo_pdf, width = 7, height = 6)
   p
 }
 ```

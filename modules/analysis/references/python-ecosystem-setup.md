@@ -38,7 +38,7 @@ conda activate paper-analysis
 # 方式一：临时指定
 pip install pandas statsmodels -i https://pypi.tuna.tsinghua.edu.cn/simple
 
-# 方式二：持久配置 (~/.pip/pip.conf 或 %APPDATA%/pip/pip.ini)
+# 方式二：持久配置（用户级 pip.conf；Windows 为 <用户配置目录>\pip\pip.ini）
 # [global]
 # index-url = https://pypi.tuna.tsinghua.edu.cn/simple
 # trusted-host = pypi.tuna.tsinghua.edu.cn
@@ -169,7 +169,7 @@ python3 "script.py"
 - **双格式导出**：`fig.savefig(...)` 同时存 PDF（排版）+ PNG（预览）
 - **公式模型预测**：使用 `C()` 编码（如 `"y ~ x + C(gender)"`），避免在公式中写 dummy 列名
 
-绘图函数（模板已内置）：`save_plot_pair()`、`theme_paper()`、`plot_distribution()`、`plot_group_mean()`、`plot_coef()`、`plot_marginal()`、`plot_diagnostics()`。详见 [python-analysis-template.py](../templates/python-analysis-template.py)。
+绘图：模板不自带绘图封装。绘图在项目脚本内用 `matplotlib`/`seaborn` 直接实现，公共工具（读数据、清洗、描述表、写报告）见 `templates/_shared/python_common.py`。
 
 ---
 

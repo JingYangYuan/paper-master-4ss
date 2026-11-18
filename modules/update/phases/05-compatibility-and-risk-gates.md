@@ -1,69 +1,42 @@
-# Phase 05: 兼容性与风险门控
+# Phase 05：兼容性与风险门控
 
-## 顾问派发闸门
+## 顾问派发门控
 
-兼容性与风险门控前，必须派发 `modules/update/agents/review-gate-consultant.md`。若候选项为 `self-update: true`，必须复用或再次派发 `modules/update/agents/target-routing-consultant.md`，形成“双重审核”记录：目标路由复核 + 审核门控复核。
-
-顾问意见写入 `paper-workspace/_logs/agents/update-[YYYY-MM-DD]/review-gate-consultant.md`，并同步进入 `agent-synthesis-update-[YYYY-MM-DD].md`。
+生成审核包前须派发 `modules/update/agents/review-gate-consultant.md`。若候选条目包含 `self-update: true`，须同时复用或增派 `modules/update/agents/target-routing-consultant.md`，形成「目标路由复核 + 审核门控复核」双重审核记录。意见写入 `paper-workspace/_logs/agents/update-[YYYY-MM-DD]/review-gate-consultant.md` 并更新 `agent-synthesis-update-[YYYY-MM-DD].md`。
 
 ## 目标
 
-在生成待审核更新包前，检查候选更新是否会影响模块边界、执行逻辑、脚本运行、模板兼容性、agent 调度、自更新安全和跨模块一致性。所有候选仍保持 `pending`，不得自动合并。
+核查候选更新对模块边界、执行流程、脚本运行、模板兼容、顾问调度与自更新安全的潜在影响。所有候选状态维持 `pending`，不得自动合并。
 
-## 风险等级
+## 风险分级与验证要求
 
-| Risk tier | 目标面 | 要求 |
+| 风险等级 | 典型目标面 | 准入要求 |
 |---|---|---|
-| `low` | `frame/`, `chapters/`, `references/`, `resources/` 中的知识条目 | 来源清楚、证据充分、目标正确、边界明确 |
-| `medium` | `SKILL.md`, `phases/`, `agents/` 的流程或角色协议 | 说明兼容影响、相邻模块影响、需要同步更新的索引 |
-| `high` | `scripts/`, `templates/`, 自更新、执行命令、二进制模板 | 提供人工验证命令、失败风险、回滚提示和双重审核 |
+| `low` | `frame/`、`chapters/`、`references/`、`resources/` 知识条目 | 来源清楚、证据充分、目标准确、适用边界明确 |
+| `medium` | `MODULE.md`、`phases/`、`agents/` 流程或角色协议 | 说明兼容性影响、相邻模块影响及须同步更新的索引 |
+| `high` | `scripts/`、`templates/`、`self-update`、执行命令与二进制模板 | 提供人工验证命令、失败风险、回滚提示及双重审核（`self-update`） |
 
-## 必查项
+## 强制核查清单
 
-| 检查项 | 通过标准 |
-|---|---|
-| 输出边界 | 所有内容只写入 `paper-workspace/07-update/` |
-| 审核状态 | 所有候选均为 `pending` |
-| 来源 | 有路径、题名、作者、URL 或材料说明 |
-| 目标 | 有目标模块、目标面、目标文件和建议位置 |
-| 风险 | 有 `Risk tier` 与风险解释 |
-| 兼容性 | 说明是否影响入口、phase、agent、脚本、模板或跨模块交接 |
-| 验证 | medium/high 候选包含人工验证方式 |
-| 自更新 | `self-update: true` 候选包含目标路由复核和审核门控复核 |
+- **输出边界**：全部产物仅写入 `paper-workspace/07-update/`；
+- **状态锁定**：所有候选保持 `pending`；
+- **来源与目标**：路径/出处、目标模块、目标面、目标文件与建议位置齐全；
+- **风险与兼容性**：标明 `Risk tier` 与影响面（入口、阶段、顾问、脚本、模板或跨模块交接）；
+- **人工验证**：`medium`/`high` 候选须含可执行的人工验证方式（脚本候选须含命令、样例与预期输出；模板候选须含导出/格式检查方式；协议与角色候选须含静态一致性核查项）；
+- **自更新双重审核**：`self-update: true` 候选须具备两份独立复核记录。
 
 ## 执行步骤
 
-1. 读取 Phase 04 的目标路由表。
-2. 按 `Risk tier` 分组检查候选项。
-3. 对 `medium` 候选补写兼容性影响：
-   - 影响哪个入口文件或 phase。
-   - 是否需要同步修改 agent 描述或注册表。
-   - 是否影响已有输出协议。
-4. 对 `high` 候选补写验证方式：
-   - 脚本候选：给出人工运行命令、输入样例、预期输出。
-   - 模板候选：给出渲染、导出或格式检查方式。
-   - agent/phase/SKILL 候选：给出静态一致性检查项。
-5. 对 `self-update` 候选执行双重审核：
-   - `target-routing-consultant` 确认目标面和目标文件。
-   - `review-gate-consultant` 确认不会绕过 pending 审核。
-6. 输出风险门控表：
+1. 读取 Phase 04 目标路由表并按 `Risk tier` 分组核查；
+2. 为 `medium` 候选补齐兼容性影响说明（影响入口/阶段、是否需同步调整 `agent-registry.md` 或输出协议）；
+3. 为 `high` 候选补齐可执行验证方式与回滚提示；
+4. 对 `self-update` 候选执行 `target-routing-consultant` + `review-gate-consultant` 双重审核；
+5. 输出风险门控表（字段：`Candidate ID`、`Risk tier`、`Compatibility impact`、`Required validation`、`Self-update review`、`Gate status`、`Required fix`）。
 
-| Candidate ID | Risk tier | Compatibility impact | Required validation | Self-update review | Gate status | Required fix |
-|---|---|---|---|---|---|---|
+## 门控结论取值
 
-## 门控状态
+- `pass-to-review-package`：可进入 Phase 06 生成审核包；
+- `revise-before-package`：候选内容保留，但须补充来源、目标、风险或验证方式；
+- `blocked`：目标越界、状态非 `pending`、试图直接修改核心文件或 `self-update` 跳过双重审核。
 
-- `pass-to-review-package`：可进入 Phase 06。
-- `revise-before-package`：候选内容可保留，但必须补来源、目标、风险或验证方式。
-- `blocked`：目标越界、状态不是 pending、试图直接修改核心文件，或 self-update 试图跳过双重审核。
-
-## 输出要求
-
-将门控结果写入：
-
-```text
-paper-workspace/07-update/review-checklist-[slug]-[date].md
-paper-workspace/_logs/agents/update-[YYYY-MM-DD]/agent-synthesis-update-[YYYY-MM-DD].md
-```
-
-若存在 `blocked`，最终回复只能说明“已生成待修正候选包”，不得建议合并。
+门控结果写入 `paper-workspace/07-update/review-checklist-[slug]-[date].md` 与 `agent-synthesis-update-[YYYY-MM-DD].md`。存在 `blocked` 条目时，最终回复须注明「已生成待修正候选包」，不得建议合并。

@@ -1,5 +1,25 @@
 # 国际政治（国际关系）理论框架目录
 
+<!-- section-index (auto-generated, do not edit by hand; re-run tool after edits) -->
+<!-- 分区索引：本文件较大，按下表行号定点读取，不要整读。行号含本索引块偏移。 -->
+<!-- L22: 一、现实主义理论谱系 / Realism Tradition -->
+<!-- L96: 二、自由主义理论谱系 / Liberalism Tradition -->
+<!-- L142: 三、建构主义 / Constructivism -->
+<!-- L174: 四、英国学派 / English School -->
+<!-- L192: 五、国际政治中层理论 / Mid-Level Theories -->
+<!-- L238: 六、中国IR理论贡献 / Chinese IR Theoretical Contributions -->
+<!-- L312: 七、国际政治经济学 / International Political Economy (IPE) -->
+<!-- L344: 八、外交政策分析 / Foreign Policy Analysis -->
+<!-- L390: 九、内战与冲突研究 / Civil War & Intrastate Conflict -->
+<!-- L408: 十、女性主义IR / Feminist IR -->
+<!-- L426: 十一、后殖民与去殖民IR / Postcolonial & Decolonial IR -->
+<!-- L444: 十二、和平研究与冲突解决 / Peace Research & Conflict Resolution -->
+<!-- L462: 十三、理性选择与博弈论IR / Rational Choice & Game Theory in IR -->
+<!-- L480: 十四、批判理论谱系 / Critical Theories -->
+<!-- L498: 八、前沿发展 / Contemporary Frontiers -->
+<!-- L530: 九、均势理论 / Balance of Power -->
+
+
 ## 一、现实主义理论谱系 / Realism Tradition
 
 ### 1.1 古典现实主义 / Classical Realism (Morgenthau 1948; Carr 1939)

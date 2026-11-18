@@ -1,6 +1,38 @@
 # 质性研究路由与设计
 
-> 覆盖质性研究全过程模型中的**定位立场 → 聚焦困惑 → 设计方案**阶段。用于确定分析路径前的方法路由、设计家族选择和抽样策略。
+> 覆盖质性研究全过程模型中的**定位立场 → 聚焦困惑 → 设计方案**阶段。用于确定分析路径前的方法路由、设计家族选择和抽样策略。本文件同时是质性方法库的路由索引（原 `qualitative-methods.md` 已并入，2026-10）。
+
+---
+
+## 0.1 路线图（阶段与快速方法路由）
+
+| 研究阶段 | 对应全过程步骤 | 加载文件 | 内容 |
+|---------|-------------|---------|------|
+| **设计与准备** | 1.定位立场 → 2.聚焦困惑 → 3.设计方案 | 本文件 | 全过程模型、方法路由、设计家族决策、认识论前提、编码单位与抽样 |
+| **数据收集** | 4.收集密集数据 | `qualitative-analysis-methods.md` §0 | 田野观察与札记、访谈指南与追问技能、焦点小组设计 |
+| **分析方法** | 5.归纳迭代分析 | `qualitative-analysis-methods.md` | 扎根理论、主题分析、框架分析、内容分析、编码本设计、LLM辅助编码 |
+| **质量保证与整合** | 6.验证与反身审核 → 7.写作与意义呈现 | `qualitative-quality-integration.md` | 可信性保证体系、过程追踪、混合方法整合、个案研究、行动研究、口述史、引文规则、软件工具、报告清单、反模式诊断、**伦理全程化、发表适配扫描** |
+
+快速方法路由：
+
+| 需求 | 方法 | 加载文件 |
+|------|------|---------|
+| 从材料中归纳新概念/理论 | 扎根理论 | `qualitative-analysis-methods.md` §1 |
+| 提炼共享意义模式 | 主题分析 | `qualitative-analysis-methods.md` §2 |
+| 已有框架，套用到材料 | 框架分析 | `qualitative-analysis-methods.md` §3 |
+| 量化文本中框架/话题频率 | 内容分析 | `qualitative-analysis-methods.md` §4 |
+| 解释因果机制 | 过程追踪 | `qualitative-quality-integration.md` §2 |
+| 多编码者一致性 | 信度评估 | `qualitative-quality-integration.md` §1.3-1.4 |
+| 大规模文本初筛 | LLM 辅助编码 | `qualitative-analysis-methods.md` §6 |
+| 解释回归机制 | 混合方法整合 | `qualitative-quality-integration.md` §3 |
+| 改善实践 | 行动研究 | `qualitative-quality-integration.md` §5 |
+| 保存/解释记忆 | 口述史 | `qualitative-quality-integration.md` §6 |
+| 选择研究设计 | 设计家族决策 | 本文件 §1.1 |
+| 收集访谈/观察数据 | 数据收集协议 | `qualitative-analysis-methods.md` §0 |
+| 设计编码本 | 编码本规范 | `qualitative-analysis-methods.md` §5 |
+| 质量自检 | 可信性+反模式 | `qualitative-quality-integration.md` §1 + §10 |
+| 伦理审计 | 伦理全程化 | `qualitative-quality-integration.md` §11 |
+| 发表前自检 | 期刊适配扫描 | `qualitative-quality-integration.md` §12 |
 
 ---
 
@@ -11,7 +43,7 @@
 1. **定位探究立场**：明确世界观（后实证主义/建构主义/批判/实用主义）如何约束编码和分析策略
 2. **聚焦研究困惑**：将研究问题中的"核心现象-参与者-探究行动"映射到分析方法
 3. **设计方案**：选择设计家族（叙事/现象学/扎根/民族志/个案/行动研究/口述史）——见 §1.1
-4. **收集密集数据**：访谈、观察、文档/影像、田野札记 ——见 `qualitative-data-collection.md`
+4. **收集密集数据**：访谈、观察、文档/影像、田野札记 ——见 `qualitative-analysis-methods.md` §0
 5. **归纳迭代分析**：准备数据 → 通读 → 备忘录 → 编码 → 缩减编码 → 构建主题 → 关联主题 → 检验解释 ——见 `qualitative-analysis-methods.md`
 6. **验证与反身审核**：三角测量、成员检验、负面案例、同行汇报、审核链、编码者协议、反身性写作 ——见 `qualitative-quality-integration.md`
 7. **写作与意义呈现**：厚描述、证据呈现、研究者角色、局限性、设计特定结构 ——见 `qualitative-quality-integration.md`

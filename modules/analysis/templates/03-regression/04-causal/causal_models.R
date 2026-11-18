@@ -101,3 +101,21 @@ if (!is.null(scm)) {
 summary_path <- write_md(file.path(out, "reports", "causal-results.md"), "Causal Results",
                          lapply(Filter(Negate(is.null), list(IV = iv, LIML = liml, EventStudy = es, CSDID = csdid, RD = rd, PSM = psm, IPW = ipw, CEM = cem, Ebal = ebal, SCM = scm)),
                                 function(m) paste(capture.output(summary(m)), collapse = "\n")))
+
+# ---- 表A1g：识别诊断钩子（五个 F / AR / RD 回退 / SKIP 表） ----
+# 独立进程调用，避免诊断出错牵连主结果；把 causal_diagnostics.R 复制到脚本目录或用 PM_DIAG_R 指定。
+diag_path <- Sys.getenv("PM_DIAG_R", "paper-workspace/04-analysis/scripts/causal_diagnostics.R")
+if (file.exists(diag_path)) {
+  diag_args <- c(diag_path,
+                 paste0("--data=", data_path), paste0("--out=", out),
+                 paste0("--y=", roles$y),
+                 paste0("--endog=", roles$endog %||% "endog_x"),
+                 paste0("--iv=", paste(roles$iv %||% "instrument_z", collapse = " ")),
+                 paste0("--controls=", paste(roles$controls %||% "", collapse = " ")),
+                 paste0("--cluster=", roles$cluster %||% ""))
+  diag_out <- tryCatch(system2("Rscript", diag_args, stdout = TRUE, stderr = TRUE),
+                       error = function(e) paste("SKIP: 诊断脚本调用失败：", conditionMessage(e)))
+  message(paste(diag_out, collapse = "\n"))
+} else {
+  message("SKIP: causal_diagnostics.R 未就位（", diag_path, "）；五个 F 与 AR 区间缺失")
+}

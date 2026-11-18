@@ -118,6 +118,21 @@ def main() -> int:
     common.export_model_summary(p["reports"] / "causal-results.md",
                                 {k: v for k, v in {**mods, "EventStudy": es}.items() if v is not None},
                                 "Causal Results")
+
+    # 表A1g：识别诊断钩子（五个 F / AR / RD 回退 / SKIP 表）
+    # 把 causal_diagnostics.py 复制到项目脚本目录，或用 PM_DIAG_PY 指定路径；缺列/缺包只写 SKIP。
+    import os
+    import subprocess
+
+    diag = Path(os.environ.get("PM_DIAG_PY", "paper-workspace/04-analysis/scripts/causal_diagnostics.py"))
+    if diag.exists():
+        try:
+            subprocess.run([sys.executable, str(diag), "--data", str(data_path), "--out", str(args.out_root)],
+                           check=False)
+        except Exception as exc:  # 诊断失败不影响主结果
+            print(f"SKIP: causal_diagnostics.py 执行失败：{exc}")
+    else:
+        print(f"SKIP: causal_diagnostics.py 未就位（{diag}）；五个 F 与 AR 区间缺失")
     return 0
 
 

@@ -233,7 +233,7 @@
 
 ## 使用说明
 - 本文件是 `write` 模块生成 `writing-dispatch-plan` 的直接输入。
-- 只有写作状态为"可写"的段落可派发给 `chapter-draft-writer`。
+- 只有写作状态为"可写"的段落可派活给 `chapter-draft-writer`。
 - 写作状态为"暂不写入正文"的段落必须先补材料或降级论点。
 
 ## 段落蓝图总览

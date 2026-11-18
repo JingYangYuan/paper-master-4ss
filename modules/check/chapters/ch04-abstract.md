@@ -45,4 +45,4 @@
 
 ## Connects To
 - **ch02-title.md / ch05-keywords.md / ch06-introduction.md / ch08-conclusion.md**：题摘词引言结尾互相兑现。
-- **10维回流**：摘要 → editorial-screening-reviewer → write。
+- **10维回流**：摘要 → reviewer → write。

@@ -1,213 +1,112 @@
-# Phase 03: 模型执行、扩展检验与结果表
+# Phase 03：模型执行、扩展检验与结果表
 
-本 phase 的模型决策记录、分析执行计划、扩展检验说明和结果摘要必须遵守 `master/output-protocol.md`。回归流程不再固定为“描述统计→主回归→稳健性”，而是读取 design、lit、outline 和变量发现包中的完整变量蓝图，自动执行所有已经设定的分析环节。
+本阶段模型决策记录、分析执行计划、扩展检验说明与结果摘要须遵守 `master/output-protocol.md`。本阶段依据上游设计与变量发现包中的完整变量蓝图自动规划并执行全部设定环节，而非固定简化为「主回归 + 稳健性」。
 
 ```mermaid
 flowchart TD
-  A["读取 design/lit/outline/变量发现包"] --> B["analysis-plan-consultant"]
-  B --> C["analysis-execution-plan"]
-  C --> D{"变量角色/数据结构是否足够"}
-  D -->|不足| E["回流 02-quant-cleaning 变量发现与清洗复核"]
-  D -->|足够| F["identification-model 复核"]
-  F --> G["多代码 writer 并行撰写子流程脚本"]
-  G --> H["00-plan-dispatch 生成 regression-dispatch"]
-  H --> I["按 dispatch 顺序 CLI 执行子流程"]
-  I --> J{"执行是否成功"}
-  J -->|失败| K["修复脚本或记录阻断"]
-  J -->|成功| L["reporting/export 复核并导出"]
+  A[读取 design/lit/outline/变量发现包] --> B[analysis-plan-consultant]
+  B --> C[生成 analysis-execution-plan]
+  C --> D{变量角色与数据结构是否充分}
+  D -->|不足| E[退回 02-quant-cleaning 补证或清洗]
+  D -->|充分| F[identification-consultant 复核]
+  F --> G[code-writer 按 task_id 编写子流程脚本]
+  G --> H[00-plan-dispatch 生成派活清单]
+  H --> I[按序执行命令行子流程]
+  I --> J{执行是否成功}
+  J -->|失败| K[修复脚本或写入阻断日志]
+  J -->|成功| L[reporting-consultant 复核并导出]
 ```
 
-- `analysis-execution-plan` 是本 phase 的硬入口；没有该计划不得直接写回归脚本。
-- 中介、机制、调节、异质性、门槛、非线性、交互、分组、DiD、IV、RDD、PSM、面板等只要在 design 或变量发现包中出现，就必须进入执行计划。
-- 信息不足时回流到清洗与变量发现流程，不询问用户补选模型选项。
+## 0. 顾问派发门控
 
-## 0. 顾问派发闸门
+1. **制定执行计划**：派发 `modules/analysis/agents/analysis-plan-consultant.md` 读取 `01-design/`、`02-literature/`、`03-outline/`、`variable-discovery-pack-[date].md`、`variable-dictionary.csv` 与 `cleaning-report-[date].md`，抽取完整变量蓝图。
+2. **模型与识别裁决**：派发 `modules/analysis/agents/identification-consultant.md` 复核模型设定与识别策略。
+3. **代码编写（按 `task_id` 分族派发）**：
 
-建模前必须派发 `modules/analysis/agents/analysis-plan-consultant.md`，从以下位置抽取完整分析蓝图：
-
-- `paper-workspace/01-design/`
-- `paper-workspace/02-literature/`
-- `paper-workspace/03-outline/`
-- `paper-workspace/04-analysis/reports/variable-discovery-pack-[date].md`
-- `paper-workspace/04-analysis/data/variable-dictionary.csv`
-- `paper-workspace/04-analysis/reports/cleaning-report-[date].md`
-
-随后必须派发 `modules/analysis/agents/identification-model-consultant.md` 复核模型和识别路径。代码撰写阶段派发以下 writer；可并行，不能并行时按顺序执行并记录 `sequential-review`：
-
-| Writer | 文件路径 | 覆盖任务 |
+| 顾问文件 | 模板族 | 负责任务范围 |
 |---|---|---|
-| main-regression-code-writer | `modules/analysis/agents/main-regression-code-writer.md` | 描述统计、Table 1、基准模型、主回归、基础诊断 |
-| mechanism-extension-code-writer | `modules/analysis/agents/mechanism-extension-code-writer.md` | 中介、机制、调节、异质性、门槛、非线性、交互、分组、边际效应图 |
-| causal-robustness-code-writer | `modules/analysis/agents/causal-robustness-code-writer.md` | DiD、事件研究、IV、RDD、PSM/CEM/IPW、面板、稳健性、安慰剂 |
-| export-reporting-code-writer | `modules/analysis/agents/export-reporting-code-writer.md` | 表格、图形、`script-index.md`、结果报告、质量门控导出 |
+| `modules/analysis/agents/code-writer.md` | 主回归族 | 描述统计、Table 1、基准模型、主回归与基础诊断 |
+| `modules/analysis/agents/code-writer.md` | 机制扩展族 | 中介、机制、调节、异质性、门槛、非线性、交互、分组与边际效应图 |
+| `modules/analysis/agents/code-writer.md` | 因果稳健族 | DiD、事件研究、IV、RDD、PSM/CEM/IPW、面板、稳健性与安慰剂 |
+| `modules/analysis/agents/reporting-consultant.md` | 导出呈现 | CSV 宽表、图形、`script-index.md`、结果报告与导出脚本 |
 
-主模型和扩展模型生成后，继续派发 `modules/analysis/agents/robustness-consultant.md` 与 `modules/analysis/agents/result-reporting-consultant.md` 复核。所有顾问意见进入 `paper-workspace/_logs/agents/analysis-[YYYY-MM-DD]/` 和 `agent-synthesis-analysis-[YYYY-MM-DD].md`。
+4. **结果复核**：模型运行完成后派发 `identification-consultant` 与 `reporting-consultant` 复核结果边界。所有意见写入 `paper-workspace/_logs/agents/analysis-[YYYY-MM-DD]/` 并综合至 `agent-synthesis-analysis-[YYYY-MM-DD].md`（无并行能力时记录 `sequential-review`）。
 
-## 1. 分析执行计划
+## 1. 分析执行计划（硬入口）
 
-主流程综合 `analysis-plan-consultant` 输出，生成：
+未生成 `paper-workspace/04-analysis/reports/analysis-execution-plan-[date].md` 前不得撰写任何回归脚本。计划须使用中文 Markdown，包含以下六节：
+- `## 来源回查`：已读取的 `design`、`lit`、`outline`、`analysis` 产物路径；
+- `## 变量角色表`：全部 19 类角色归属；
+- `## 假设与机制链`：上游假设（H1/H2…）、机制链与可检验路径；
+- `## 模型执行任务表`：描述统计、主回归、机制/中介/调节/异质性/门槛/非线性、识别设计、稳健性与导出任务；
+- `## 代码派活表`：各 `task_id` 的输入包、输出片段、合并位置与产物路径；
+- `## 退回清洗项`：缺失变量、角色冲突、样本口径不清、数据结构不足或环境阻断。
 
-`paper-workspace/04-analysis/reports/analysis-execution-plan-[date].md`
+信息不足时退回 `02-quant-cleaning.md` Part A/Part B 补证，不向用户抛回模型选择问题。
 
-执行计划必须使用中文 Markdown，并至少包含：
+## 2. 模型路由与必执行范围
 
-| 板块 | 必填内容 |
-|---|---|
-| `## 来源回查` | 已读取的 design、lit、outline、analysis 产物路径 |
-| `## 变量角色表` | `Y/X/control/fe/cluster/weight/id/time/mechanism/mediator/moderator/heterogeneity/threshold/nonlinear/instrument/treatment/post/running/cutoff` |
-| `## 假设与机制链` | design/lit 中的 H1/H2、机制链、理论变量和可检验路径 |
-| `## 模型执行任务表` | 描述统计、主回归、中介、机制、调节、异质性、门槛、非线性、识别设计、稳健性、导出 |
-| `## 代码派发表` | 每个 writer 的输入包、输出片段、合并顺序和产物路径 |
-| `## 回流清洗项` | 变量不存在、角色冲突、样本口径不清、数据结构不足、CLI 阻断 |
+先读取 `modules/analysis/references/quantitative-model-router.md` 与 `quantitative-reporting-standards.md`。机制检验默认采用江艇（2022）两步法，调节效应默认四列递进规范，高维固定效应采用 `reghdfe`，工具变量采用 `ivreghdfe`（见 `quantitative-model-router.md` §11）。凡在变量蓝图中出现的机制、中介、调节、异质性、门槛、非线性、IV、DiD、RDD、面板或匹配角色，均须列入执行任务或明确记录不可执行阻断，不得笼统合并为「可选稳健性」。
 
-变量角色或数据结构不足时，不询问用户选择模型；必须把缺口写入“回流清洗项”，回到 `02-quant-cleaning.md` 的 Part A/Part B 重新补证据或生成阻断说明。
+## 2.5 因果识别前置诊断门（条件触发）
 
-## 2. 模型路由与执行范围
-
-先读取 `modules/analysis/references/quantitative-model-router.md` 和 `modules/analysis/references/quantitative-reporting-standards.md`。模型执行范围由 `analysis-execution-plan` 决定。机制检验默认江艇（2022）两步法；调节效应默认四列递进规范；高维固定效应统一 `reghdfe`，工具变量统一 `ivreghdfe`（见 `references/quantitative-model-router.md` §11）。
-
-| 设计蓝图信号 | 必须进入的执行任务 |
-|---|---|
-| `Y/X/control/fe/cluster/weight` | 描述统计、主回归、基础诊断、Table 1/2 |
-| `mediator` 或中介假设 | 中介路径、间接效应、bootstrap 或可替代的机制证据 |
-| `mechanism` | 机制变量回归、机制链证据、替代机制排除 |
-| `moderator` 或调节假设 | 交互项、简单斜率、边际效应图 |
-| `heterogeneity` 或分组理论 | 分组回归、组间差异检验、异质性表 |
-| `threshold` | 门槛模型、分段回归、阈值敏感性或不可执行阻断 |
-| `nonlinear` | 二次项、样条、分位数、非线性边际效应或预测概率 |
-| `instrument` | 第一阶段、弱工具、2SLS、过识别或排除限制说明 |
-| `treatment/post` | DiD、事件研究、平行趋势、安慰剂和窗口敏感性 |
-| `running/cutoff` | RDD、带宽、操纵检验、协变量平衡、placebo cutoff |
-| `id/time` 或面板结构 | FE/RE、Hausman、双向固定效应、面板诊断、聚类标准误 |
-| PSM/CEM/IPW 设计 | 倾向得分、平衡性、共同支撑、匹配/加权后回归 |
-
-不得把中介、机制、调节、异质性和门槛笼统写成“可选稳健性”。只要变量蓝图中出现对应角色，就必须执行或明确记录不可执行阻断。
+当研究设计命中 `references/quantitative-model-router.md` §12 分流表（DiD / IV / RD / 合成控制 / shift-share / 宽严度 / 可观测选择 / HTE / TMLE / 干扰 / 缺失数据）时触发（纯描述、无因果声称关联与质性路径不触发）：
+1. **协议归类**：读取对应识别协议（DiD 九步 / IV 三阶段 / RDD 四阶段 / 合成控制八动作 / shift-share 两路径 / 宽严度五步 / 协变量三步）；
+2. **填写识别包**：产出 `paper-workspace/04-analysis/reports/identification-protocol-pack-[date].md`，涵盖目标参数（精确估计量）、识别假设版本与制度论证、协议必做诊断清单、四条退出判据初判及结论适用范围；
+3. **顾问裁决**：交 `paper-analysis-identification-consultant` 裁决，未获裁决前不得撰写 `model-decision`；
+4. **退出判据处理**：识别包缺目标参数或假设版本时退回第 1 节重写计划；退出判据已触发时退回 `analysis-plan-consultant` 与设计层修改设计，严禁以更换更宽松估计量规避识别失败。
 
 ## 3. 模型决策记录
 
-运行任何模型前，生成或追加：
+运行模型前在 `paper-workspace/04-analysis/reports/model-decision-[date].md` 逐块记录：来源设计、对应假设、变量角色、因变量类型、数据结构、模型选择（追溯至 `quantitative-model-router.md`）、标准误与聚类层级、固定效应与权重、诊断清单、可声称与不可声称内容、退回清洗项。
 
-`paper-workspace/04-analysis/reports/model-decision-[date].md`
+## 4. 子流程脚本组织与 CSV 宽表规范
 
-每个模型块至少记录：
+按 `templates/03-regression/README.md` 划分脚本目录，执行顺序固定如下（`08-spatial` 编号靠后但在 `07-regression-export` 汇总导出前运行）：
+1. `00-plan-dispatch`：生成 `model-decision-[date].md` 与 `regression-dispatch.json/csv`（不跑统计模型）；
+2. `01-main-models`：描述统计、Table 1、OLS/基准模型、基础诊断与主回归；
+3. `02-nonlinear`：Logit/Probit/Poisson/Tobit/Heckman/有序/多分类模型（输出边际效应或预测概率）；
+4. `03-panel`：FE/RE、Hausman、双向固定效应、动态 GMM、面板 IV 与面板诊断；
+5. `04-causal`：IV/2SLS/GMM、DID/事件研究、多期 DID、RDD、PSM/CEM/IPW、SCM；
+6. `05-mechanism-heterogeneity`：中介、机制、调节、异质性、门槛、非线性、交互与分组检验（不并入稳健性）；
+7. `06-robustness`：替代变量、替代样本、替代模型、标准误/聚类、安慰剂与敏感性检验；
+8. `08-spatial`：空间权重矩阵、全局 Moran's I、截面与面板 SAR/SDM 及效应分解；
+9. `07-regression-export`：汇总表格、图形、`script-index.md`、缺失产物报告与 `regression-results-[date].md`。
 
-```markdown
-## 模型决策：[任务名/模型名]
+Stata 生产交付默认采用双总代码体系（`01_clean_and_prepare_master.do` + `02_empirical_analysis_master.do`，见 `MODULE.md` §4.2）；子流程模板用作模块化构建素材与并行拆分参考。脚本失败时直接报错并由主流程将退出码、错误信号与 stdout/stderr 路径记入 `run-log-[date].md`。
 
-- 来源设计:
-- 对应假设:
-- 变量角色:
-- 因变量类型:
-- 数据结构:
-- 模型选择:
-- 标准误/聚类层级:
-- 固定效应/权重:
-- 诊断与质量门控:
-- 可声称内容:
-- 不可声称内容:
-- 回流清洗项:
-```
+**CSV 论文宽表硬性要求**（默认写入 `tables/*.csv`，HTML/TeX/DOCX 仅作附加导出）：
+- 第 1 行为中文表题（如 `表4基准回归`）；第 2 行为模型编号 `(1)`、`(2)`…；第 3 行为因变量名或模型标签；
+- 核心变量、机制/调节变量与**全部控制变量逐行列报**，每变量两行（系数/边际效应及星号行 + 括号内 t/z 值行），不适用单元格填 `-`；模型特有参数（如 `cut1`、`常数`）保留为普通行；
+- 固定效应用中文行名（如「省份固定」「年份固定」）汇总为「是/否」；表尾保留「观测值」，`R²` / `调整 R²` / `Pseudo R²` / `Within R²` 仅在适用模型输出；
+- 标准误类型、聚类层级、权重、参照组与显著性说明写入末尾「注：」行；
+- 表格、图轴与报告使用 `variable-dictionary.csv` 中的 `display_name`（其次数据标签或清洗后变量名），模板示例保持泛化占位名。
 
-模型选择必须追溯到 `quantitative-model-router.md`；报告呈现必须追溯到 `quantitative-reporting-standards.md`。
+## 5. 诊断失败退回规则
 
-## 4. 多 Agent 代码撰写与子流程执行
+1. 回查清洗报告与变量发现包核对变量口径、缺失、异常值与面板唯一性；
+2. 退回 `02-quant-cleaning.md` Part A/Part B 修正发现包或清洗脚本后重跑；
+3. 数据、工具或环境变量缺失时记录阻断原因与不可声称边界。除用户明确中断外，流程应从描述统计推进至导出门控，不向用户抛回多选一模型列表。
 
-代码 writer 只输出代码草案、依赖、输入输出路径和风险，不直接声称结果。主流程不再合并成一个超长回归脚本，而是按 `templates/03-regression/README.md` 的子流程结构复制或改写脚本，并由 `00-plan-dispatch` 生成派发表：
-
-- `paper-workspace/04-analysis/scripts/00-plan-dispatch/`
-- `paper-workspace/04-analysis/scripts/01-main-models/`
-- `paper-workspace/04-analysis/scripts/02-nonlinear/`
-- `paper-workspace/04-analysis/scripts/03-panel/`
-- `paper-workspace/04-analysis/scripts/04-causal/`
-- `paper-workspace/04-analysis/scripts/05-mechanism-heterogeneity/`
-- `paper-workspace/04-analysis/scripts/06-robustness/`
-- `paper-workspace/04-analysis/scripts/08-spatial/`
-- `paper-workspace/04-analysis/scripts/07-regression-export/`
-
-执行顺序固定为：
-
-1. `00-plan-dispatch` 读取 `analysis-execution-plan-[date].md`、变量字典和清洗报告，生成 `model-decision-[date].md` 与 `regression-dispatch.json/csv`；不运行统计模型。
-2. `01-main-models` 执行描述统计、Table 1、OLS/基准模型、基础诊断和主回归。
-3. `02-nonlinear` 仅在 dispatch 触发时执行 Logit、Probit、Poisson、Tobit、Heckman、有序/多分类模型，并输出边际效应或预测概率。
-4. `03-panel` 仅在 `id/time/fe/cluster` 等角色足够时执行 FE/RE、Hausman、双向固定效应、动态 GMM、面板 IV 和面板诊断。
-5. `04-causal` 按计划触发 IV/2SLS/GMM、DID/事件研究、多期 DID、RDD、PSM/CEM/IPW 和 SCM。
-6. `05-mechanism-heterogeneity` 执行中介、机制、调节、异质性、门槛、非线性、交互和分组检验；不得并入稳健性。
-7. `06-robustness` 只执行 dispatch 中明确列出的替代变量、替代样本、替代模型、标准误/聚类、安慰剂和敏感性任务。
-8. `08-spatial` 在变量角色含 `spatial/空间/Moran/邻接/反距离` 时执行空间权重矩阵、全局 Moran's I、截面 SAR/SDM 与面板空间回归，并输出直接/间接/总效应分解。
-9. `07-regression-export` 汇总表格、图形、`script-index.md`、缺失产物报告和 `regression-results-[date].md`；不重新估计模型。
-
-`08-spatial` 目录编号为 08，但运行顺序在 `07-regression-export` 之前（导出脚本汇总含空间表在内的全部产物）。
-
-Stata 生产交付默认采用双总代码体系（`01_clean_and_prepare_master.do` 清洗与前置表 + `02_empirical_analysis_master.do` 全套回归与导出，见 `SKILL.md` §4.2），不得落盘为无分段的单一长脚本；子流程模板与派发表仍作为模块化构建与拆分依据，复杂并行项目可按子流程目录拆分执行。子流程脚本直接报错而不静默跳过；失败原因、退出码与 stdout/stderr 路径由 agent 写入 `run-log-[date].md`，缺失产物写入 `regression-dispatch.csv` 或缺失产物报告。
-
-所有回归、扩展检验、因果识别和稳健性表默认写入 `paper-workspace/04-analysis/tables/*.csv`。CSV 不是长表字段摘要，必须采用论文宽表结构：首列为变量/统计项，后续列为模型编号 `(1)`、`(2)`、`(3)`、`(4)` 等；第二表头行写每列因变量或模型标签；每个变量两行，第一行是系数/边际效应和显著性星号，第二行是括号内 t/z 值；不适用的单元格用 `-`。所有控制变量必须逐行列报；固定效应用中文行名如“省份固定”“年份固定”“个体固定”汇总为“是/否”；表尾至少包含“观测值”，并在适用时包含 `R²`、`调整 R²`、`Pseudo R²`、`Within R²`。标准误类型、聚类层级、权重和显著性规则写入 CSV 末尾“注：”行。HTML、TeX、DOCX 只在用户要求、投稿整备或期刊格式需要时附加导出。
-
-文档和模板示例必须使用泛化占位名，避免固化某个项目的具体变量名称。真实项目导出表格、图轴和结果报告时，使用可发表展示名：优先采用变量字典中的 `display_name`，其次采用数据标签或清洗后的变量名；不得把真实输出强制替换为“因变量”“核心解释变量”“控制变量1”等角色名。
-
-## 5. 诊断与回流规则
-
-诊断失败时按以下顺序处理：
-
-1. 回查清洗报告和变量发现包，确认变量存在、类型、缺失、异常值、样本口径和面板唯一性。
-2. 回流 `02-quant-cleaning.md` Part A/Part B，补充 `variable-discovery-pack` 或清洗脚本。
-3. 修复合并脚本并重新执行。
-4. 若数据、CLI、许可或必要变量仍缺失，记录阻断和不可声称内容。
-
-禁止在回归阶段停下来要求用户从多个模型选项中选择。用户没有明确要求中断时，主流程必须从描述统计一直推进到导出门控；任何不能执行的环节写成阻断、回流任务或限制。
-
-## 6. 建模脚本执行门槛
-
-生成主模型、扩展检验、因果识别、稳健性、异质性、机制、调节、门槛、非线性或导出脚本后，必须立即实际执行（Stata 经 statamcp 的 `stata_run_file`）：
+## 6. 脚本执行门槛
 
 ```bash
-# Stata 示例：statamcp —— stata_run_file(
-#   file_path="paper-workspace/04-analysis/scripts/01-main-models/main_models.do",
-#   working_dir=<.do 相对路径基准目录>,
-#   timeout=1800,  # 重回归显式调大（默认 600 秒）
-#   session_id=并行子流程各用独立 ID)
+# Stata（statamcp）:
+# stata_run_file(file_path="paper-workspace/04-analysis/scripts/01_clean_and_prepare_master.do", working_dir=..., timeout=1800)
+# stata_run_file(file_path="paper-workspace/04-analysis/scripts/02_empirical_analysis_master.do", working_dir=..., timeout=1800)
 
-# Stata 双总代码（默认）：statamcp —— stata_run_file(
-#   file_path="paper-workspace/04-analysis/scripts/01_clean_and_prepare_master.do", timeout=1800)
-#   file_path="paper-workspace/04-analysis/scripts/02_empirical_analysis_master.do", timeout=1800)
-
-# R 示例
+# R:
 Rscript "paper-workspace/04-analysis/scripts/01-main-models/main_models.R"
 
-# Python 示例
+# Python:
 python3 "paper-workspace/04-analysis/scripts/01-main-models/main_models.py"
 ```
 
-把 statamcp 调用与返回输出（或 CLI 命令与路径）、失败信号、模型表、图形产物和失败原因写入 `paper-workspace/04-analysis/reports/run-log-[date].md`。只有无失败信号且产物存在时，才能在 `regression-results-[date].md` 中写统计结论；否则只能写阻断原因、修复步骤和未能声称的内容。
+仅当 `run-log-[date].md` 无报错信号且输出文件实际存在时，方可在 `regression-results-[date].md` 中撰写统计结论。
 
-## 7. 输出文件
+## 7. 输出文件清单
 
-- `reports/analysis-execution-plan-[date].md`
-- `reports/model-decision-[date].md`
-- `reports/regression-dispatch.json`
-- `reports/regression-dispatch.csv`
-- `scripts/00-plan-dispatch/*`
-- `scripts/01-main-models/*`
-- `scripts/02-nonlinear/*`
-- `scripts/03-panel/*`
-- `scripts/04-causal/*`
-- `scripts/05-mechanism-heterogeneity/*`
-- `scripts/06-robustness/*`
-- `scripts/08-spatial/*`
-- `scripts/07-regression-export/*`
-- `tables/table1-descriptives.csv`
-- `tables/table2-main-regression.csv`
-- `tables/table3-nonlinear-marginal-effects.csv`
-- `tables/table3-mechanism-mediation-moderation.csv`
-- `tables/table4-heterogeneity-threshold-nonlinear.csv`
-- `tables/tableA-panel-models.csv`
-- `tables/tableA-robustness.csv`
-- `tables/tableA1-causal-robustness.csv`
-- `tables/tableS1-spatial-weights.csv`
-- `tables/tableS2-spatial-cross-section.csv`
-- `tables/tableS3-spatial-panel.csv`
-- `figures/coefplot-main.*`
-- `figures/marginal-effects.*`
-- `figures/event-study.*`
-- `figures/mechanism-or-threshold.*`
-- `reports/regression-results-[date].md`
-- `reports/script-index.md`
+- `reports/analysis-execution-plan-[date].md`、`reports/model-decision-[date].md`、`reports/regression-dispatch.json` / `.csv`、`reports/regression-results-[date].md`、`reports/script-index.md`
+- `scripts/00-plan-dispatch/*` 至 `scripts/08-spatial/*`
+- `tables/table1-descriptives.csv`、`table2-main-regression.csv`、`table3-nonlinear-marginal-effects.csv`、`table3-mechanism-mediation-moderation.csv`、`table4-heterogeneity-threshold-nonlinear.csv`、`tableA-panel-models.csv`、`tableA-robustness.csv`、`tableA1-causal-robustness.csv`、`tableS1-spatial-weights.csv`、`tableS2-spatial-cross-section.csv`、`tableS3-spatial-panel.csv`
+- `figures/coefplot-main.*`、`marginal-effects.*`、`event-study.*`、`mechanism-or-threshold.*`

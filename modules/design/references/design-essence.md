@@ -2,8 +2,8 @@
 
 > 为 DESIGN 模式提供：将理论框架转化为可操作研究设计蓝图的完整决策体系。
 >
-> **定量方法细节**已分发至：`method-router.md`（路由+诊断+报告规则）、`regression-models.md`（OLS+Logistic）、`panel-models.md`（面板+纵贯）、`factor-network-bootstrap.md`（因子+网络+Bootstrap）、`identification-strategies.md`（识别策略+稳健性+面板FE/GMM）。
-> **质性方法细节**已分发至：`qualitative-methods.md`（七种设计家族、全流程模型、资料收集三合一、精益编码、质量逻辑、反身性与伦理）。
+> **定量方法细节**已分发至：`method-feasibility.md`（方法可行性与识别策略，设计期判断；执行期细则见 analysis 模块的 `quantitative-model-router.md`）、`factor-network-bootstrap.md`（因子+网络+Bootstrap）。
+> **质性方法细节**已分发至：`qualitative-methods.md`（适用性判定、七种设计家族、抽样与饱和度、质量逻辑；执行期细则见 analysis 模块质性参考库）。
 
 ---
 
@@ -36,13 +36,13 @@
 
 ### 步骤 3：识别策略匹配
 
-根据数据结构、处理分配方式和因果强度匹配识别策略。详见 `identification-strategies.md`：
+根据数据结构、处理分配方式和因果强度匹配识别策略。详见 `method-feasibility.md`：
 
-- **识别策略匹配矩阵** → `identification-strategies.md` §一
-- **各策略详解**（RCT/DiD/RDD/IV/PSM/SCM）→ `identification-strategies.md` §二
-- **面板 FE/RE/GMM** → `identification-strategies.md` §三
-- **面板因果模型族**（变化得分/交叉滞后等）→ `panel-models.md` §一
-- **研究设计优先决策树** → `identification-strategies.md` §五
+- **识别策略匹配矩阵** → `method-feasibility.md` §一
+- **各策略详解**（RCT/DiD/RDD/IV/PSM/SCM）→ `method-feasibility.md` §二
+- **面板 FE/RE/GMM** → `method-feasibility.md` §三
+- **面板因果模型族**（变化得分/交叉滞后等）→ analysis 模块 `quantitative-model-router.md` §8
+- **研究设计优先决策树** → `method-feasibility.md` §五
 
 ### 步骤 4：操作化与功效分析
 
@@ -68,7 +68,7 @@
 | 6 | **功效充分性** | 样本量/信息量满足检测 frame 中报告的典型效应量（≥80% 功效） |
 | 7 | **外部效度** | 样本/情境与理论宣称的适用范围一致；若不一致，有明确的局限性讨论 |
 
-**定量稳健性方案**：详见 `identification-strategies.md` §四。
+**定量稳健性方案**：详见 `method-feasibility.md` §四。
 
 ---
 
@@ -77,7 +77,7 @@
 每次 DESIGN 运行输出：
 
 1. **理论锚点确认**：选定的理论、机制链、边界条件、效应量基准
-2. **研究范式与识别策略**：选择理由、关键假设及检验方案（参考 `identification-strategies.md` 和 `method-router.md`）
+2. **研究范式与识别策略**：选择理由、关键假设及检验方案（参考 `method-feasibility.md`）
 3. **操作化表**：每个构念的理论定义、操作化指标、测量效度证据
 4. **功效分析**：基于 frame 中报告的效应量基准计算 MDES
 5. **理论-方法对齐检验报告**：七项逐条通过/不通过，不通过项附修正方案
@@ -90,9 +90,6 @@
 
 | 文件 | 内容 |
 |------|------|
-| `method-router.md` | 快速模型路由表、七步诊断序列、红牌警告、报告规则、各学科方法偏好 |
-| `regression-models.md` | 数学基础（矩阵/MLE/贝叶斯）、OLS 设定与五大诊断、Logistic 三尺度与专属诊断、多项/序次 Logit |
-| `panel-models.md` | 面板因果模型族（六种模型选择+时序理论）、纵贯研究设计（APC/设计菜单/损耗与缺失） |
+| `method-feasibility.md` | 方法可行性预判（设计期）：识别策略匹配矩阵、面板方法选择要点、各学科定量方法偏好；执行期诊断闻值与标准误规则见 analysis 模块 `quantitative-model-router.md` |
 | `factor-network-bootstrap.md` | 因子分析决策链（抽取→旋转→CFA→得分）、社会网络设计规范与结构测度、Bootstrap 推断（四种 CI+适用边界） |
-| `identification-strategies.md` | 识别策略匹配矩阵、策略详解（RCT/DiD/RDD/IV/PSM/SCM）、面板 FE/RE/GMM、稳健性方案清单、设计优先决策树 |
-| `qualitative-methods.md` | 七种设计家族选择、全流程七步模型、资料收集三合一（访谈/观察/文件）、精益编码模型、质量逻辑四维、反身性规则、伦理全程化、常见反模式、发表适配扫描 |
+| `qualitative-methods.md` | 质性适用性判定、认识论约束、七种设计家族选择、抽样策略、饱和度标准、质量逻辑（执行期细则见 analysis 模块） |

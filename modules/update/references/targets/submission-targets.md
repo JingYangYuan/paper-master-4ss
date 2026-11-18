@@ -12,7 +12,7 @@ submission 模块负责 Markdown 到 Word、格式检查、引用整理、投稿
 | `knowledge-reference` | `modules/submission/references/journal-style-sociological-research.md` | 投稿样式、版式边界、报告依据 | low |
 | `knowledge-reference` | `modules/submission/references/install-dependencies.md` | pandoc、python-docx、lxml 安装与验收 | low |
 | `workflow-protocol` | `modules/submission/agents/*.md` | 格式、引用、投稿包顾问职责 | medium |
-| `workflow-protocol` | `modules/submission/SKILL.md` | 输入优先级、导出流程、回流规则 | medium |
+| `workflow-protocol` | `modules/submission/MODULE.md` | 输入优先级、导出流程、退回规则 | medium |
 | `tooling-template` | `modules/submission/scripts/*.py` | docx 导出、格式检查、引用检查、模板清理 | high |
 | `tooling-template` | `modules/submission/templates/*.docx` | Word reference docx 样式资产 | high |
 

@@ -10,9 +10,9 @@ design 模块负责选题、理论框架、跨学科头脑风暴和研究设计�
 |---|---|---|---|
 | `knowledge-reference` | `modules/design/frame/theory-frameworks-*.md` | 理论、概念、机制、测量、争议、适用场景 | low |
 | `knowledge-reference` | `modules/design/references/*.md` | 研究设计方法、方法路由、识别策略、质性/定量参考 | low |
-| `workflow-protocol` | `modules/design/phases/*.md` | FRAME/STORM/DESIGN/FULL 流程、质量门控 | medium |
+| `workflow-protocol` | `modules/design/phases/*.md` | FRAME/STORM/DESIGN/FULL 流程、交付前检查 | medium |
 | `workflow-protocol` | `modules/design/agents/*.md` | 理论、方法、领域、期刊适配、致命审查顾问职责 | medium |
-| `workflow-protocol` | `modules/design/SKILL.md` | 入口路由、模式确认、输出协议 | medium |
+| `workflow-protocol` | `modules/design/MODULE.md` | 入口路由、模式确认、输出协议 | medium |
 | `tooling-template` | `modules/design/scripts/frame_locator.py` | 框架检索逻辑、输出字段、命令参数 | high |
 
 ## 路由提示

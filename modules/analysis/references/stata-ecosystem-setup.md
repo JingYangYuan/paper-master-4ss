@@ -1,6 +1,6 @@
 # Stata 执行通道与依赖安装
 
-本文件供 `modules/analysis/` 在需要运行 Stata 脚本时按需读取。Stata 统一经 **statamcp（宿主 Stata MCP 服务）** 执行，覆盖安装配置、通道验收、调用规范、包源、社区包和常见故障。
+本文件供 `modules/analysis/` 在需要运行 Stata 脚本时按需读取。Stata 统一经 **statamcp（软件 Stata MCP 服务）** 执行，覆盖安装配置、通道验收、调用规范、包源、社区包和常见故障。
 
 ---
 
@@ -14,13 +14,13 @@ Stata 本体为商业软件（要求 Stata 17+），需自行购买并安装；M
 git clone https://github.com/JingYangYuan/stata-mcp.git
 cd stata-mcp
 powershell -ExecutionPolicy Bypass -File deploy.ps1
-# 默认 Stata 路径 E:\Stata18；其他位置/端口显式指定：
-powershell -ExecutionPolicy Bypass -File deploy.ps1 -StataPath "D:\Stata21" -Port 4001
+# 默认 Stata 路径取环境变量或常见安装位置；其他位置/端口显式指定：
+powershell -ExecutionPolicy Bypass -File deploy.ps1 -StataPath "<Stata 安装目录>" -Port 4001
 ```
 
-部署脚本完成三件事：安装 VS Code 扩展 DeepEcon.stata-mcp 并预构建其 Python venv（VS Code 仅安装期需要，运行时不需要）；把 `mcp.servers["stata-mcp"] → http://localhost:<port>/mcp-streamable`（默认端口 4001）写入宿主 `%USERPROFILE%\.zcode\cli\config.json`；注册 SessionStart hook（`stata-mcp-start.ps1` 探测 `http://localhost:4001/health`，服务未运行则自动拉起）。脚本幂等可重复运行，`uv` 缺失时自动安装。
+部署脚本完成三件事：安装 VS Code 扩展 DeepEcon.stata-mcp 并预构建其 Python venv（VS Code 仅安装期需要，运行时不需要）；把 `mcp.servers["stata-mcp"] → http://localhost:<port>/mcp-streamable`（默认端口 4001）写入宿主的用户级配置文件（位置以宿主文档为准）；注册 SessionStart hook（`stata-mcp-start.ps1` 探测 `http://localhost:4001/health`，服务未运行则自动拉起）。脚本幂等可重复运行，`uv` 缺失时自动安装。
 
-其他平台或手动配置：按仓库 README 对应章节把同一 MCP 端点注册进宿主 `mcp.servers["stata-mcp"]`，重启会话后按 §2 验收；验收不通过时不得运行任何 Stata 分析，只能记录阻断。
+其他平台或手动配置：按仓库 README 对应章节把同一 MCP 端点注册进软件 `mcp.servers["stata-mcp"]`，重启会话后按 §2 验收；验收不通过时不得运行任何 Stata 分析，只能记录阻断。
 
 ---
 
@@ -58,85 +58,46 @@ net set ado https://fmwww.bc.edu/repec/bocode/
 
 ## 4. 关键依赖安装（社区包）
 
+包清单的唯一事实源是 [stata-packages.txt](../templates/_shared/stata-packages.txt)（每行一个包名，`#` 为注释；`github:` 行走 `net install`）。在 Stata 中循环安装：
+
 ```stata
-ssc install reghdfe, replace
-ssc install ftools, replace
-ssc install estout, replace
-ssc install winsor2, replace
-ssc install ivreg2, replace
-ssc install ranktest, replace
-ssc install ivreghdfe, replace
-ssc install rdrobust, replace
-ssc install rddensity, replace
-ssc install psmatch2, replace
-ssc install pstest, replace
-ssc install outreg2, replace
-ssc install xtabond2, replace
-ssc install csdid, replace
-* 模型扩展所需的社区包（03-regression 全部子流程）
-ssc install xtdpdgmm, replace
-ssc install xtbcfe, replace
-ssc install xtcdf, replace
-ssc install xtcd2, replace
-ssc install xtcd, replace
-ssc install xtdcce2, replace
-ssc install xthst, replace
-ssc install kmatch, replace
-ssc install moremata, replace
-ssc install paramed, replace
-ssc install sdid, replace
-ssc install ritest, replace
-ssc install rwolf, replace
-ssc install wyoung, replace
-ssc install sensemakr, replace
-ssc install konfound, replace
-ssc install gologit2, replace
-ssc install oglm, replace
-ssc install fmlogit, replace
-ssc install betafit, replace
-ssc install stpm2, replace
-ssc install bdiff, replace
-ssc install weakiv, replace
-ssc install jwdid, replace
-ssc install did_multiplegt_dyn, replace
-* 空间计量：官方 sp*（spset/spmatrix/spregress/spxtregress）已内置于 Stata 15+，无需安装；
-* 旧式权重矩阵与全局 Moran's I 与面板空间需要以下 SSC 包：
-ssc install spatwmat, replace
-ssc install spatgsa, replace
-ssc install spatreg, replace
-ssc install xsmle, replace
-* 合成控制：synth 的插件是平台相关的编译产物，缺失时 install name 与二进制架构不符会报
-* "Could not load plugin: .../synthopt.plugin"，用 replace 重装可修复：
-ssc install synth, replace
-* SSC 无 scpi，经 GitHub 源安装：
+* 默认通道：SSC 官方源（需联网）
+foreach p of global PKGS {   // PKGS 由 stata-packages.txt 读入或手工填入
+    ssc install `p', replace
+}
+* GitHub 源包（如 scpi）：
 net install scpi, from("https://raw.githubusercontent.com/nppackages/scpi/main/stata") replace
 ```
+
+手工逐包安装时，直接按 `stata-packages.txt` 每行执行 `ssc install <pkg>, replace`。
 
 **依赖差异与构建前置**（实测）：
 
 - `moremata` 是 Mata 函数库而不是 ado 命令，`which moremata` 必然失败；用依赖它的 `kmatch` 实际估计成功作为功能验收标准。
 - `synth` 的 `synthopt.plugin` 是平台相关的编译插件：装成 Windows PE 或 x86_64 版本会在 macOS arm64 上报 `Could not load plugin`。`ssc install synth, replace` 可重新拉到 universal Mach-O 版本。
 - `honestdid` 依赖编译插件，验收用 `honestdid _plugin_check`（加载 `honestosqp`/`honestecos` 插件成功即通过）。
+- `07-ml` 的三个 ML 社区包各有坑，装完必须验收，不能看 `ssc install` 返回成功就算过：
+  - `lasso`、`elasticnet`、`ivregress`、`pca`、`cluster` 是 Stata 16+ 自带，**不需要**安装；`version 16` 以下的 Stata 直接阻断。
+  - `pdslasso` 依赖 `lassopack`，`ssc install pdslasso` 不会自动装它；验收用 `which lassopack`。
+  - `ddml` 先在 SSC 找，找不到再走 GitHub（`net install ddml, from("https://raw.githubusercontent.com/aahrens1/ddml/main") replace`）；验收用 `help ddml` 能打开且 `ddml` 不报 unrecognized command。
+  - `rforest` 只给回归森林（Breiman 口径），预测与置换重要性可用；因果森林没有等价实现，`03-heterogeneity` 不给个体 CATE。
+- 装不上就阻断并在 `reports/ml-blocked-<子流程>-<date>.md` 写安装指引，不得用 `regress` 手写循环冒充 lasso 或 DML。
 
 社区包在 statamcp 会话内安装一次即可（用 `stata_run_selection` 运行安装命令），后续所有会话共享同一 ado 路径。
 
 ---
 
-## 4.1 随包分发的 ado 快照（免安装路径）
+## 4.1 离线安装（Release 资产）
 
-本 skill 在 `templates/_shared/stata-ado/plus/` 下附带了一份本地 `ado/plus` 的完整快照
-（2503 文件 / 83 MB，含全部上述社区包及其 `.ado`/`.sthlp`/`.mata`/`.mlib`/`.plugin`），
-用于在**无法联网或不想逐个安装**的环境里让 `03-regression` 模板开箱即用：
+无法联网时，从 runtime 仓库的 Release 下载 `stata-ado-plus-<date>.zip`，解压到 `<skill>/runtime/ado/plus`（解压时排除 `.plugin`——平台相关二进制，误装报 `Could not load plugin`），然后：
 
 ```stata
-adopath + "<skill 根目录>/modules/analysis/templates/_shared/stata-ado/plus"
+adopath + "<skill>/runtime/ado/plus"
 ```
 
-- 两种方式**二选一**：已用 `ssc install` 装好依赖时不要再加载本目录，避免版本混用。
-- `.plugin` 是平台相关二进制；加载失败时报 `Could not load plugin`，对该命令 `ssc install <pkg>, replace` 即可。
-- 详细内容、平台注意与许可说明见 `templates/_shared/stata-ado/README.md`；该目录**不含** Stata 官方 base ado。
+验收：`which reghdfe` 返回路径；`honestdid _plugin_check` 加载插件成功（该命令需联网装 honestdid，离线时以 `which reghdfe` 为准）。
 
-模板不再在运行期守卫依赖；上表社区包必须在执行分析前装好，缺失时 Stata 直接报 unrecognized command。
+获取方式总览与维护流程见 [runtime-README.md](../templates/_shared/runtime-README.md)。
 
 ---
 

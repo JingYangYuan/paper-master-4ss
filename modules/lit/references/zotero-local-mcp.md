@@ -2,7 +2,7 @@
 
 本文件是 lit 模块在用户启用 Zotero MCP 后的操作协议。安装、授权与验收命令见 [install-dependencies.md](install-dependencies.md)。推荐实现：`zotero-local-mcp`（Zotero 10 本地 API，`http://localhost:23119/api/`）。其他 Zotero MCP 实现只要通过同一验收口径，可按各自工具名对照执行。
 
-宿主工具名可能带前缀（如 `mcp__zotero__zotero_search_items`）。本协议只使用规范工具名；调用前按当前宿主实际暴露的工具列表匹配，不得假设固定前缀。
+软件工具名可能带前缀（如 `mcp__zotero__zotero_search_items`）。本协议只使用规范工具名；调用前按当前软件实际暴露的工具列表匹配，不得假设固定前缀。
 
 ```mermaid
 flowchart TD
@@ -30,9 +30,9 @@ flowchart TD
 | 角色 | 可选增强：本地文献库检索、题录/摘要保存、附件深读、集合整理 |
 | 存储 | 附件写入本机 Zotero `storage/<key>/`，不经 Zotero 官方云端存储转发 |
 | 同步 | WebDAV 或官方同步由 Zotero 桌面端执行；MCP 不直连同步服务 |
-| 授权 | `POST /api/local/authorize`；密钥在 `~/.config/pyzotero/local-api-key.json`（`0600`） |
+| 授权 | `POST /api/local/authorize`；密钥存在本地配置目录（如 `<用户配置目录>/pyzotero/local-api-key.json`，`0600`） |
 | 删除 | `zotero_delete_item` 移入回收站，不物理删除 |
-| 不替代 | 不能替代摘要准入、CNKI kns8s 闭环、Google Scholar/exa 检索完成状态 |
+| 不替代 | 不能替代摘要准入、CNKI 机构出口取全文、NCPSSD/Crossref/web_search 检索状态 |
 
 **不要**配置 `ZOTERO_API_KEY` / `ZOTERO_LIBRARY_ID`。残留云端凭据会使写入走错误路径。
 
@@ -43,7 +43,7 @@ flowchart TD
 仅当 Step 0Q 记录为启用时执行。检查顺序：
 
 1. Zotero Desktop 正在运行，且已勾选「允许本机上的其他应用程序与 Zotero 通信」。
-2. 当前宿主工具列表中能匹配到 `zotero_search_items`（或等价检索工具）。
+2. 当前软件工具列表中能匹配到 `zotero_search_items`（或等价检索工具）。
 3. 用一个短查询试检索（如当前主题的核心概念词），能返回条目或空结果，而不是连接/授权错误。
 4. 需要全文深读时，再试 `zotero_get_item_fulltext` 或 `zotero_get_pdf_outline` 于一篇已有 PDF 的条目。
 
@@ -98,7 +98,7 @@ MCP 工具不可用但 `zotero-cli` 可用时，可用 CLI 做等价操作（`zo
 
 ## 5. 摘要即时入库
 
-对每篇正式清单中相关度 H 或 M、且来自 CNKI / Scholar / `web_search` / 本地新发现的论文：抓取摘要后**立即**入库，禁止检索全部结束后批量补存。
+对每篇正式清单中相关度 H 或 M、且来自 CNKI / Scholar / 联网搜索 / 本地新发现的论文：抓取摘要后**立即**入库，禁止检索全部结束后批量补存。
 
 推荐调用：
 
@@ -136,8 +136,8 @@ zotero_add_item
    - 失败记入注册表 `notes=zotero_note=pending`，不阻塞流程。
 
 **写入通道实测结论（2026-09-12）**：
-- 首选 MCP 工具（`zotero_attach_file`、`zotero_manage_note`）；批量脚本可复用 MCP 同款客户端：`sys.path` 指向 `~/.local/share/uv/tools/zotero-mcp-server/lib/python3.12/site-packages`，`from zotero_mcp.client import get_local_write_client`，笔记 `zot.create_items([...])`、附件 `zot.attachment_simple([path], key)`。该通道 26/26 全部持久化成功。
-- **不要**用裸 `urllib/requests` POST `/api/users/0/items` 批量写子项：返回 200 但静默不落盘（本地 API 写入竞态），且裸 GET `/items/<key>/children` 有缓存，回查结果不可信。回查唯一可信口径是同款 pyzotero 客户端的 `zot.children(key)`（`/items/<key>/children` 端点）；**不要**用 `zot.items(parentKey=…)`——本地 API 会忽略该参数并返回库内前 N 条，造成“已就位”假阳性。
+- 首选 MCP 工具（`zotero_attach_file`、`zotero_manage_note`）；批量脚本可复用 MCP 同款客户端：`sys.path` 指向该包的 site-packages 目录（`uv tool` 装的通常在 `<用户数据目录>/uv/tools/zotero-mcp-server/lib/python*/site-packages`），`from zotero_mcp.client import get_local_write_client`，笔记 `zot.create_items([...])`、附件 `zot.attachment_simple([path], key)`。该通道 26/26 全部持久化成功。
+- **不要**用裸 `urllib/requests` POST `/api/users/0/items` 批量写子项：返回 200 但静默不写入（本地 API 写入竞态），且裸 GET `/items/<key>/children` 有缓存，回查结果不可信。回查唯一可信口径是同款 pyzotero 客户端的 `zot.children(key)`（`/items/<key>/children` 端点）；**不要**用 `zot.items(parentKey=…)`——本地 API 会忽略该参数并返回库内前 N 条，造成“已就位”假阳性。
 - 重复尝试会留下重复附件/笔记，收尾必须按 `zot.children(key)` 逐条目去重（保留 version 最小的一个），并核对附件题名与论文题名一致，防止张冠李戴。
 
 ```mermaid
@@ -194,9 +194,9 @@ flowchart LR
 
 ## 10. 不可替代规则
 
-- `web_search`、exa、顾问意见不得标记为 `Zotero MCP 正常`。
+- 联网搜索、NCPSSD、Crossref、顾问意见不得标记为 `Zotero MCP 正常`。
 - 空结果不是失败；连接错误、401/403、本地 API 未开启才是 `能力缺失`。
-- 本协议不改变 CNKI「浏览器控制 + Cookie/curl」下载铁律。
+- 本协议不改变 CNKI「机构 IP + `ego-browser` + 下载单直取」下载要求。
 - 无摘要条目不得因「已在 Zotero」而进入文献地图。
 
 ---
@@ -212,4 +212,4 @@ zotero-cli --json config
 zotero-cli --json search "test" --limit 1
 ```
 
-宿主侧：能调用 `zotero_search_items`；启用写入时能对测试条目执行 `zotero_add_item` 并回收站删除。
+软件侧：能调用 `zotero_search_items`；启用写入时能对测试条目执行 `zotero_add_item` 并回收站删除。

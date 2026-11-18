@@ -48,4 +48,4 @@
 ## Connects To
 - **ch04-abstract.md / ch07-body.md / ch08-conclusion.md**：提出—证明—回收。
 - **ch01-outline-selection-design-writing.md**：诱导感。
-- **10维回流**：引言 → editorial-screening-reviewer → outline/write。
+- **10维回流**：引言 → reviewer → outline/write。

@@ -12,6 +12,7 @@
 | 质性分析 | `04-qual/` | 匿名化文本、分段数据、编码本、编码表、信度记录 |
 | 混合方法 | `05-mixed/` | 读取真实定量表和质性编码表，生成 joint display |
 | 导出门控 | `06-export/` | `script-index.md`、结果报告、质量门控清单 |
+| 机器学习与因果 ML | `07-ml/` | `ml-model-performance.csv`、`ml-selected-variables.csv`、`ml-causal-estimates.csv`、`ml-cate.csv`、`ml-wide-table.csv` |
 
 ## 语言覆盖差异
 
@@ -28,8 +29,12 @@
 | 面板空间效应分解（`margins predict(direct/indirect/total)`） | 提供 | 不提供等价实现（以 `impacts` 口径为主） | 不提供等价实现 |
 | 空间权重构造 | `spmatrix`/`spatwmat` | base R 线性代数（行标准化 K 近邻 W；`spdep` 可用时自动优先使用） | `libpysal`（不依赖 `geopandas`） |
 | AME 口径 | `margins` | `marginaleffects::slopes` | `statsmodels.get_margeff`/手写 AME |
+| 弹性网／lasso 筛变量、λ 路径 | 提供（官方 `lasso`、`elasticnet`） | 提供（`glmnet`） | 提供（`scikit-learn`） |
+| PDS／DML 因果 ML | 提供（`pdslasso`、`ddml`，SSC 未装即阻断） | 提供（`hdm`＋手工交叉拟合） | 提供（`scikit-learn`＋手工交叉拟合） |
+| 因果森林（CATE + honest 区间） | **不提供**（只给 GATES／BLP 手工实现） | 视 `grf` 而定，未装即阻断 | 以 T-learner 近似并注明非 honest 森林 |
+| SHAP 归因 | **不提供** | 视 `shap` 而定 | 视 `shap` 而定 |
 
-**Python 不实现的四项**（Tobit、Heckman/样本选择、面板选择模型、Oster `psacalc` 敏感性分析）仅由 Stata/R 模板提供；Python 模板中**直接删除**对应方法块，**不得**用近似模型冒充。R 与 Stata 的 AME、多重检验校正与空间效应分解口径不同，表注必须写明所用软件与 VCE，**不得**为对齐数值而统一改用非聚类口径。
+**Python 不实现的四项**（Tobit、Heckman/样本选择、面板选择模型、Oster `psacalc` 敏感性分析）仅由 Stata/R 模板提供；Python 模板中**直接删除**对应方法块，**不得**用近似模型冒充。`07-ml` 的 DML 同理：三语言的 nuisance 学习器与 VCE 口径不同，并列结果必须在表注写明学习器与标准误口径，**不得**为对齐数值更换聚类口径或改用样本内拟合。R 与 Stata 的 AME、多重检验校正与空间效应分解口径不同，表注必须写明所用软件与 VCE，**不得**为对齐数值而统一改用非聚类口径。
 
 ## 统一接口
 
